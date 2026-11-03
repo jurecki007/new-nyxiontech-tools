@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-updates",
+  "description": "Lets the app check GitHub Releases for a newer signed version, install it and restart. Network access happens in the app, not the page, so the page's CSP is unchanged.",
+  "platforms": ["windows"],
+  "windows": ["main"],
+  "permissions": ["updater:default", "process:allow-restart"]
+}

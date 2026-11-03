@@ -26,20 +26,69 @@ async function fetchDeployedVersion(): Promise<string | null> {
   }
 }
 
+export type InstallState = { phase: 'idle' } | { phase: 'downloading'; percent: number | null } | { phase: 'installing' } | { phase: 'error'; message: string };
+
+export interface AvailableUpdate {
+  version: string;
+  /**
+   * Desktop app: downloads the signed installer, installs it and restarts.
+   * Absent in the browser, where a reload loads the new version.
+   */
+  install?: (onState: (state: InstallState) => void) => Promise<void>;
+}
+
+/** Desktop app: asks GitHub Releases (through the app, not the page) for a newer signed version. */
+async function checkDesktopUpdate(): Promise<AvailableUpdate | null> {
+  try {
+    const { check } = await import('@tauri-apps/plugin-updater');
+    const update = await check();
+    if (!update) return null;
+    return {
+      version: update.version,
+      install: async (onState) => {
+        let total: number | null = null;
+        let received = 0;
+        try {
+          onState({ phase: 'downloading', percent: null });
+          // The signature is checked against the public key built into the app before anything runs.
+          await update.downloadAndInstall((e) => {
+            if (e.event === 'Started') total = e.data.contentLength ?? null;
+            else if (e.event === 'Progress') {
+              received += e.data.chunkLength;
+              onState({ phase: 'downloading', percent: total ? Math.min(100, Math.round((received / total) * 100)) : null });
+            } else onState({ phase: 'installing' });
+          });
+          // On Windows the installer closes the app itself; elsewhere restart into the new version.
+          const { relaunch } = await import('@tauri-apps/plugin-process');
+          await relaunch();
+        } catch (e) {
+          onState({ phase: 'error', message: e instanceof Error ? e.message : String(e) });
+        }
+      },
+    };
+  } catch {
+    return null; // offline, or no release published yet
+  }
+}
+
+async function checkWebUpdate(): Promise<AvailableUpdate | null> {
+  const v = await fetchDeployedVersion();
+  return v && isNewer(v, APP_VERSION) ? { version: v } : null;
+}
+
 /**
- * Returns the version deployed on this server when it is newer than the running one.
- * Only asks this origin (/version.json): on start, every 30 minutes and when the tab is shown again.
+ * Returns a newer version when there is one: in the browser, the version deployed on
+ * this server (/version.json, same origin); in the desktop app, the latest signed GitHub
+ * release. Checked on start, every 30 minutes and when the window is shown again.
  */
-export function useAvailableUpdate(): string | null {
-  const [available, setAvailable] = useState<string | null>(null);
+export function useAvailableUpdate(): AvailableUpdate | null {
+  const [available, setAvailable] = useState<AvailableUpdate | null>(null);
 
   useEffect(() => {
-    // The desktop app carries its own build, so there is no newer one to load.
-    if (isDesktop) return;
     let cancelled = false;
     const check = () =>
-      void fetchDeployedVersion().then((v) => {
-        if (!cancelled && v && isNewer(v, APP_VERSION)) setAvailable(v);
+      void (isDesktop ? checkDesktopUpdate() : checkWebUpdate()).then((u) => {
+        if (!cancelled && u) setAvailable((prev) => (prev?.version === u.version ? prev : u));
       });
     const onVisible = () => {
       if (document.visibilityState === 'visible') check();

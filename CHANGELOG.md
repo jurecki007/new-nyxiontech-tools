@@ -5,15 +5,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
-### Changed
-- Sidebar links, version and "What's new" are now reachable on phones.
-- Default snippets are "Approved for payment" and "Copy – original on file" instead of a Poland-specific stamp. Snippets you saved yourself are kept.
-- Updated pdf.js to 6, which adds decoding of JPEG 2000 and JBIG2 images and ICC colour profiles (loaded from this server, like the other WebAssembly files).
-- Updated React to 19.3, Vite to 8, TypeScript to 7 and lucide icons to 1.x; the Docker image now uses Node 26 and nginx 1.31.
-
-### Added
-- Licences of the Rust libraries in the Windows app are listed in THIRD-PARTY-NOTICES.
-
 ## [1.1.0] - 2026-11-03
 
 ### Added
@@ -23,11 +14,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Links to the project website, source code and issue tracker.
 - "Support" link to the project's Ko-fi page; GitHub Sponsors in the repository.
 - Windows desktop app (Tauri 2) with NSIS and MSI installers, including offline variants with WebView2.
+- The Windows app updates itself: when a new version is released, a banner offers "Install and restart". Updates are signed, and the app checks the signature before installing.
+- Windows installers are published on GitHub Releases, built by a release workflow.
+- Licences of the Rust libraries in the Windows app are listed in THIRD-PARTY-NOTICES.
 
 ### Changed
 - Renamed to Nyxiontech PDF Tools, with a new logo and colours.
 - The QR code generator suggests nyxiontech.com as the sample link.
 - Documents, snippets and settings saved by earlier versions are moved to the new storage names on first start.
+- Sidebar links, version and "What's new" are now reachable on phones.
+- Default snippets are "Approved for payment" and "Copy – original on file" instead of a Poland-specific stamp. Snippets you saved yourself are kept.
+- Updated pdf.js to 6, which adds decoding of JPEG 2000 and JBIG2 images and ICC colour profiles (loaded from this server, like the other WebAssembly files).
+- Updated React to 19.3, Vite to 8, TypeScript to 7 and lucide icons to 1.x; the Docker image now uses Node 26 and nginx 1.31.
 
 ### Removed
 - Internal deployment pipeline (Jenkinsfile). See the README for self-hosting with Docker.

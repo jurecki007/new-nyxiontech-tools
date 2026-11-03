@@ -42,6 +42,15 @@
     "windows": {
       "webviewInstallMode": { "type": "downloadBootstrapper" },
       "nsis": { "installMode": "currentUser" }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJCRTdENkY5RTc0RDk5RTUKUldUbG1VM24rZGJuSzdPQWpldUpxMUtKNVN2ck5sSXlwMVF3Z3A5U1pXOC9VakxGZkY3ZVROQ0sK",
+      "endpoints": ["https://github.com/jurecki007/new-nyxiontech-tools/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" },
+      "requireSignedVersion": true
     }
   }
 }

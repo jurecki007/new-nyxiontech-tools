@@ -26,12 +26,19 @@ async function launch(dataDir: string): Promise<Omit<App, 'outDir'>> {
       WEBVIEW2_USER_DATA_FOLDER: dataDir,
     },
   });
+  let exitInfo: string | null = null;
+  proc.once('exit', (code, signal) => (exitInfo = `exited with code ${code}${signal ? `, signal ${signal}` : ''}`));
+  proc.once('error', (e) => (exitInfo = `failed to start: ${e.message}`));
+  // A cold start on a fresh CI machine (WebView2 setting up its profile) can take a while.
   let browser: Browser | undefined;
-  for (let i = 0; i < 60 && !browser; i++) {
+  for (let i = 0; i < 180 && !browser && !exitInfo; i++) {
     browser = await chromium.connectOverCDP(`http://127.0.0.1:${PORT}`).catch(() => undefined);
     if (!browser) await new Promise((r) => setTimeout(r, 500));
   }
-  if (!browser) throw new Error('desktop app did not open a debugging port');
+  if (!browser) {
+    proc.kill();
+    throw new Error(`desktop app did not open a debugging port (${exitInfo ?? 'still running after 90 s'})`);
+  }
   const page = browser.contexts()[0].pages()[0];
   await expect(page.locator('.tool-grid').first()).toBeVisible({ timeout: 30_000 });
   return { proc, browser, page, dataDir };
