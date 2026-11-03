@@ -107,8 +107,17 @@ const SNIPPETS_KEY = `${STORAGE_NAME}:snippets`;
 
 export const DEFAULT_SNIPPETS: Snippet[] = [
   {
-    id: 'country-of-origin',
-    text: 'Country of Origin: Poland (Polska)',
+    id: 'approved',
+    text: 'Approved for payment',
+    font: 'arimo',
+    size: 10,
+    color: '#1530cb',
+    bold: true,
+    italic: false,
+  },
+  {
+    id: 'copy',
+    text: 'Copy – original on file',
     font: 'arimo',
     size: 9,
     color: '#333333',

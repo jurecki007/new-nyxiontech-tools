@@ -1,4 +1,4 @@
-FROM node:22.20.0-alpine AS builder
+FROM node:26.13.0-alpine AS builder
 
 # Reduce npm log spam and colour during install
 ENV NPM_CONFIG_LOGLEVEL=warn
@@ -14,7 +14,7 @@ RUN npm run build
 RUN node -e "const p=require('./package.json');require('fs').writeFileSync('dist/info.json',JSON.stringify({name:p.name,version:p.version,builtAt:new Date().toISOString()}))"
 
 # Create production image
-FROM nginx:1.27.5-alpine AS deploy
+FROM nginx:1.31.8-alpine AS deploy
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=builder /app/dist /usr/share/nginx/html

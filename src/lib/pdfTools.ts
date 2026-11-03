@@ -1,7 +1,7 @@
 // Stand-alone PDF operations behind the dashboard tools. All run in the browser.
 import { degrees, EncryptedPDFError, PDFDocument, type PDFFont, type PDFPage } from 'pdf-lib';
-import { embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
-import { normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
+import { blobBytes, embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
+import { closePdf, normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
 
 export interface NamedBytes {
   name: string;
@@ -10,7 +10,7 @@ export interface NamedBytes {
 
 export const baseName = (name: string) => name.replace(/\.[^.\\/]+$/, '');
 
-export const pdfBlob = (bytes: Uint8Array) => new Blob([bytes], { type: 'application/pdf' });
+export const pdfBlob = (bytes: Uint8Array) => new Blob([blobBytes(bytes)], { type: 'application/pdf' });
 
 /**
  * Loads a PDF for modification, with a readable error for password-protected files.
@@ -120,7 +120,7 @@ export async function rasterizePdf(
     }
     return await out.save({ useObjectStreams: true });
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
@@ -140,7 +140,7 @@ export async function pdfToImages(
     }
     return blobs;
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
@@ -161,7 +161,7 @@ export async function extractText(bytes: Uint8Array): Promise<string> {
     }
     return pages.join('\n\n');
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
