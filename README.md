@@ -9,7 +9,9 @@ Edit, sign, merge, split, compress, OCR, redact and convert, without uploading a
 [![CI](https://github.com/jurecki007/new-nyxiontech-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/jurecki007/new-nyxiontech-tools/actions/workflows/ci.yml)
 [![Made by Nyxiontech](https://img.shields.io/badge/made%20by-Nyxiontech-2643e8)](https://nyxiontech.com)
 
-[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=feature_request.yml) · [Support the project](https://ko-fi.com/nyxiontech)
+[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=feature_request.yml)
+
+<a href="https://ko-fi.com/nyxiontech"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white"></a>&nbsp;<a href="https://github.com/sponsors/jurecki007"><img alt="Sponsor on GitHub" src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white"></a>
 
 </div>
 
@@ -38,11 +40,10 @@ Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI im
 Nyxiontech PDF Tools is free and will stay free. If it saves you a subscription, please consider supporting its development:
 
 <p>
-  <a href="https://ko-fi.com/nyxiontech"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?logo=kofi&logoColor=white"></a>
-  <a href="https://github.com/sponsors/jurecki007"><img alt="Sponsor on GitHub" src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?logo=githubsponsors&logoColor=white"></a>
+  <a href="https://ko-fi.com/nyxiontech"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?style=for-the-badge&logo=kofi&logoColor=white"></a>&nbsp;<a href="https://github.com/sponsors/jurecki007"><img alt="Sponsor on GitHub" src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white"></a>
 </p>
 
-- ☕ **[Ko-fi](https://ko-fi.com/nyxiontech)**: one-off or monthly, by card, PayPal, Apple Pay or Google Pay. No account needed.
+- ☕ **[Ko-fi](https://ko-fi.com/nyxiontech)**: one-off or monthly, by card, Apple Pay, Google Pay, Przelewy24 or BLIK. No account needed.
 - 💖 **[GitHub Sponsors](https://github.com/sponsors/jurecki007)**: if you already use GitHub.
 
 - ⭐ Star the repository: it helps other people find it.

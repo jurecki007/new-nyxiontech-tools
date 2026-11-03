@@ -14,7 +14,7 @@ export const ISSUES_URL = `${REPO_URL}/issues`;
 
 /**
  * Donation page linked as "Support" in the app. Ko-fi: no platform fee on donations,
- * and donors can pay by card, PayPal, Apple Pay or Google Pay without an account.
+ * and donors can pay by card, Apple Pay, Google Pay, Przelewy24 or BLIK without an account.
  * Leave empty to hide the link.
  */
 export const DONATE_URL = 'https://ko-fi.com/nyxiontech';
