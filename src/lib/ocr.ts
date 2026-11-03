@@ -16,7 +16,7 @@ import {
 } from 'pdf-lib';
 import type Tesseract from 'tesseract.js';
 import { embedRegistryFont, viewToPdf, visibleBox } from './export';
-import { normalizeRotation, openPdf } from './pdfjs';
+import { closePdf, normalizeRotation, openPdf } from './pdfjs';
 import { loadPdf } from './pdfTools';
 
 export type OcrLanguage = 'pol' | 'eng';
@@ -86,7 +86,7 @@ export async function ocrPdf(
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await src.render({ canvasContext: ctx, viewport }).promise;
+      await src.render({ canvas, viewport }).promise;
       src.cleanup();
 
       const { data } = await worker.recognize(canvas, {}, { text: true, blocks: true });
@@ -95,7 +95,7 @@ export async function ocrPdf(
     }
   } finally {
     await worker.terminate();
-    void render.destroy();
+    void closePdf(render);
   }
   return { pdf: await doc.save(), text: texts.filter(Boolean).join('\n\n'), skipped };
 }

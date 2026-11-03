@@ -63,7 +63,7 @@ async function renderToCanvas(doc: PDFDocumentProxy, n: number, width: number): 
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  await page.render({ canvasContext: ctx, viewport }).promise;
+  await page.render({ canvas, viewport }).promise;
   page.cleanup();
   return canvas;
 }
