@@ -8,6 +8,7 @@ repository = "https://github.com/jurecki007/new-nyxiontech-tools"
 homepage = "https://nyxiontech.com"
 edition = "2024"
 rust-version = "1.90"
+publish = false
 
 [lib]
 name = "app_lib"
