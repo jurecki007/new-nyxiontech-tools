@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/jurecki007/nyxiontech-tools/security/advisories/new
+    url: https://github.com/jurecki007/new-nyxiontech-tools/security/advisories/new
     about: Report security issues privately.
   - name: Custom development or business enquiries
     url: https://nyxiontech.com

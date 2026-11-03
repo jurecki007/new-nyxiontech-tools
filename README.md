@@ -6,10 +6,10 @@
 Edit, sign, merge, split, compress, OCR, redact and convert, without uploading a single file.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
-[![CI](https://github.com/jurecki007/nyxiontech-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/jurecki007/nyxiontech-tools/actions/workflows/ci.yml)
+[![CI](https://github.com/jurecki007/new-nyxiontech-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/jurecki007/new-nyxiontech-tools/actions/workflows/ci.yml)
 [![Made by Nyxiontech](https://img.shields.io/badge/made%20by-Nyxiontech-2643e8)](https://nyxiontech.com)
 
-[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=feature_request.yml) · [Support the project](https://ko-fi.com/nyxiontech)
+[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/new-nyxiontech-tools/issues/new?template=feature_request.yml) · [Support the project](https://ko-fi.com/nyxiontech)
 
 </div>
 
@@ -33,7 +33,7 @@ Nyxiontech PDF Tools is free and will stay free. If it saves you a subscription,
 - 💖 **[GitHub Sponsors](https://github.com/sponsors/jurecki007)**: if you already use GitHub.
 
 - ⭐ Star the repository: it helps other people find it.
-- 🐛 [Report bugs](https://github.com/jurecki007/nyxiontech-tools/issues) and suggest features.
+- 🐛 [Report bugs](https://github.com/jurecki007/new-nyxiontech-tools/issues) and suggest features.
 - 🛠️ [Contribute](CONTRIBUTING.md) code, tests or translations.
 - 💼 Need a custom tool, an integration or AI automation for your business? [Work with Nyxiontech](https://nyxiontech.com).
 
