@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest a new tool or an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do?
+      description: The task you are trying to get done, and what is missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Suggested solution
+  - type: checkboxes
+    id: local
+    attributes:
+      label: Privacy
+      options:
+        - label: This can work fully in the browser, without uploading files to a server.
