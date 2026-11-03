@@ -1,4 +1,4 @@
-FROM node:22.20.0-alpine AS builder
+FROM node:26.13.0-alpine AS builder
 
 # Reduce npm log spam and colour during install
 ENV NPM_CONFIG_LOGLEVEL=warn
