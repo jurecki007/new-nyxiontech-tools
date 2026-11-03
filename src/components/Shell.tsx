@@ -5,7 +5,7 @@ import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
-import { useAvailableUpdate } from '../lib/updates';
+import { useAvailableUpdate, type AvailableUpdate, type InstallState } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
 import type { Project } from '../types';
 
@@ -99,21 +99,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
       </aside>
 
       <main className="shell-main">
-        {update && (
-          <div className="banner update" role="status">
-            <RefreshCw size={15} />
-            <span>
-              Version {update} is available. Reloading is safe: your documents are saved {storedIn}.
-            </span>
-            <span className="spacer" />
-            <a className="btn ghost" href={`${REPO_URL}/blob/master/CHANGELOG.md`} {...externalLink}>
-              What's new
-            </a>
-            <button className="btn primary" onClick={() => window.location.reload()}>
-              Reload
-            </button>
-          </div>
-        )}
+        {update && <UpdateBanner update={update} />}
         {error && (
           <div className="banner error" onClick={onDismissError}>
             {error} <span className="muted">(click to dismiss)</span>
@@ -122,6 +108,42 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
         {utility ? <utility.Component key={utility.id} ctx={ctx} /> : <Home ctx={ctx} onOpenProject={onOpenProject} />}
       </main>
       {about && <AboutDialog initialTab={about} onClose={closeAbout} />}
+    </div>
+  );
+}
+
+/** Offers a newer version: a reload in the browser, a signed download-and-install in the desktop app. */
+function UpdateBanner({ update }: { update: AvailableUpdate }) {
+  const [state, setState] = useState<InstallState>({ phase: 'idle' });
+  const notes = update.install ? `${REPO_URL}/releases/tag/v${update.version}` : `${REPO_URL}/blob/master/CHANGELOG.md`;
+  const busy = state.phase === 'downloading' || state.phase === 'installing';
+  return (
+    <div className="banner update" role="status">
+      <RefreshCw size={15} />
+      <span>
+        {state.phase === 'downloading'
+          ? `Downloading version ${update.version}…${state.percent === null ? '' : ` ${state.percent}%`}`
+          : state.phase === 'installing'
+            ? `Installing version ${update.version}. The app restarts when it's done.`
+            : state.phase === 'error'
+              ? `The update could not be installed: ${state.message}`
+              : update.install
+                ? `Version ${update.version} is available. Your documents are kept ${storedIn}.`
+                : `Version ${update.version} is available. Reloading is safe: your documents are saved ${storedIn}.`}
+      </span>
+      <span className="spacer" />
+      <a className="btn ghost" href={notes} {...externalLink}>
+        What's new
+      </a>
+      {update.install ? (
+        <button className="btn primary" disabled={busy} onClick={() => void update.install!(setState)}>
+          {state.phase === 'error' ? 'Try again' : 'Install and restart'}
+        </button>
+      ) : (
+        <button className="btn primary" onClick={() => window.location.reload()}>
+          Reload
+        </button>
+      )}
     </div>
   );
 }

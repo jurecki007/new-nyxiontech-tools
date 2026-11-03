@@ -22,7 +22,11 @@ async fn save_file(window: WebviewWindow, request: Request<'_>) -> Result<bool, 
         .map(|v| v.into_owned())
         .unwrap_or_else(|| "document".into());
 
-    let mut dialog = window.dialog().file().set_parent(&window).set_file_name(&name);
+    let mut dialog = window
+        .dialog()
+        .file()
+        .set_parent(&window)
+        .set_file_name(&name);
     if let Some(ext) = Path::new(&name).extension().and_then(|e| e.to_str()) {
         dialog = dialog.add_filter(ext.to_uppercase(), &[ext]);
     }
@@ -67,6 +71,8 @@ fn navigation_guard() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(navigation_guard())
         .invoke_handler(tauri::generate_handler![save_file])
