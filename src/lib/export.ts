@@ -115,8 +115,17 @@ export async function exportPdf(sources: Source[], doc: Doc): Promise<Uint8Array
   return out.save();
 }
 
+/**
+ * pdf-lib types its output as `Uint8Array<ArrayBufferLike>`, but `Blob` only accepts
+ * views over a plain `ArrayBuffer` (TypeScript 5.9+ lib). The bytes are not shared
+ * memory in practice, so this only copies if they ever are.
+ */
+export function blobBytes(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
+  return bytes.buffer instanceof ArrayBuffer ? (bytes as Uint8Array<ArrayBuffer>) : new Uint8Array(bytes);
+}
+
 export function downloadBytes(bytes: Uint8Array, filename: string) {
-  downloadBlob(new Blob([bytes], { type: 'application/pdf' }), filename);
+  downloadBlob(new Blob([blobBytes(bytes)], { type: 'application/pdf' }), filename);
 }
 
 /** Embeds a font from the registry into a document (subset), using fontkit 2. */
