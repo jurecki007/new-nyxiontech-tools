@@ -1,6 +1,6 @@
 // Stand-alone PDF operations behind the dashboard tools. All run in the browser.
 import { degrees, EncryptedPDFError, PDFDocument, type PDFFont, type PDFPage } from 'pdf-lib';
-import { embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
+import { blobBytes, embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
 import { normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
 
 export interface NamedBytes {
@@ -10,7 +10,7 @@ export interface NamedBytes {
 
 export const baseName = (name: string) => name.replace(/\.[^.\\/]+$/, '');
 
-export const pdfBlob = (bytes: Uint8Array) => new Blob([bytes], { type: 'application/pdf' });
+export const pdfBlob = (bytes: Uint8Array) => new Blob([blobBytes(bytes)], { type: 'application/pdf' });
 
 /**
  * Loads a PDF for modification, with a readable error for password-protected files.
