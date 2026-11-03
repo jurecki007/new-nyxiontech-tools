@@ -1,0 +1,8 @@
+node_modules
+dist
+*.local
+public/vendor
+test-results
+playwright-report
+tests/.fixtures
+*.tsbuildinfo

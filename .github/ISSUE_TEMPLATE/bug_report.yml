@@ -1,0 +1,42 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please **do not attach confidential documents**: share a minimal PDF that reproduces the problem, or describe it.
+        For security issues, follow SECURITY.md instead of opening a public issue.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool
+      description: Which tool or part of the editor?
+      placeholder: e.g. Compress PDF, Editor → Text
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown at the bottom of the sidebar (e.g. v1.1.0).
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: e.g. Chrome 140 on Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Optional. Open DevTools (F12) → Console and paste any errors.
+      render: text

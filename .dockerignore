@@ -1,0 +1,11 @@
+node_modules
+dist
+public/vendor
+.git
+.idea
+.vscode
+*.local
+npm-debug.log*
+test-results
+playwright-report
+tests/.fixtures
