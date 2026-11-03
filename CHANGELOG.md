@@ -3,6 +3,13 @@
 All notable changes to this project are listed here. The app shows this file under "What's new".
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Sidebar links, version and "What's new" are now reachable on phones.
+- Default snippets are "Approved for payment" and "Copy – original on file" instead of a Poland-specific stamp. Snippets you saved yourself are kept.
+- Updated React to 19.3 and the Docker image to Node 26 and nginx 1.31.
+
 ## [1.1.0] - 2026-11-03
 
 ### Added

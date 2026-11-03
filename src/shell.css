@@ -145,8 +145,12 @@
 }
 @media (max-width: 860px) {
   .shell {
-    grid-template-columns: 1fr;
+    /* minmax(0, …): the one-line tool strip must scroll, not widen the page. */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
+  }
+  .nav {
+    min-width: 0;
   }
   .nav-list {
     display: flex;
@@ -160,8 +164,20 @@
     margin: 0;
   }
   .nav-group,
-  .nav-foot {
+  .nav-privacy {
     display: none;
+  }
+  /* Footer links stay reachable on phones: one scrollable row under the tools. */
+  .nav-foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .nav-links {
+    flex-wrap: nowrap;
   }
   .nav-item {
     white-space: nowrap;
