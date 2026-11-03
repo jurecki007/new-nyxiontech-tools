@@ -1,5 +1,7 @@
 version: 2
 updates:
+  # Minor and patch updates arrive as one grouped PR a month. Major versions are
+  # ignored here because they usually need code changes; upgrade them by hand.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -7,6 +9,19 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: monthly
+    groups:
+      rust:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -15,3 +30,6 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
