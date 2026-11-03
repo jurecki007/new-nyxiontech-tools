@@ -3,7 +3,7 @@
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef, PDFStream, type PDFContext, type PDFObject } from 'pdf-lib';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import * as pdfjs from 'pdfjs-dist';
-import { openPdf } from './pdfjs';
+import { closePdf, openPdf } from './pdfjs';
 import { loadPdf } from './pdfTools';
 
 /** A box in page view space (points, top-left origin, as displayed). */
@@ -73,7 +73,7 @@ export async function redactPdf(bytes: Uint8Array, boxesByPage: Box[][], dpi: nu
         const ctx = canvas.getContext('2d')!;
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvas, viewport }).promise;
         ctx.fillStyle = '#000';
         for (const b of boxes) ctx.fillRect(b.x * scale, b.y * scale, b.w * scale, b.h * scale);
         const png = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
@@ -86,7 +86,7 @@ export async function redactPdf(bytes: Uint8Array, boxesByPage: Box[][], dpi: nu
       onProgress?.(i + 1, src.getPageCount());
     }
   } finally {
-    void render.destroy();
+    void closePdf(render);
   }
   await out.flush();
   dropOrphanPages(out);

@@ -70,7 +70,8 @@ export async function fontNames(bytes: Uint8Array): Promise<string[]> {
   return names;
 }
 
-const STANDARD_FONTS = path.join(path.dirname(fileURLToPath(import.meta.resolve('pdfjs-dist/package.json'))), 'standard_fonts') + path.sep;
+// pdf.js 5+ insists on a trailing '/' (not path.sep); Node's fs accepts mixed separators on Windows.
+const STANDARD_FONTS = path.join(path.dirname(fileURLToPath(import.meta.resolve('pdfjs-dist/package.json'))), 'standard_fonts') + '/';
 
 async function openWithPdfjs(bytes: Uint8Array, password?: string) {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -81,14 +82,14 @@ async function openWithPdfjs(bytes: Uint8Array, password?: string) {
 export async function pdfjsTitle(bytes: Uint8Array, password?: string): Promise<string | undefined> {
   const doc = await openWithPdfjs(bytes, password);
   const { info } = await doc.getMetadata();
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   return (info as { Title?: string }).Title;
 }
 
 /** Whether pdf.js asks for a password to open the file. */
 export async function needsPassword(bytes: Uint8Array): Promise<boolean> {
   try {
-    await (await openWithPdfjs(bytes)).destroy();
+    await (await openWithPdfjs(bytes)).loadingTask.destroy();
     return false;
   } catch (e) {
     return (e as Error).name === 'PasswordException';
@@ -103,7 +104,7 @@ export async function pdfText(bytes: Uint8Array): Promise<string[]> {
     const content = await (await doc.getPage(n)).getTextContent();
     pages.push(content.items.map((i) => ('str' in i ? i.str : '')).join(' '));
   }
-  await doc.destroy();
+  await doc.loadingTask.destroy();
   return pages;
 }
 
