@@ -153,7 +153,7 @@ Results can be downloaded one by one or as a .zip, and PDFs can be sent straight
 
 ### Offline assets
 
-OCR and background removal load a worker, WebAssembly, language data and a model by URL.
+OCR and background removal load a worker, WebAssembly, language data and a model by URL; pdf.js loads its WebAssembly image decoders (JPEG 2000, JBIG2) and colour-profile support the same way.
 `scripts/copy-assets.mjs` copies them from `node_modules` and `assets/` into `public/vendor/` (about 50 MB) before `npm run dev` and `npm run build`, so nothing is fetched from a CDN.
 
 ## Editor features

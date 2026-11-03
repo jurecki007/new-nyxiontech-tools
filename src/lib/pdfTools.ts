@@ -1,7 +1,7 @@
 // Stand-alone PDF operations behind the dashboard tools. All run in the browser.
 import { degrees, EncryptedPDFError, PDFDocument, type PDFFont, type PDFPage } from 'pdf-lib';
 import { blobBytes, embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
-import { normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
+import { closePdf, normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
 
 export interface NamedBytes {
   name: string;
@@ -120,7 +120,7 @@ export async function rasterizePdf(
     }
     return await out.save({ useObjectStreams: true });
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
@@ -140,7 +140,7 @@ export async function pdfToImages(
     }
     return blobs;
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
@@ -161,7 +161,7 @@ export async function extractText(bytes: Uint8Array): Promise<string> {
     }
     return pages.join('\n\n');
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 

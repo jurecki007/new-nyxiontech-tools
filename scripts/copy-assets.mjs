@@ -26,6 +26,15 @@ for (const lang of ['pol', 'eng']) {
   copy(join(nm, `@tesseract.js-data/${lang}/4.0.0_best_int/${lang}.traineddata.gz`), join(out, 'tessdata', `${lang}.traineddata.gz`));
 }
 
+// pdf.js: WebAssembly image decoders (JPEG 2000, JBIG2) and colour management,
+// plus the JS fallbacks it loads where WebAssembly is unavailable, and ICC profiles.
+for (const f of ['openjpeg.wasm', 'jbig2.wasm', 'qcms_bg.wasm', 'openjpeg_nowasm_fallback.js', 'jbig2_nowasm_fallback.js']) {
+  copy(join(nm, 'pdfjs-dist/wasm', f), join(out, 'pdfjs/wasm', f));
+}
+for (const f of readdirSync(join(nm, 'pdfjs-dist/iccs'))) {
+  if (f.endsWith('.icc')) copy(join(nm, 'pdfjs-dist/iccs', f), join(out, 'pdfjs/iccs', f));
+}
+
 // ONNX Runtime (background removal).
 for (const f of readdirSync(join(nm, 'onnxruntime-web/dist'))) {
   if (/^ort-wasm-simd-threaded\.(mjs|wasm)$/.test(f)) copy(join(nm, 'onnxruntime-web/dist', f), join(out, 'ort', f));
