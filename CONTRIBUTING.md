@@ -38,6 +38,16 @@ npx generate-license-file --input package.json --output notices.txt --overwrite
 
 Then update Part 1 of `public/THIRD-PARTY-NOTICES.txt` with it.
 
+#### Regenerating the Rust crate notices
+
+If you add or update a Rust crate in `src-tauri/Cargo.toml`, regenerate Part 4 with [cargo-about](https://github.com/EmbarkStudios/cargo-about) (`cargo install cargo-about --locked --features cli`). Run it from `src-tauri/`:
+
+```bash
+cargo about generate --locked about.hbs -o ../notices-rust.txt
+```
+
+`about.toml` lists the accepted licences and limits the scan to the Windows target; the command fails if a crate uses any other licence. Replace the body of Part 4 in `public/THIRD-PARTY-NOTICES.txt` with the output (LF line endings), then delete `notices-rust.txt`.
+
 ## Licence of contributions
 
 By submitting a contribution, you agree that it is licensed under the project's licence, the [GNU AGPL v3.0 or later](LICENSE) (inbound = outbound), and that you have the right to submit it.
