@@ -56,6 +56,11 @@ jobs:
           workspaces: src-tauri -> target
       - run: npm ci
       - run: npx tauri build --no-bundle
+      - name: Show the WebView2 runtime the app will use
+        shell: pwsh
+        run: |
+          Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}' -ErrorAction SilentlyContinue | Select-Object name, pv
+          Get-Item src-tauri/target/release/nyxiontech-pdf-tools.exe | Select-Object Name, Length
       - run: npm run test:desktop
       - uses: actions/upload-artifact@v7
         if: failure()
