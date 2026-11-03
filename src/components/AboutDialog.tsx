@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bug, ExternalLink, Github, Globe, Heart, X } from 'lucide-react';
+import { Bug, ExternalLink, Globe, Heart, X } from 'lucide-react';
+import { GithubIcon } from './GithubIcon';
 import changelog from '../../CHANGELOG.md?raw';
 import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL, SPONSORS_URL } from '../config';
 import { externalLink, isDesktop } from '../lib/desktop';
@@ -71,7 +72,7 @@ export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onC
                 <Globe size={15} /> nyxiontech.com
               </a>
               <a className="btn" href={REPO_URL} {...externalLink}>
-                <Github size={15} /> Source code
+                <GithubIcon size={15} /> Source code
               </a>
               <a className="btn" href={ISSUES_URL} {...externalLink}>
                 <Bug size={15} /> Report a problem

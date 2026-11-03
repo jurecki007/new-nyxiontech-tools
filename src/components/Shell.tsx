@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Github, Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { AboutDialog, type AboutTab } from './AboutDialog';
+import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
@@ -82,7 +83,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
               <Info size={13} /> About
             </button>
             <a href={REPO_URL} {...externalLink} title="Source code on GitHub">
-              <Github size={13} /> GitHub
+              <GithubIcon size={13} /> GitHub
             </a>
             <a href={COMPANY_URL} {...externalLink} title="Made by Nyxiontech">
               <Globe size={13} /> nyxiontech.com
