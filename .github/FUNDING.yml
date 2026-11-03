@@ -1,10 +1,4 @@
 # Adds a "Sponsor" button to the GitHub repository page.
-# Uncomment and fill in the platforms you use, then use the same link for DONATE_URL in src/config.ts.
 # Docs: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
-
-# github: [YOUR_GITHUB_USERNAME]
-# ko_fi: YOUR_KOFI_NAME
-# buy_me_a_coffee: YOUR_BMC_NAME
-# liberapay: YOUR_LIBERAPAY_NAME
-# open_collective: YOUR_COLLECTIVE
-custom: ["https://nyxiontech.com"]
+github: [jurecki007]
+ko_fi: nyxiontech

@@ -1,0 +1,47 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Nyxiontech PDF Tools",
+  "mainBinaryName": "nyxiontech-pdf-tools",
+  "version": "../package.json",
+  "identifier": "com.nyxiontech.pdf-tools",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5180",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Nyxiontech PDF Tools",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 900,
+        "minHeight": 600,
+        "center": true,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; connect-src 'self' data: blob: ipc: http://ipc.localhost; media-src 'self' blob:; object-src 'none'; frame-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'",
+      "dangerousDisableAssetCspModification": ["style-src"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "publisher": "Nyxiontech",
+    "homepage": "https://nyxiontech.com",
+    "copyright": "Copyright © 2026 Nyxiontech and contributors. AGPL-3.0-or-later.",
+    "license": "AGPL-3.0-or-later",
+    "licenseFile": "../LICENSE",
+    "shortDescription": "Edit, convert and protect PDFs offline",
+    "category": "Productivity",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": { "installMode": "currentUser" }
+    }
+  }
+}

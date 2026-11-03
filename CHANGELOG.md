@@ -10,6 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - "What's new" and "About" in the sidebar, with the running version and the full change history.
 - Update notice: when a newer version is deployed, a banner offers to reload. The check only asks this server for `/version.json`; nothing is sent anywhere else.
 - Links to the project website, source code and issue tracker.
+- "Support" link to the project's Ko-fi page; GitHub Sponsors in the repository.
+- Windows desktop app (Tauri 2) with NSIS and MSI installers, including offline variants with WebView2.
 
 ### Changed
 - Renamed to Nyxiontech PDF Tools, with a new logo and colours.

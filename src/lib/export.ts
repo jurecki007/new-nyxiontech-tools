@@ -2,6 +2,7 @@ import { PDFDocument, PDFPage, degrees, rgb, type PDFFont, type PDFImage } from 
 import { LINE_HEIGHT, resolveFace } from './fonts';
 import { fontkitAdapter } from './fontkitAdapter';
 import { normalizeRotation } from './pdfjs';
+import { downloadBlob } from './zip';
 import type { Doc, Rotation, Source } from '../types';
 
 export function hexColor(hex: string) {
@@ -115,12 +116,7 @@ export async function exportPdf(sources: Source[], doc: Doc): Promise<Uint8Array
 }
 
 export function downloadBytes(bytes: Uint8Array, filename: string) {
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadBlob(new Blob([bytes], { type: 'application/pdf' }), filename);
 }
 
 /** Embeds a font from the registry into a document (subset), using fontkit 2. */

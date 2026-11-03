@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Copy, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { Thumb } from './Thumb';
 import { pickFiles } from '../lib/files';
+import { storedFrom, storedIn } from '../lib/desktop';
 import { loadFonts } from '../lib/fonts';
 import { usePageInfos, pageKey } from '../lib/hooks';
 import { clearProjects, deleteProject, listProjects, saveProject } from '../lib/storage';
@@ -34,7 +35,7 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
       <header className="home-header">
         <div>
           <h1>Dashboard</h1>
-          <p className="muted">Everything runs in this browser: no uploads, no accounts, no limits.</p>
+          <p className="muted">Everything runs {storedIn}: no uploads, no accounts, no limits.</p>
         </div>
       </header>
 
@@ -94,7 +95,7 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
             <button
               className="btn ghost danger"
               onClick={() => {
-                if (confirm(`Delete all ${projects.length} documents from this browser? This cannot be undone.`)) void clearProjects().then(refresh);
+                if (confirm(`Delete all ${projects.length} documents ${storedFrom}? This cannot be undone.`)) void clearProjects().then(refresh);
               }}
             >
               <Trash2 size={15} /> Clear all documents
@@ -114,7 +115,7 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
                 onOpen={() => onOpenProject(p)}
                 onDuplicate={() => void duplicate(p)}
                 onDelete={() => {
-                  if (confirm(`Delete “${p.name}” from this browser?`)) void deleteProject(p.id).then(refresh);
+                  if (confirm(`Delete “${p.name}” ${storedFrom}?`)) void deleteProject(p.id).then(refresh);
                 }}
               />
             ))}

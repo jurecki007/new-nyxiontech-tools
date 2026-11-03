@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { APP_VERSION } from '../config';
+import { isDesktop } from './desktop';
 
 const CHECK_EVERY_MS = 30 * 60 * 1000;
 
@@ -33,6 +34,8 @@ export function useAvailableUpdate(): string | null {
   const [available, setAvailable] = useState<string | null>(null);
 
   useEffect(() => {
+    // The desktop app carries its own build, so there is no newer one to load.
+    if (isDesktop) return;
     let cancelled = false;
     const check = () =>
       void fetchDeployedVersion().then((v) => {

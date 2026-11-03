@@ -13,7 +13,10 @@
   "bugs": {
     "url": "https://github.com/jurecki007/nyxiontech-tools/issues"
   },
-  "funding": "https://github.com/jurecki007/nyxiontech-tools#support-the-project",
+  "funding": [
+    "https://ko-fi.com/nyxiontech",
+    "https://github.com/sponsors/jurecki007"
+  ],
   "keywords": [
     "pdf",
     "pdf-editor",
@@ -32,7 +35,11 @@
     "predev": "node scripts/copy-assets.mjs",
     "prebuild": "node scripts/copy-assets.mjs",
     "test:e2e": "playwright test",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
+    "desktop:build:offline": "node scripts/build-desktop-offline.mjs",
+    "test:desktop": "playwright test -c playwright.desktop.config.ts"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "2.11.1",
@@ -53,6 +60,7 @@
     "@expo-google-fonts/roboto-mono": "0.4.2",
     "@expo-google-fonts/source-sans-3": "0.4.2",
     "@expo-google-fonts/tinos": "0.4.2",
+    "@tauri-apps/api": "2.12.4",
     "@tesseract.js-data/eng": "1.0.0",
     "@tesseract.js-data/pol": "1.0.0",
     "dejavu-fonts-ttf": "2.37.3",
@@ -74,6 +82,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
+    "@tauri-apps/cli": "2.12.3",
     "@types/node": "22.18.0",
     "@types/qrcode": "1.5.6",
     "@types/react": "19.1.8",

@@ -1,4 +1,5 @@
 import { zipSync } from 'fflate';
+import { isDesktop, saveWithDialog } from './desktop';
 
 /** Packs files into a .zip; duplicate names get a numeric suffix. */
 export async function zipFiles(files: { name: string; blob: Blob }[]): Promise<Blob> {
@@ -13,7 +14,12 @@ export async function zipFiles(files: { name: string; blob: Blob }[]): Promise<B
   return new Blob([zipped], { type: 'application/zip' });
 }
 
+/** Saves a file: a "Save as" dialog in the desktop app, a download in the browser. */
 export function downloadBlob(blob: Blob, filename: string) {
+  if (isDesktop) {
+    saveWithDialog(blob, filename).catch((e) => window.alert(String(e)));
+    return;
+  }
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

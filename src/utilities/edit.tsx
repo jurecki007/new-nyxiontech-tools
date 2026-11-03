@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Droplet, FilePenLine, Hash, LayoutGrid, Signature, Tags } from 'lucide-react';
 import { ColorField, FontPicker, NumberField } from '../components/fields';
 import { DEFAULT_FONT } from '../lib/fonts';
+import { storedIn } from '../lib/desktop';
 import {
   addPageNumbers,
   addWatermark,
@@ -46,7 +47,7 @@ export const editUtility = editorLauncher({
   tips: [
     'Existing text cannot be retyped in place: cover it with Whiteout and type the new text on top.',
     'Arimo, Tinos and Cousine match Arial, Times and Courier, so additions blend in with most invoices.',
-    'Your work is saved in this browser automatically; find it under Recent documents.',
+    `Your work is saved ${storedIn} automatically; find it under Recent documents.`,
   ],
 });
 
@@ -59,7 +60,7 @@ export const signUtility = editorLauncher({
   tool: 'signature',
   tips: [
     'The signature dialog opens with the document. Draw with a mouse or touchpad, type your name in a handwriting font, or upload a scan.',
-    'Your last signature is remembered in this browser for next time.',
+    `Your last signature is remembered ${storedIn} for next time.`,
     'This is a visual signature, not a qualified electronic signature (e.g. Profil Zaufany or a certificate).',
   ],
 });

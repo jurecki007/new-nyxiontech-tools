@@ -13,7 +13,9 @@ export const REPO_URL = 'https://github.com/jurecki007/nyxiontech-tools';
 export const ISSUES_URL = `${REPO_URL}/issues`;
 
 /**
- * Donation page (GitHub Sponsors, Ko-fi, Buy Me a Coffee, ...).
- * Leave empty to hide the "Support" link in the app.
+ * Donation page linked as "Support" in the app. Ko-fi: no platform fee on donations,
+ * and donors can pay by card, PayPal, Apple Pay or Google Pay without an account.
+ * Leave empty to hide the link.
  */
-export const DONATE_URL = '';
+export const DONATE_URL = 'https://ko-fi.com/nyxiontech';
+export const SPONSORS_URL = 'https://github.com/sponsors/jurecki007';

@@ -3,6 +3,7 @@ import { Github, Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, ShieldC
 import { AboutDialog, type AboutTab } from './AboutDialog';
 import { Home } from './Home';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
+import { externalLink, storedIn } from '../lib/desktop';
 import { useAvailableUpdate } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
 import type { Project } from '../types';
@@ -80,14 +81,14 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
             <button onClick={() => setAbout('about')} title={`About ${APP_NAME}`}>
               <Info size={13} /> About
             </button>
-            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" title="Source code on GitHub">
+            <a href={REPO_URL} {...externalLink} title="Source code on GitHub">
               <Github size={13} /> GitHub
             </a>
-            <a href={COMPANY_URL} target="_blank" rel="noopener noreferrer" title="Made by Nyxiontech">
+            <a href={COMPANY_URL} {...externalLink} title="Made by Nyxiontech">
               <Globe size={13} /> nyxiontech.com
             </a>
             {DONATE_URL && (
-              <a className="donate" href={DONATE_URL} target="_blank" rel="noopener noreferrer" title="Support the project">
+              <a className="donate" href={DONATE_URL} {...externalLink} title="Support the project">
                 <Heart size={13} /> Support
               </a>
             )}
@@ -101,10 +102,10 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
           <div className="banner update" role="status">
             <RefreshCw size={15} />
             <span>
-              Version {update} is available. Reloading is safe: your documents are saved in this browser.
+              Version {update} is available. Reloading is safe: your documents are saved {storedIn}.
             </span>
             <span className="spacer" />
-            <a className="btn ghost" href={`${REPO_URL}/blob/master/CHANGELOG.md`} target="_blank" rel="noopener noreferrer">
+            <a className="btn ghost" href={`${REPO_URL}/blob/master/CHANGELOG.md`} {...externalLink}>
               What's new
             </a>
             <button className="btn primary" onClick={() => window.location.reload()}>
