@@ -22,6 +22,17 @@ Everything runs locally in the browser: **files are never uploaded**, there is n
 
 Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI implementations, business automations and custom web and mobile apps.
 
+## Download
+
+- **Web:** run it yourself (below) or use a hosted copy.
+- **Windows 10/11:** get the installer from the [latest release](https://github.com/jurecki007/new-nyxiontech-tools/releases/latest):
+  - `Nyxiontech.PDF.Tools_<version>_x64-setup.exe`: installs for the current user, no admin rights needed.
+  - `…_x64_en-US.msi`: per-machine installer for IT rollout (Intune, Group Policy).
+
+  The app updates itself: when a new version is released, it offers to install it. Updates are signed, and the app refuses any that are not.
+
+  > The installers are not code-signed yet, so Windows SmartScreen may show "Windows protected your PC". Click **More info → Run anyway**.
+
 ## Support the project
 
 Nyxiontech PDF Tools is free and will stay free. If it saves you a subscription, please consider supporting its development:
@@ -112,8 +123,18 @@ How it differs from the web build:
 The version comes from `package.json`. Before giving the installers to users:
 
 - **Sign them** (Azure Trusted Signing or a code-signing certificate; see Tauri's *Windows code signing* guide). Unsigned, SmartScreen warns about an unknown publisher.
-- Updates are not automatic yet: install the new version over the old one (documents are kept). Tauri's updater plugin can be added once there is a place to host releases.
-- Build on Windows (for example GitHub Actions `windows-latest`); the Docker image does not include the desktop app.
+- Build on Windows; the Docker image does not include the desktop app. Releases are built by GitHub Actions (see Releasing).
+
+**Updates in the desktop app** use Tauri's updater: on start, every 30 minutes and when the window is shown again, the app reads `latest.json` from the latest GitHub release. If there is a newer version, a banner offers **Install and restart**. The installer is downloaded, its signature is checked against the public key in `src-tauri/tauri.conf.json`, and then it is installed and the app restarts. Documents are kept. The request is made by the app, not the page, so the page's Content-Security-Policy is unchanged.
+
+### Releasing
+
+1. Bump `version` in `package.json` and move the `[Unreleased]` notes in `CHANGELOG.md` under a heading for the new version.
+2. Commit, then tag and push: `git tag v1.2.0 && git push origin v1.2.0`.
+3. The **Release** workflow (`.github/workflows/release.yml`) checks that the tag, `package.json` and the changelog agree. It then builds the installers on Windows and creates a **draft** release with the installers, `.sig` files and `latest.json`. The changelog section becomes the release notes.
+4. Check the draft and click **Publish release**. Installed apps see the update only once the release is published.
+
+The update files are signed with a private key that is stored in the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. **Keep a backup of it.** If the key is lost, installed apps can't verify any future update, and users would have to reinstall by hand. To build signed update files locally, set `TAURI_SIGNING_PRIVATE_KEY` to the key file's path.
 
 ### Updates
 

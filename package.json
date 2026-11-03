@@ -61,6 +61,8 @@
     "@expo-google-fonts/source-sans-3": "0.4.2",
     "@expo-google-fonts/tinos": "0.4.2",
     "@tauri-apps/api": "2.12.4",
+    "@tauri-apps/plugin-process": "2.4.0",
+    "@tauri-apps/plugin-updater": "2.14.1",
     "@tesseract.js-data/eng": "1.0.0",
     "@tesseract.js-data/pol": "1.0.0",
     "dejavu-fonts-ttf": "2.37.3",
