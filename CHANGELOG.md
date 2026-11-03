@@ -14,7 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Links to the project website, source code and issue tracker.
 - "Support" link to the project's Ko-fi page; GitHub Sponsors in the repository.
 - Windows desktop app (Tauri 2) with NSIS and MSI installers, including offline variants with WebView2.
-- The Windows app updates itself: when a new version is released, a banner offers "Install and restart". Updates are signed, and the app checks the signature before installing.
+- The Windows app updates itself: when a new version is released, a banner offers "Install and restart". Updates are signed, and the app checks the signature before installing. A progress bar shows the download and installation.
 - Windows installers are published on GitHub Releases, built by a release workflow.
 - Licences of the Rust libraries in the Windows app are listed in THIRD-PARTY-NOTICES.
 

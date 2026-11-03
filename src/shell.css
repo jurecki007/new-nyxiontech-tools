@@ -894,6 +894,59 @@ textarea.text-field {
 .banner.update .btn {
   height: 28px;
 }
+/* The progress bar sits in the banner's bottom padding, so the banner keeps its height. */
+.banner.update {
+  position: relative;
+}
+/* Download / install progress along the bottom edge of the banner. */
+.update-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  overflow: hidden;
+  background: #c9d1fb;
+}
+.update-progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.25s ease-out;
+}
+.update-progress.indeterminate .update-progress-fill {
+  width: 35%;
+  animation: update-progress-slide 1.2s ease-in-out infinite;
+}
+@keyframes update-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(290%);
+  }
+}
+.banner.update .spin {
+  animation: update-spin 1s linear infinite;
+}
+@keyframes update-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .update-progress-fill {
+    transition: none;
+  }
+  .update-progress.indeterminate .update-progress-fill {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+  .banner.update .spin {
+    animation: none;
+  }
+}
 .version-pill {
   display: inline-block;
   padding: 1px 8px;

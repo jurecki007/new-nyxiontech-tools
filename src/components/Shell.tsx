@@ -118,8 +118,8 @@ function UpdateBanner({ update }: { update: AvailableUpdate }) {
   const notes = update.install ? `${REPO_URL}/releases/tag/v${update.version}` : `${REPO_URL}/blob/master/CHANGELOG.md`;
   const busy = state.phase === 'downloading' || state.phase === 'installing';
   return (
-    <div className="banner update" role="status">
-      <RefreshCw size={15} />
+    <div className={`banner update${busy ? ' is-updating' : ''}`} role="status">
+      <RefreshCw size={15} className={busy ? 'spin' : undefined} />
       <span>
         {state.phase === 'downloading'
           ? `Downloading version ${update.version}…${state.percent === null ? '' : ` ${state.percent}%`}`
@@ -144,6 +144,23 @@ function UpdateBanner({ update }: { update: AvailableUpdate }) {
           Reload
         </button>
       )}
+      {busy && <UpdateProgress percent={state.phase === 'downloading' ? state.percent : null} />}
+    </div>
+  );
+}
+
+/** A bar along the bottom of the update banner: filled to the download percentage, or moving while the size or remaining time is unknown (installing). */
+function UpdateProgress({ percent }: { percent: number | null }) {
+  return (
+    <div
+      className={`update-progress${percent === null ? ' indeterminate' : ''}`}
+      role="progressbar"
+      aria-label="Update progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent ?? undefined}
+    >
+      <div className="update-progress-fill" style={percent === null ? undefined : { width: `${percent}%` }} />
     </div>
   );
 }
