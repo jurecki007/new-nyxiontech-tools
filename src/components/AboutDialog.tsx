@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bug, ExternalLink, Github, Globe, Heart, X } from 'lucide-react';
 import changelog from '../../CHANGELOG.md?raw';
-import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL } from '../config';
+import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL, SPONSORS_URL } from '../config';
+import { externalLink, isDesktop } from '../lib/desktop';
 import { parseChangelog } from '../lib/updates';
 
 export type AboutTab = 'about' | 'changes';
@@ -47,37 +48,42 @@ export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onC
         {tab === 'about' ? (
           <div className="about-body">
             <p>
-              Free, open-source PDF and image tools that run entirely in your browser. Files are never uploaded: there is no server-side processing, no
-              account and no tracking.
+              Free, open-source PDF and image tools that run entirely {isDesktop ? 'on your computer' : 'in your browser'}. Files are never uploaded:
+              there is no server-side processing, no account and no tracking.
             </p>
             <p className="muted">
               Made by{' '}
-              <a href={COMPANY_URL} target="_blank" rel="noopener noreferrer">
+              <a href={COMPANY_URL} {...externalLink}>
                 {COMPANY_NAME}
               </a>
               . Licensed under the{' '}
-              <a href={`${REPO_URL}/blob/master/LICENSE`} target="_blank" rel="noopener noreferrer">
+              <a href={`${REPO_URL}/blob/master/LICENSE`} {...externalLink}>
                 GNU Affero General Public License v3.0
               </a>
               . Built on open-source libraries and fonts:{' '}
-              <a href="/THIRD-PARTY-NOTICES.txt" target="_blank" rel="noopener">
+              <a href={isDesktop ? `${REPO_URL}/blob/master/public/THIRD-PARTY-NOTICES.txt` : '/THIRD-PARTY-NOTICES.txt'} {...externalLink}>
                 third-party licences
               </a>
               .
             </p>
             <div className="about-links">
-              <a className="btn" href={COMPANY_URL} target="_blank" rel="noopener noreferrer">
+              <a className="btn" href={COMPANY_URL} {...externalLink}>
                 <Globe size={15} /> nyxiontech.com
               </a>
-              <a className="btn" href={REPO_URL} target="_blank" rel="noopener noreferrer">
+              <a className="btn" href={REPO_URL} {...externalLink}>
                 <Github size={15} /> Source code
               </a>
-              <a className="btn" href={ISSUES_URL} target="_blank" rel="noopener noreferrer">
+              <a className="btn" href={ISSUES_URL} {...externalLink}>
                 <Bug size={15} /> Report a problem
               </a>
               {DONATE_URL && (
-                <a className="btn primary" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <a className="btn primary" href={DONATE_URL} {...externalLink}>
                   <Heart size={15} /> Support the project
+                </a>
+              )}
+              {SPONSORS_URL && (
+                <a className="btn" href={SPONSORS_URL} {...externalLink}>
+                  <Heart size={15} /> GitHub Sponsors
                 </a>
               )}
             </div>
@@ -102,7 +108,7 @@ export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onC
                 ))}
               </section>
             ))}
-            <a className="muted changelog-full" href={`${REPO_URL}/blob/master/CHANGELOG.md`} target="_blank" rel="noopener noreferrer">
+            <a className="muted changelog-full" href={`${REPO_URL}/blob/master/CHANGELOG.md`} {...externalLink}>
               Full changelog on GitHub <ExternalLink size={12} />
             </a>
           </div>

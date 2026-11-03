@@ -8,6 +8,7 @@ test.describe('branding, about and updates', () => {
     await expect(page.locator('.nav-version')).toHaveText(/^v\d+\.\d+\.\d+/);
     await expect(page.locator('.nav-links a', { hasText: 'nyxiontech.com' })).toHaveAttribute('href', 'https://nyxiontech.com');
     await expect(page.locator('.nav-links a', { hasText: 'GitHub' })).toHaveAttribute('href', /github\.com/);
+    await expect(page.locator('.nav-links a', { hasText: 'Support' })).toHaveAttribute('href', 'https://ko-fi.com/nyxiontech');
   });
 
   test("What's new lists the running version from the changelog", async ({ page }) => {

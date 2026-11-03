@@ -9,7 +9,7 @@ Edit, sign, merge, split, compress, OCR, redact and convert, without uploading a
 [![CI](https://github.com/jurecki007/nyxiontech-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/jurecki007/nyxiontech-tools/actions/workflows/ci.yml)
 [![Made by Nyxiontech](https://img.shields.io/badge/made%20by-Nyxiontech-2643e8)](https://nyxiontech.com)
 
-[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=feature_request.yml) · [Support the project](#support-the-project)
+[Website](https://nyxiontech.com) · [Report a bug](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=bug_report.yml) · [Request a feature](https://github.com/jurecki007/nyxiontech-tools/issues/new?template=feature_request.yml) · [Support the project](https://ko-fi.com/nyxiontech)
 
 </div>
 
@@ -24,17 +24,13 @@ Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI im
 
 Nyxiontech PDF Tools is free and will stay free. If it saves you a subscription, please consider supporting its development:
 
-<!--
-  DONATION LINKS: replace the placeholders below, then uncomment this block.
-  Use the same URL for DONATE_URL in src/config.ts (shows a "Support" link in the app)
-  and enable the matching line in .github/FUNDING.yml (adds GitHub's "Sponsor" button).
-
 <p>
-  <a href="https://github.com/sponsors/YOUR_GITHUB_USERNAME"><img alt="Sponsor on GitHub" src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=githubsponsors&logoColor=white"></a>
-  <a href="https://ko-fi.com/YOUR_KOFI_NAME"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=kofi&logoColor=white"></a>
-  <a href="https://buymeacoffee.com/YOUR_BMC_NAME"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy%20me%20a-coffee-ffdd00?logo=buymeacoffee&logoColor=black"></a>
+  <a href="https://ko-fi.com/nyxiontech"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?logo=kofi&logoColor=white"></a>
+  <a href="https://github.com/sponsors/jurecki007"><img alt="Sponsor on GitHub" src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?logo=githubsponsors&logoColor=white"></a>
 </p>
--->
+
+- ☕ **[Ko-fi](https://ko-fi.com/nyxiontech)**: one-off or monthly, by card, PayPal, Apple Pay or Google Pay. No account needed.
+- 💖 **[GitHub Sponsors](https://github.com/sponsors/jurecki007)**: if you already use GitHub.
 
 - ⭐ Star the repository: it helps other people find it.
 - 🐛 [Report bugs](https://github.com/jurecki007/nyxiontech-tools/issues) and suggest features.
@@ -66,7 +62,7 @@ npm run test:e2e:report   # opens the HTML report
 - Tests run with one worker, because OCR and the AI model use a lot of memory.
 - `vite preview` sends the same security headers as nginx (read from `nginx/security-headers.conf`), so the tests run under the production Content-Security-Policy. The dev server (`npm run dev`) cannot send it: React Fast Refresh needs an inline script.
 
-Not covered: HEIC conversion (needs a sample iPhone photo) and the print dialog in "Word to PDF".
+Not covered: HEIC conversion (needs a sample iPhone photo) and the print dialog in "Word to PDF". For the desktop app see below.
 
 ## Self-hosting
 
@@ -83,6 +79,40 @@ docker run --rm -p 8080:80 nyxiontech-pdf-tools   # http://localhost:8080
 - A strict Content-Security-Policy allows only this origin, plus WebAssembly and blob workers (`nginx/security-headers.conf`).
 - There is no backend: documents never reach the server.
 
+### Windows desktop app
+
+The same build also ships as a Windows desktop app ([Tauri 2](https://tauri.app)): the app window is the system WebView2 (Edge), and everything still runs on the computer.
+
+```bash
+npm run desktop:dev       # app window on the Vite dev server, with hot reload
+npm run desktop:build     # builds the web app, then the exe and both installers
+npm run desktop:build:offline  # the same installers with WebView2 inside, for offline machines
+npm run test:desktop      # smoke tests of the built exe (~30 s)
+```
+
+Building needs [Rust](https://rustup.rs) (stable, MSVC) and the Visual Studio C++ Build Tools. Output in `src-tauri/target/release/`:
+
+- `nyxiontech-pdf-tools.exe`: the app on its own (the web build is embedded). Runs on any Windows 10/11 machine with WebView2, which Windows 11 includes.
+- `bundle/nsis/Nyxiontech PDF Tools_<version>_x64-setup.exe`: per-user installer (~35 MB).
+- `bundle/msi/Nyxiontech PDF Tools_<version>_x64_en-US.msi`: per-machine installer for IT rollout (Intune, Group Policy).
+- `…_offline-setup.exe` and `…_offline.msi` (~240 MB, from `desktop:build:offline`): the same, with the full WebView2 installer inside.
+
+On a fresh machine the app needs nothing but WebView2: the C/C++ runtime is linked into the exe, and the other DLLs are part of Windows 10/11. Windows 11 and updated Windows 10 already have WebView2. If it is missing, the normal installers download it (so they need internet), and the offline installers install the copy they carry. The bare exe never installs it. Windows 7/8 are not supported.
+
+How it differs from the web build:
+
+- **Saving** opens a native "Save as" dialog. The page has no file-system access of its own: it can only call the app's `save_file` command (`src-tauri/src/lib.rs`), which always asks the user.
+- **Links** to websites or e-mail (e.g. in a Word preview) open in the default browser; the window never leaves the app.
+- **Content-Security-Policy** is the one in `nginx/security-headers.conf` plus Tauri's IPC endpoint (`src-tauri/tauri.conf.json`); `npm run test:desktop` fails if the two drift apart.
+- **Recent documents and the signature** are stored per Windows user in `%LOCALAPPDATA%\com.nyxiontech.pdf-tools`.
+- **Drag and drop** of files is handled by the page, as in the browser (Tauri's own file-drop handling is off).
+
+The version comes from `package.json`. Before giving the installers to users:
+
+- **Sign them** (Azure Trusted Signing or a code-signing certificate; see Tauri's *Windows code signing* guide). Unsigned, SmartScreen warns about an unknown publisher.
+- Updates are not automatic yet: install the new version over the old one (documents are kept). Tauri's updater plugin can be added once there is a place to host releases.
+- Build on Windows (for example GitHub Actions `windows-latest`); the Docker image does not include the desktop app.
+
 ### Updates
 
 Each build writes `/version.json`. The app checks it on start, every 30 minutes and when the tab becomes visible again. When a newer version has been deployed, it shows a banner offering to reload. The check only talks to the server the app was loaded from.
@@ -92,7 +122,7 @@ To release: bump `version` in `package.json`, add a section to `CHANGELOG.md`, a
 
 ### Rebranding a fork
 
-Name, links and the optional donation URL are in `src/config.ts`. Colours are the `--accent*` and `--dark` tokens at the top of `src/styles.css`. The wordmark is in `Shell.tsx` and `Editor.tsx`, and the favicon is in `index.html`.
+Name, links and the donation URL (`DONATE_URL`, empty hides the link) are in `src/config.ts`. Change `.github/FUNDING.yml` too. Colours are the `--accent*` and `--dark` tokens at the top of `src/styles.css`. The wordmark is in `Shell.tsx` and `Editor.tsx`, and the favicon is in `index.html`.
 Under the AGPL, a modified version that you let others use over a network must offer them its source code. Keep the "Source code" link pointing at your fork.
 
 ## Dashboard tools
@@ -183,8 +213,11 @@ src/
   lib/fontkitAdapter.ts fontkit 2 for pdf-lib
   lib/storage.ts        IndexedDB projects, localStorage snippets
   lib/updates.ts        update check (/version.json) and changelog parser
+  lib/desktop.ts        desktop app (Tauri) detection and native Save dialog
   config.ts             app name, links, donation URL
   components/           Shell (sidebar), Home (dashboard), Editor, AboutDialog, ToolSidebar, PageView, Inspector, ...
+src-tauri/              Windows desktop app: window, CSP, installers (tauri.conf.json), save command and link handling (src/lib.rs)
+tests/desktop/          smoke tests of the built exe
 ```
 
 ## Adding a dashboard tool

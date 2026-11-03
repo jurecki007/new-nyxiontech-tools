@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The app window may only use core events/window APIs; saving goes through the app's own save_file command, which always asks the user.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
