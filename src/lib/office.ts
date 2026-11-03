@@ -1,6 +1,6 @@
 // Basic Word conversions. Exact layout cannot be reproduced in a browser; these
 // keep the text and its structure, which covers editing and re-using content.
-import { openPdf } from './pdfjs';
+import { closePdf, openPdf } from './pdfjs';
 
 /**
  * PDF → .docx: one paragraph per text line, page breaks between pages, and
@@ -42,7 +42,7 @@ export async function pdfToDocx(bytes: Uint8Array): Promise<Blob> {
     const doc = new Document({ sections: [{ children: paragraphs }] });
     return await Packer.toBlob(doc);
   } finally {
-    void src.destroy();
+    void closePdf(src);
   }
 }
 
