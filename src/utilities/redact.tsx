@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { EyeOff, Search, Trash2 } from 'lucide-react';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
-import { openPdf } from '../lib/pdfjs';
+import { closePdf, openPdf } from '../lib/pdfjs';
 import { baseName, pdfBlob } from '../lib/pdfTools';
 import { findTextBoxes, redactPdf, REDACT_PATTERNS, type Box } from '../lib/redact';
 import { Option, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
@@ -29,7 +29,7 @@ function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; in
       canvas.current.width = viewport.width;
       canvas.current.height = viewport.height;
       setSize({ w: base.width, h: base.height, scale });
-      const t = page.render({ canvasContext: canvas.current.getContext('2d')!, viewport });
+      const t = page.render({ canvas: canvas.current, viewport });
       task = t;
       await t.promise.catch(() => undefined);
     })();
@@ -111,7 +111,7 @@ export const redactUtility: Utility = {
         setDoc(x);
         setBoxes(Array.from({ length: x.numPages }, () => []));
       });
-      return () => void d?.destroy();
+      return () => void (d && closePdf(d));
     }, [pdf.bytes, pdf.pages]);
 
     const addMatches = async (q: string | RegExp, label: string) => {

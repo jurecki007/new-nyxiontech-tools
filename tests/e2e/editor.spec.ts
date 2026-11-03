@@ -18,7 +18,7 @@ async function exportPdf(page: Page) {
 test.describe('editor', () => {
   test('snippet and typed text with Polish characters end up in the PDF', async ({ page }) => {
     await openEditor(page);
-    await page.locator('.snippet', { hasText: 'Country of Origin' }).click();
+    await page.locator('.snippet', { hasText: 'Approved for payment' }).click();
 
     await page.locator('.tool-item', { hasText: 'Text' }).click();
     await page.locator('.overlay').first().click({ position: { x: 120, y: 600 } });
@@ -28,7 +28,7 @@ test.describe('editor', () => {
     await expect(page.locator('.overlay text', { hasText: 'Zażółć' })).toBeVisible();
 
     const [first] = await pdfText(await exportPdf(page));
-    expect(first).toContain('Country of Origin: Poland (Polska)');
+    expect(first).toContain('Approved for payment');
     expect(first).toContain('Zażółć gęślą jaźń');
     expect(first).toContain('Invoice 3/10/2026');
   });

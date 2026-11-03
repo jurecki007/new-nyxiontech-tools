@@ -13,6 +13,8 @@ Edit, sign, merge, split, compress, OCR, redact and convert, without uploading a
 
 </div>
 
+![Nyxiontech PDF Tools dashboard: tool sidebar on the left, file drop zone and tool grid on the right](docs/screenshot.png)
+
 ---
 
 Nyxiontech PDF Tools covers the everyday jobs people otherwise pay iLovePDF, Smallpdf and similar services for.
@@ -151,7 +153,7 @@ Results can be downloaded one by one or as a .zip, and PDFs can be sent straight
 
 ### Offline assets
 
-OCR and background removal load a worker, WebAssembly, language data and a model by URL.
+OCR and background removal load a worker, WebAssembly, language data and a model by URL; pdf.js loads its WebAssembly image decoders (JPEG 2000, JBIG2) and colour-profile support the same way.
 `scripts/copy-assets.mjs` copies them from `node_modules` and `assets/` into `public/vendor/` (about 50 MB) before `npm run dev` and `npm run build`, so nothing is fetched from a CDN.
 
 ## Editor features
@@ -168,7 +170,7 @@ OCR and background removal load a worker, WebAssembly, language data and a model
   Arimo, Tinos and Cousine have the same metrics as Arial, Times and Courier, so added text matches typical generated invoices. New text defaults to Arimo.
 - **Whiteout / Highlight / Box**: drag to draw. To "change" existing text, whiteout the old text and type over it.
 - **Images & stamps**: PNG, JPEG, WebP, GIF or SVG (converted to PNG). Resizing keeps the aspect ratio; hold Shift to resize freely.
-- **Snippets**: reusable text stamps, stored in localStorage. "Country of Origin: Poland (Polska)" is included by default. Save any selected text as a snippet with the stamp button.
+- **Snippets**: reusable text stamps, stored in localStorage. "Approved for payment" and "Copy – original on file" are included by default. Save any selected text as a snippet with the stamp button.
 - **Pages**: drag to reorder; rotate, duplicate or delete pages; append pages from other PDFs.
 - **Undo/redo** and keyboard shortcuts (listed in the sidebar).
 - **Download**: writes a new PDF that keeps the original content and draws the edits on top. The file name comes from the name field in the top bar.

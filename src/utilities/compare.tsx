@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GitCompareArrows } from 'lucide-react';
 import { diffLines, pageChanged, pageLines, visualDiff, type DiffLine, type PageVisualDiff } from '../lib/compare';
-import { openPdf } from '../lib/pdfjs';
+import { closePdf, openPdf } from '../lib/pdfjs';
 import { formatBytes } from '../lib/zip';
 import { FileDrop, Option, RunBar, Segmented, ToolPage, useTask } from './ui';
 import type { Utility } from './types';
@@ -60,8 +60,8 @@ export const compareUtility: Utility = {
                 }
                 setPages(visuals);
               } finally {
-                void da.destroy();
-                void db.destroy();
+                void closePdf(da);
+                void closePdf(db);
               }
             })
           }

@@ -5,6 +5,12 @@ import type { PageInfo, Rotation, Source } from '../types';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
+// pdf.js 5+ decodes JPEG 2000 / JBIG2 images and ICC colour profiles with
+// WebAssembly modules it fetches at runtime; without these URLs such images are
+// skipped. Served from public/vendor (see scripts/copy-assets.mjs), never a CDN.
+const vendor = (path: string) => new URL(`${import.meta.env.BASE_URL}vendor/${path}`, window.location.origin).href;
+const assetOptions = { wasmUrl: vendor('pdfjs/wasm/'), iccUrl: vendor('pdfjs/iccs/') };
+
 const docs = new Map<string, Promise<PDFDocumentProxy>>();
 const infos = new Map<string, Promise<PageInfo>>();
 
@@ -12,7 +18,7 @@ export function loadSource(source: Source): Promise<PDFDocumentProxy> {
   let doc = docs.get(source.id);
   if (!doc) {
     // pdf.js transfers the buffer to its worker, so hand it a copy.
-    doc = pdfjs.getDocument({ data: source.bytes.slice() }).promise;
+    doc = pdfjs.getDocument({ data: source.bytes.slice(), ...assetOptions }).promise;
     docs.set(source.id, doc);
   }
   return doc;
@@ -63,9 +69,8 @@ export function renderPage(
     const viewport = page.getViewport({ scale: scale * dpr, rotation });
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    task = page.render({ canvasContext: ctx, viewport });
+    if (!canvas.getContext('2d')) return;
+    task = page.render({ canvas, viewport });
     await task.promise.catch(() => undefined);
   })();
   return () => {
@@ -76,10 +81,15 @@ export function renderPage(
 
 /**
  * Opens arbitrary bytes with pdf.js, outside the source cache. The caller owns
- * the result and should `destroy()` it when done.
+ * the result and should `closePdf()` it when done.
  */
 export function openPdf(bytes: Uint8Array, password?: string): Promise<PDFDocumentProxy> {
-  return pdfjs.getDocument({ data: bytes.slice(), password }).promise;
+  return pdfjs.getDocument({ data: bytes.slice(), password, ...assetOptions }).promise;
+}
+
+/** Frees a document from `openPdf` (pdf.js 5+ destroys via the loading task). */
+export function closePdf(doc: PDFDocumentProxy): Promise<void> {
+  return doc.loadingTask.destroy();
 }
 
 /** Renders one page (1-based) to an image blob at the given resolution. */
@@ -99,7 +109,7 @@ export async function renderPageToBlob(
   // JPEG has no transparency; give pages a white background like a viewer would.
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  await page.render({ canvasContext: ctx, viewport }).promise;
+  await page.render({ canvas, viewport }).promise;
   const blob = await new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode image'))), type, quality),
   );

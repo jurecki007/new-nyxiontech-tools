@@ -63,7 +63,7 @@ export interface ChangelogRelease {
   sections: { title: string; items: string[] }[];
 }
 
-/** Parses the "## [x.y.z] - date / ### Section / - item" subset of Keep a Changelog. */
+/** Parses the "## [x.y.z] - date / ### Section / - item" subset of Keep a Changelog, without "Unreleased". */
 export function parseChangelog(markdown: string): ChangelogRelease[] {
   const releases: ChangelogRelease[] = [];
   for (const line of markdown.split(/\r?\n/)) {
@@ -85,5 +85,6 @@ export function parseChangelog(markdown: string): ChangelogRelease[] {
       current.sections[current.sections.length - 1].items.push(item[1].trim());
     }
   }
-  return releases;
+  // Changes not released yet are not part of the running version.
+  return releases.filter((r) => r.version.toLowerCase() !== 'unreleased');
 }

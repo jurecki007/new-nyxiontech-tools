@@ -3,6 +3,17 @@
 All notable changes to this project are listed here. The app shows this file under "What's new".
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Sidebar links, version and "What's new" are now reachable on phones.
+- Default snippets are "Approved for payment" and "Copy – original on file" instead of a Poland-specific stamp. Snippets you saved yourself are kept.
+- Updated pdf.js to 6, which adds decoding of JPEG 2000 and JBIG2 images and ICC colour profiles (loaded from this server, like the other WebAssembly files).
+- Updated React to 19.3, Vite to 8, TypeScript to 7 and lucide icons to 1.x; the Docker image now uses Node 26 and nginx 1.31.
+
+### Added
+- Licences of the Rust libraries in the Windows app are listed in THIRD-PARTY-NOTICES.
+
 ## [1.1.0] - 2026-11-03
 
 ### Added
