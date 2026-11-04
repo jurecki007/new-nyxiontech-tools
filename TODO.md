@@ -32,7 +32,7 @@ Steps for the owner:
 
 ## Release process improvements
 
-- [ ] The release workflow creates a draft, so `latest.json` gets API asset URLs. For v1.1.0 they were replaced by hand with `releases/download/...` URLs. Automate this: a small workflow on `release: published` that rewrites and re-uploads `latest.json`.
+- [x] The draft release's `latest.json` gets API asset URLs that installed apps can't download. Fixed by `scripts/fix-latest-json.mjs`, run locally before publishing (README → Releasing, step 5). Local on purpose: no extra GitHub Actions minutes.
 - [ ] Desktop smoke tests don't work on GitHub's Windows runners: the app starts, but WebView2 never opens the remote-debugging port. They run with `continue-on-error`. Until this is fixed, run `npm run test:desktop` locally before tagging (see README → Releasing).
 
 ## Later / optional

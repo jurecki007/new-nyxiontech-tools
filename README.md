@@ -154,7 +154,8 @@ The version comes from `package.json`. Before giving the installers to users:
 2. Run `npm run desktop:build` and `npm run test:desktop` locally (CI builds the desktop app but cannot run its smoke tests yet).
 3. Commit, then tag and push: `git tag v1.2.0 && git push origin v1.2.0`.
 4. The **Release** workflow (`.github/workflows/release.yml`) checks that the tag, `package.json` and the changelog agree. It then builds the installers on Windows and creates a **draft** release with the installers, `.sig` files and `latest.json`. The changelog section becomes the release notes.
-5. Check the draft and click **Publish release**. Installed apps see the update only once the release is published.
+5. Run `node scripts/fix-latest-json.mjs v1.2.0` on your PC. The draft's `latest.json` points at download links that installed apps can't use; the script replaces them with the public ones and re-uploads it. It runs locally, so it uses no GitHub Actions minutes.
+6. Check the draft and click **Publish release**. Installed apps see the update only once the release is published. Run the script once more: it now also checks that every download link works.
 
 The update files are signed with a private key that is stored in the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. **Keep a backup of it.** If the key is lost, installed apps can't verify any future update, and users would have to reinstall by hand. To build signed update files locally, set `TAURI_SIGNING_PRIVATE_KEY` to the key file's path.
 
