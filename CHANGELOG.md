@@ -8,6 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 - Windows app: "Check for updates automatically" under About (on by default). When it's off, the app never contacts GitHub on its own; "Check now" checks on request.
 - Privacy policy (PRIVACY.md), also shown on the installer's licence page.
+- README: a short demo, a comparison with other PDF tools, and "Why does Windows warn me?" (the SmartScreen warning for the not yet code-signed installers, and how to check a download's SHA-256). The release notes on GitHub explain the warning too.
 - Tests cover PDFs with JPEG 2000 and JBIG2 images, checking that they actually render.
 - Detailed tests for the Convert and Security tools: every option's effect on the output file, AES-256 encryption details and permissions, and redaction leaks in text, file bytes, metadata, outlines, comments, form fields and attachments.
 

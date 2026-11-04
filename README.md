@@ -15,12 +15,37 @@ Edit, sign, merge, split, compress, OCR, redact and convert, without uploading a
 
 </div>
 
-![Nyxiontech PDF Tools dashboard: tool sidebar on the left, file drop zone and tool grid on the right](docs/screenshot.png)
+<h3 align="center"><a href="https://tools.nyxiontech.com">Try it in your browser →</a> &nbsp;·&nbsp; <a href="https://github.com/jurecki007/nyxiontech-tools/releases/latest">Download for Windows</a></h3>
 
----
+![Redacting a sample agreement: search for a name, add the e-mail, phone and bank account presets, then redact and download](docs/demo.gif)
 
-Nyxiontech PDF Tools covers the everyday jobs people otherwise pay iLovePDF, Smallpdf and similar services for.
-Everything runs locally in the browser: **files are never uploaded**, there is no account and no tracking. Projects are autosaved in the browser's IndexedDB.
+## Why
+
+- **Your files never leave your device.** Every tool runs in the browser and there is no backend to upload to. The Content-Security-Policy only lets the page connect to its own origin, so it couldn't send your documents anywhere else. The Windows app works fully offline.
+- **Free, with no limits.** No account, no sign-up, no daily task limit, no watermark, no tracking.
+- **Redaction that really removes the text.** Redacted pages are re-rendered as images with the boxes burnt in, and comments and form-field values that contain the searched text are removed too. The tests check the output for leaks.
+- **Open source** (AGPL-3.0): read the code, or host your own copy with the included Docker image.
+- **Windows app** with per-user and MSI installers that updates itself.
+
+It covers the everyday jobs people otherwise use iLovePDF, Smallpdf and similar services for: [merge](https://tools.nyxiontech.com/merge-pdf), [compress](https://tools.nyxiontech.com/compress-pdf), [sign](https://tools.nyxiontech.com/sign-pdf), [redact](https://tools.nyxiontech.com/redact-pdf), [OCR](https://tools.nyxiontech.com/ocr-pdf), [password-protect](https://tools.nyxiontech.com/protect-pdf), [PDF to Word](https://tools.nyxiontech.com/pdf-to-word), [HEIC to JPG](https://tools.nyxiontech.com/heic-to-jpg) and [more](#dashboard-tools). Projects are autosaved in the browser's IndexedDB.
+
+### How it compares
+
+| | Where your files are processed | Free use | Open source | Desktop app / offline | Redaction |
+| --- | --- | --- | --- | --- | --- |
+| **Nyxiontech PDF Tools** | In your browser or the Windows app | Unlimited, no account | Yes (AGPL-3.0) | Windows, works offline | Yes, free; text removed |
+| [iLovePDF](https://www.ilovepdf.com/pricing) | Their servers (kept up to 2 hours)[^ilovepdf] | Free tier with limits; Premium for more | No | Windows and Mac, on Premium | Yes, free; AI redaction on Premium |
+| [Smallpdf](https://smallpdf.com/pricing) | Their servers, per its FAQ (deleted after 1 hour)[^smallpdf] | Free tier with usage limits; Pro for unlimited | No | Windows app with offline access | Yes, within the free limits |
+| [Adobe Acrobat online](https://www.adobe.com/acrobat/online.html) | Adobe's cloud | One task without signing in; free Adobe account has quotas[^adobe] | No | Acrobat Reader / Acrobat (desktop) | Acrobat Pro (paid, free trial)[^adobe-redact] |
+| [Stirling-PDF](https://github.com/Stirling-Tools/Stirling-PDF) | The server you host it on (or their cloud) | Free to self-host; paid plans for enterprise features | Open-core (MIT plus proprietary parts)[^stirling] | Windows, Mac and Linux; works offline | Yes |
+
+<sub>As of November 2026, from each vendor's own pages; plans change, so check them before relying on this. Corrections are welcome.</sub>
+
+[^ilovepdf]: iLovePDF [FAQ](https://www.ilovepdf.com/help/faq) ("We just keep them for a maximum of 2 hours") and [pricing](https://www.ilovepdf.com/pricing) (free plan: "Limited document processing"; desktop app and Redact PDF (Smart) not on Free).
+[^smallpdf]: Smallpdf [Redact PDF](https://smallpdf.com/redact-pdf) (FAQ: "All processing happens on secure servers", "Your files are automatically deleted after one hour", "There are some usage limits for free users", "Upgrading to Pro gives you unlimited redactions"; the same page also mentions in-browser processing) and [desktop app](https://smallpdf.com/desktop) ("offline access").
+[^adobe]: Adobe [FAQ on the free online tools](https://helpx.adobe.com/document-cloud/faq/free-online-pdf.html): without signing in, most tools allow one free transaction; signed-in free users have quotas on premium tools.
+[^adobe-redact]: Adobe, [How to redact a PDF](https://www.adobe.com/uk/acrobat/resources/how-to-redact-a-pdf.html): redaction is an Acrobat Pro feature, available through the free trial.
+[^stirling]: Stirling-PDF [README](https://github.com/Stirling-Tools/Stirling-PDF), [LICENSE](https://github.com/Stirling-Tools/Stirling-PDF/blob/main/LICENSE) and [docs](https://docs.stirlingpdf.com/) (desktop app "Works offline"; server via Docker, Kubernetes or JAR).
 
 Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI implementations, business automations and custom web and mobile apps.
 
@@ -35,9 +60,19 @@ Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI im
 
   To uninstall: Windows Settings → Apps → Installed apps → Nyxiontech PDF Tools → Uninstall.
 
-  > The installers are not code-signed yet (see [Code signing policy](#code-signing-policy)), so Windows SmartScreen may show "Windows protected your PC". Click **More info → Run anyway**.
-
 See the [privacy policy](PRIVACY.md): the web app sends nothing anywhere, and the desktop app only asks GitHub for the latest version number.
+
+### Why does Windows warn me?
+
+The installers are not code-signed yet: the application to [SignPath Foundation](https://signpath.org/) is pending (see [Code signing policy](#code-signing-policy)). Until then, Windows SmartScreen shows **"Windows protected your PC"** for a new download from an unknown publisher. It is a warning about reputation, not a virus detection. To install, click **More info → Run anyway**.
+
+To check that your download is the file GitHub Actions built from this repository, compare its SHA-256 hash with the `sha256:` digest that GitHub shows next to each file on the [release page](https://github.com/jurecki007/nyxiontech-tools/releases/latest):
+
+```powershell
+Get-FileHash .\Nyxiontech.PDF.Tools_1.1.0_x64-setup.exe   # SHA256 by default
+```
+
+You can also build the installers yourself from source (see [Windows desktop app](#windows-desktop-app)).
 
 ## Code signing policy
 
@@ -176,6 +211,8 @@ Under the AGPL, a modified version that you let others use over a network must o
 ## Dashboard tools
 
 The sidebar on the main screen lists every tool, grouped and searchable. Each tool has its own URL (`#/tool/<id>`).
+
+![Nyxiontech PDF Tools dashboard: tool sidebar on the left, file drop zone and tool grid on the right](docs/screenshot.png)
 
 | Group | Tools |
 | --- | --- |

@@ -41,7 +41,7 @@ jobs:
           fi
           {
             echo 'body<<NOTES_EOF'
-            node scripts/release-notes.mjs "$VERSION"
+            node scripts/release-notes.mjs "$VERSION" --github
             echo
             echo '---'
             echo 'Windows 10/11: `*_x64-setup.exe` installs for the current user; `*_x64_en-US.msi` is for IT rollout. Installed apps offer this update automatically.'
