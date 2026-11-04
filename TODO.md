@@ -38,8 +38,9 @@ Steps for the owner:
 ## Later / optional
 
 - [x] Public web instance at https://tools.nyxiontech.com (Cloudflare Pages, auto-deploys from `master`), with SEO / AI-search metadata.
-- [ ] Link tools.nyxiontech.com from the nyxiontech.com website.
-- [ ] Submit `https://tools.nyxiontech.com/sitemap.xml` in Google Search Console and Bing Webmaster Tools.
+- [ ] Link from nyxiontech.com: portfolio case study ready in jurecki007/nyxiontech-ignition PR #5; merge to publish.
+- [x] Google Search Console: domain property `nyxiontech.com` (auto-verified via Cloudflare DNS); tools sitemap read successfully (2 pages).
+- [ ] Bing Webmaster Tools: nyxiontech.com imported from Google on 2026-11-04, still processing (up to 48 h). Then check that `https://tools.nyxiontech.com/sitemap.xml` is listed under Sitemaps, and submit it if not.
 - [x] Renamed the repo to `nyxiontech-tools` (2026-11-04). GitHub redirects the old URLs, so v1.1.0 still finds updates at its old address.
-- [ ] Ko-fi: profile picture (`src-tauri/icons/icon.png`), description, connect PayPal, currency EUR instead of USD.
+- [x] Ko-fi: profile picture, description, category, EUR, PayPal and Stripe connected.
 - [x] PDFs with JPEG 2000 / JBIG2 images render correctly; covered by `tests/e2e/image-codecs.spec.ts` (samples from the pdf.js test corpus).
