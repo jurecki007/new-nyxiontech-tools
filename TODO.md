@@ -38,7 +38,7 @@ Steps for the owner:
 ## Later / optional
 
 - [x] Public web instance at https://tools.nyxiontech.com (Cloudflare Pages, auto-deploys from `master`), with SEO / AI-search metadata.
-- [ ] Link from nyxiontech.com: portfolio case study ready in jurecki007/nyxiontech-ignition PR #5; merge to publish.
+- [x] Linked from nyxiontech.com: portfolio case study at https://www.nyxiontech.com/portfolio/pdf-tools (nyxiontech-ignition PR #5, merged 2026-11-04).
 - [x] Google Search Console: domain property `nyxiontech.com` (auto-verified via Cloudflare DNS); tools sitemap read successfully (2 pages).
 - [x] Bing Webmaster Tools: `tools.nyxiontech.com` verified with the `msvalidate.01` meta tag in index.html (keep it) and its sitemap submitted (2026-11-04).
 - [ ] Bing: `nyxiontech.com` itself still says "User is unauthorized" after the import from Google. If it stays that way, add it by hand (verification via the meta tag on the main site or a CNAME in Cloudflare).
