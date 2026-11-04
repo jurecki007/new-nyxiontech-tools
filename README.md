@@ -31,9 +31,28 @@ Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI im
   - `Nyxiontech.PDF.Tools_<version>_x64-setup.exe`: installs for the current user, no admin rights needed.
   - `…_x64_en-US.msi`: per-machine installer for IT rollout (Intune, Group Policy).
 
-  The app updates itself: when a new version is released, it offers to install it. Updates are signed, and the app refuses any that are not.
+  The app updates itself: when a new version is released, it offers to install it. Updates are signed, and the app refuses any that are not. To stop the app from checking, untick **Check for updates automatically** under **About**.
 
-  > The installers are not code-signed yet, so Windows SmartScreen may show "Windows protected your PC". Click **More info → Run anyway**.
+  To uninstall: Windows Settings → Apps → Installed apps → Nyxiontech PDF Tools → Uninstall.
+
+  > The installers are not code-signed yet (see [Code signing policy](#code-signing-policy)), so Windows SmartScreen may show "Windows protected your PC". Click **More info → Run anyway**.
+
+See the [privacy policy](PRIVACY.md): the web app sends nothing anywhere, and the desktop app only asks GitHub for the latest version number.
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
+Windows installers are built from this repository by the [Release workflow](.github/workflows/release.yml) on GitHub Actions and signed only after a manual approval for each release.
+
+| Role | Members |
+| --- | --- |
+| Committers and reviewers | [jurecki007](https://github.com/jurecki007) |
+| Approvers | [jurecki007](https://github.com/jurecki007) |
+
+Changes from other contributors are merged only through a reviewed pull request.
+
+Privacy: this program does not send any information to other networked systems except the update check described in the [privacy policy](PRIVACY.md), which can be turned off.
 
 ## Support the project
 
@@ -120,13 +139,14 @@ How it differs from the web build:
 - **Content-Security-Policy** is the one in `nginx/security-headers.conf` plus Tauri's IPC endpoint (`src-tauri/tauri.conf.json`); `npm run test:desktop` fails if the two drift apart.
 - **Recent documents and the signature** are stored per Windows user in `%LOCALAPPDATA%\com.nyxiontech.pdf-tools`.
 - **Drag and drop** of files is handled by the page, as in the browser (Tauri's own file-drop handling is off).
+- **The installers' licence page** shows the privacy policy and then the licence. `scripts/installer-license.mjs` combines `PRIVACY.md` and `LICENSE` into `src-tauri/target/installer-license.txt` before each build.
 
 The version comes from `package.json`. Before giving the installers to users:
 
-- **Sign them** (Azure Trusted Signing or a code-signing certificate; see Tauri's *Windows code signing* guide). Unsigned, SmartScreen warns about an unknown publisher.
+- **Sign them.** Releases are to be signed through SignPath Foundation (see [Code signing policy](#code-signing-policy)). Unsigned, SmartScreen warns about an unknown publisher.
 - Build on Windows; the Docker image does not include the desktop app. Releases are built by GitHub Actions (see Releasing).
 
-**Updates in the desktop app** use Tauri's updater: on start, every 30 minutes and when the window is shown again, the app reads `latest.json` from the latest GitHub release. If there is a newer version, a banner offers **Install and restart**. The installer is downloaded, its signature is checked against the public key in `src-tauri/tauri.conf.json`, and then it is installed and the app restarts. Documents are kept. The request is made by the app, not the page, so the page's Content-Security-Policy is unchanged.
+**Updates in the desktop app** use Tauri's updater: on start, every 30 minutes and when the window is shown again, the app reads `latest.json` from the latest GitHub release. The user can turn this off under **About** (the app then contacts GitHub only on **Check now**). If there is a newer version, a banner offers **Install and restart**. The installer is downloaded, its signature is checked against the public key in `src-tauri/tauri.conf.json`, and then it is installed and the app restarts. Documents are kept. The request is made by the app, not the page, so the page's Content-Security-Policy is unchanged.
 
 ### Releasing
 
@@ -237,7 +257,7 @@ src/
   lib/fontFiles.ts      list of bundled font files
   lib/fontkitAdapter.ts fontkit 2 for pdf-lib
   lib/storage.ts        IndexedDB projects, localStorage snippets
-  lib/updates.ts        update check (/version.json) and changelog parser
+  lib/updates.ts        update check (/version.json, GitHub Releases), its on/off setting, changelog parser
   lib/desktop.ts        desktop app (Tauri) detection and native Save dialog
   config.ts             app name, links, donation URL
   components/           Shell (sidebar), Home (dashboard), Editor, AboutDialog, ToolSidebar, PageView, Inspector, ...

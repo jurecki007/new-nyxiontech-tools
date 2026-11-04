@@ -20,6 +20,8 @@ test.describe('branding, about and updates', () => {
     await expect(dialog.locator('.changelog h4').first()).toContainText('current');
     await dialog.getByRole('button', { name: 'About' }).click();
     await expect(dialog).toContainText('Files are never uploaded');
+    // The update check setting is desktop-only: the web app only asks its own server.
+    await expect(dialog.getByRole('checkbox', { name: 'Check for updates automatically' })).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
   });

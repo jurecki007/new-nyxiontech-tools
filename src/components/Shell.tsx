@@ -5,7 +5,7 @@ import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
-import { useAvailableUpdate, type AvailableUpdate, type InstallState } from '../lib/updates';
+import { useUpdates, type AvailableUpdate, type InstallState } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
 import type { Project } from '../types';
 
@@ -25,7 +25,8 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
   const [query, setQuery] = useState('');
   const [about, setAbout] = useState<AboutTab | null>(null);
   const closeAbout = useCallback(() => setAbout(null), []);
-  const update = useAvailableUpdate();
+  const updates = useUpdates();
+  const update = updates.available;
   const toolId = /^#\/tool\/([\w-]+)/.exec(hash)?.[1];
   const utility = toolId ? getUtility(toolId) : undefined;
 
@@ -107,7 +108,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
         )}
         {utility ? <utility.Component key={utility.id} ctx={ctx} /> : <Home ctx={ctx} onOpenProject={onOpenProject} />}
       </main>
-      {about && <AboutDialog initialTab={about} onClose={closeAbout} />}
+      {about && <AboutDialog initialTab={about} updates={updates} onClose={closeAbout} />}
     </div>
   );
 }
