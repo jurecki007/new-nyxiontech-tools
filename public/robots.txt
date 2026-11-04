@@ -1,0 +1,7 @@
+# Nyxiontech PDF Tools: everything public may be crawled, including by AI search
+# and answer engines. The app runs in the browser and stores nothing on the server.
+User-agent: *
+Allow: /
+Disallow: /vendor/
+
+Sitemap: https://tools.nyxiontech.com/sitemap.xml

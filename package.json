@@ -33,7 +33,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "predev": "node scripts/copy-assets.mjs",
-    "prebuild": "node scripts/copy-assets.mjs",
+    "prebuild": "node scripts/check-vercel-headers.mjs && node scripts/copy-assets.mjs",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report",
     "desktop:dev": "tauri dev",

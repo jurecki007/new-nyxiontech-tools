@@ -1,0 +1,5 @@
+Contact: https://github.com/jurecki007/nyxiontech-tools/security/advisories/new
+Expires: 2027-11-04T00:00:00.000Z
+Preferred-Languages: en, pl
+Policy: https://github.com/jurecki007/nyxiontech-tools/blob/master/SECURITY.md
+Canonical: https://tools.nyxiontech.com/.well-known/security.txt

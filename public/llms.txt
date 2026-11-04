@@ -1,0 +1,33 @@
+# Nyxiontech PDF Tools
+
+> Free, open-source PDF and image tools that run entirely in the browser. Files are never uploaded: there is no server-side processing, no account, no tracking and no file limits. Made by Nyxiontech (https://nyxiontech.com), licensed AGPL-3.0. Also available as a Windows desktop app.
+
+Use it at https://tools.nyxiontech.com. Each tool has its own address, `https://tools.nyxiontech.com/#/tool/<id>`.
+
+## Tools
+
+- Edit & sign: edit PDF (add text, white-out, highlight, shapes, images), sign PDF (draw, type or upload a signature, with white-background removal), fill PDF forms (with flattening), page numbers, watermark, edit metadata.
+- Organize: merge PDF, split PDF (every page, ranges or extract), organize pages (reorder, rotate, duplicate, delete), rotate PDF.
+- Optimize: compress PDF (lossless repack, or rasterize at three quality levels).
+- Convert: OCR to searchable PDF (Polish and English), images to PDF (including iPhone HEIC), PDF to images, PDF to text, PDF to Word, Word to PDF.
+- Security: protect PDF (AES-256 password and permissions), unlock PDF, redact PDF (find text, preset patterns such as e-mail addresses and IBANs, or draw boxes; redacted content is really removed).
+- Review: compare two PDFs (text diff and visual diff per page).
+- Images: compress and convert images (JPG, PNG, WebP; resize; strips EXIF), remove background (on-device AI or plain colour), HEIC to JPG.
+- Other: QR code generator (link, Wi-Fi, contact card, e-mail, text; PNG or SVG).
+
+## Frequently asked questions
+
+- Are my files uploaded? No. Every tool runs in your browser on your own device; the files never leave it. The page loads its code once from tools.nyxiontech.com and makes no other requests.
+- Is it free? Yes, with no limits, sign-up or watermarks. It is open source under the GNU AGPL v3. Donations are welcome at https://ko-fi.com/nyxiontech.
+- Does it work offline? The Windows app works fully offline. The web version needs a connection to load a tool's files (for example the OCR language data) the first time you use it.
+- How do I make a scanned PDF searchable? Use "OCR: searchable PDF". It adds an invisible text layer over the unchanged page images.
+- How do I sign a PDF for free? Open "Sign PDF", draw, type or upload your signature and place it on the page, then download.
+- Is redaction safe? Yes. Pages with redactions are re-rendered as images with the boxes burnt in, so the hidden text is removed, not just covered.
+- Which alternatives does it replace? Online services such as iLovePDF, Smallpdf or Adobe Acrobat online for everyday tasks, without uploading documents.
+
+## Links
+
+- [Source code](https://github.com/jurecki007/nyxiontech-tools): README, licence and changelog
+- [Windows download](https://github.com/jurecki007/nyxiontech-tools/releases/latest): installer with automatic, signed updates
+- [Privacy policy](https://github.com/jurecki007/nyxiontech-tools/blob/master/PRIVACY.md)
+- [Nyxiontech](https://nyxiontech.com): AI implementations, business automation and custom web and mobile apps

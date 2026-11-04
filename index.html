@@ -3,13 +3,141 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nyxiontech PDF Tools</title>
-    <meta name="description" content="Free, open-source PDF and image tools that run entirely in your browser. Files are never uploaded. By Nyxiontech." />
+    <title>Nyxiontech PDF Tools: free PDF editor that never uploads your files</title>
+    <meta name="description" content="Free, open-source PDF and image tools that run entirely in your browser: edit, sign, merge, split, compress, OCR, redact and convert. Files are never uploaded. By Nyxiontech." />
     <meta name="theme-color" content="#14171c" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2314171c'/><path d='M8 23V9l12 14V9' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/><circle cx='25.5' cy='22.5' r='2.5' fill='%237b93ff'/></svg>" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Nyxiontech" />
+    <link rel="canonical" href="https://tools.nyxiontech.com/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- The fallback below only fades in if the app hasn't started after 1.5 s (no flash on normal loads). -->
+    <style>
+      .boot-fallback { opacity: 0; animation: boot-show 0.2s 1.5s forwards; }
+      @keyframes boot-show { to { opacity: 1; } }
+    </style>
+
+    <!-- Link previews (Open Graph: Facebook, LinkedIn, Slack, WhatsApp; Twitter/X card) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Nyxiontech PDF Tools" />
+    <meta property="og:title" content="Nyxiontech PDF Tools: free PDF tools that never upload your files" />
+    <meta property="og:description" content="Edit, sign, merge, split, compress, OCR, redact and convert PDFs right in your browser. Open source, no account, no uploads." />
+    <meta property="og:url" content="https://tools.nyxiontech.com/" />
+    <meta property="og:image" content="https://tools.nyxiontech.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Nyxiontech PDF Tools: free PDF tools that never upload your files" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nyxiontech PDF Tools: free PDF tools that never upload your files" />
+    <meta name="twitter:description" content="Edit, sign, merge, split, compress, OCR, redact and convert PDFs right in your browser. Open source, no account, no uploads." />
+    <meta name="twitter:image" content="https://tools.nyxiontech.com/og-image.png" />
+
+    <!-- Structured data for search and answer engines. A data block, not a script: the CSP doesn't apply. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://nyxiontech.com/#organization",
+            "name": "Nyxiontech",
+            "url": "https://nyxiontech.com",
+            "logo": "https://tools.nyxiontech.com/icon-512.png",
+            "sameAs": ["https://github.com/jurecki007/nyxiontech-tools", "https://ko-fi.com/nyxiontech"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://tools.nyxiontech.com/#website",
+            "name": "Nyxiontech PDF Tools",
+            "url": "https://tools.nyxiontech.com/",
+            "publisher": { "@id": "https://nyxiontech.com/#organization" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://tools.nyxiontech.com/#app",
+            "name": "Nyxiontech PDF Tools",
+            "url": "https://tools.nyxiontech.com/",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "PDF editor",
+            "operatingSystem": "Any (web browser), Windows 10, Windows 11",
+            "description": "Free, open-source PDF and image tools that run entirely in the browser. Files are never uploaded.",
+            "image": "https://tools.nyxiontech.com/og-image.png",
+            "screenshot": "https://tools.nyxiontech.com/og-image.png",
+            "downloadUrl": "https://github.com/jurecki007/nyxiontech-tools/releases/latest",
+            "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+            "publisher": { "@id": "https://nyxiontech.com/#organization" },
+            "featureList": [
+              "Edit PDF", "Sign PDF", "Fill PDF forms", "Page numbers", "Watermark", "Edit PDF metadata",
+              "Merge PDF", "Split PDF", "Organize pages", "Rotate PDF", "Compress PDF",
+              "OCR: searchable PDF", "Images to PDF", "PDF to images", "PDF to text", "PDF to Word", "Word to PDF",
+              "Protect PDF", "Unlock PDF", "Redact PDF", "Compare PDFs",
+              "Compress and convert images", "Remove background", "HEIC to JPG", "QR code generator"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Are my files uploaded?",
+                "acceptedAnswer": { "@type": "Answer", "text": "No. Every tool runs in your browser on your own device, so your files never leave it. There is no account and no tracking." }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Nyxiontech PDF Tools free?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Yes, with no limits, sign-up or watermarks. It is open source under the GNU AGPL v3." }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I make a scanned PDF searchable?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Open \"OCR: searchable PDF\" and add the file. It recognises the text (Polish and English) and adds an invisible text layer over the unchanged pages." }
+              },
+              {
+                "@type": "Question",
+                "name": "Is the redaction safe?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Yes. Pages with redactions are re-rendered as images with the boxes burnt in, so the hidden text is removed, not just covered." }
+              },
+              {
+                "@type": "Question",
+                "name": "Is there a desktop app?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Yes, for Windows 10 and 11. It works offline and updates itself with signed updates. Download it from the GitHub releases page." }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown until the app starts (and to crawlers that don't run JavaScript); React replaces it. -->
+      <main class="boot-fallback" style="max-width: 46rem; margin: 3rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; line-height: 1.5; color: #14171c">
+        <h1>Nyxiontech PDF Tools</h1>
+        <p>Free, open-source PDF and image tools that run entirely in your browser. Files are never uploaded: no account, no tracking, no limits.</p>
+        <h2>Tools</h2>
+        <ul>
+          <li><strong>Edit &amp; sign:</strong> edit PDF, sign PDF, fill PDF forms, page numbers, watermark, edit metadata</li>
+          <li><strong>Organize:</strong> merge PDF, split PDF, organize pages, rotate PDF</li>
+          <li><strong>Optimize:</strong> compress PDF</li>
+          <li><strong>Convert:</strong> OCR to searchable PDF, images to PDF (incl. HEIC), PDF to images, PDF to text, PDF to Word, Word to PDF</li>
+          <li><strong>Security:</strong> protect PDF (AES-256), unlock PDF, redact PDF</li>
+          <li><strong>Review:</strong> compare PDFs</li>
+          <li><strong>Images:</strong> compress and convert images, remove background, HEIC to JPG</li>
+          <li><strong>Other:</strong> QR code generator</li>
+        </ul>
+        <p>
+          <a href="https://github.com/jurecki007/nyxiontech-tools">Source code</a> ·
+          <a href="https://github.com/jurecki007/nyxiontech-tools/releases/latest">Windows app</a> ·
+          <a href="https://nyxiontech.com">Nyxiontech</a>
+        </p>
+        <noscript><p>This app needs JavaScript. Everything runs on your device.</p><style>.boot-fallback { opacity: 1; animation: none; }</style></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
