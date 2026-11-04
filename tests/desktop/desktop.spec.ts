@@ -151,6 +151,20 @@ test('branding, About and outside links fit the desktop app', async ({ app: { pa
   await expect(page.locator('.banner.update')).toHaveCount(0);
 });
 
+test('the automatic update check can be turned off', async ({ app: { page } }) => {
+  await page.getByRole('button', { name: 'About' }).click();
+  const auto = page.getByRole('checkbox', { name: 'Check for updates automatically' });
+  await expect(auto).toBeChecked();
+  await auto.uncheck();
+  await page.reload();
+  await expect(page.locator('.tool-grid').first()).toBeVisible();
+  await page.getByRole('button', { name: 'About' }).click();
+  await expect(auto).not.toBeChecked();
+  // "Check now" still works on request; GitHub may or may not be reachable here.
+  await page.getByRole('button', { name: 'Check now' }).click();
+  await expect(page.locator('.about-check [role=status]')).toHaveText(/latest version|is available|Could not check/, { timeout: 30_000 });
+});
+
 test('OCR result is saved through the native Save dialog', async ({ app }) => {
   test.setTimeout(180_000);
   const { page } = app;

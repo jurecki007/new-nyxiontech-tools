@@ -1,6 +1,6 @@
 # TODO
 
-Where the project stands and what is left. Last updated 2026-11-03.
+Where the project stands and what is left. Last updated 2026-11-04.
 
 ## Status
 
@@ -22,18 +22,12 @@ Where the project stands and what is left. Last updated 2026-11-03.
 
 Goal: no more "unknown publisher" warning. The publisher shown will be "SignPath Foundation". Requirements: <https://signpath.org/terms>.
 
-Code changes (one PR):
-- [ ] Desktop app: setting "Check for updates automatically" (default on; when off the app never contacts GitHub) and a "Check now" button in the About dialog.
-- [ ] `PRIVACY.md`: the web app sends nothing anywhere; the desktop app only asks GitHub Releases for the latest version, and only when the setting is on.
-- [ ] Show the privacy notice during installation, on the NSIS licence page next to the licence.
-- [ ] README section "Code signing policy" with:
-  - the attribution "Free code signing provided by SignPath.io, certificate by SignPath Foundation" (with the links SignPath requires)
-  - team roles: authors, reviewers, approvers
-  - a link to the privacy policy
+Code changes: done on branch `code-signing-prep`: the update check setting and "Check now" (About dialog), `PRIVACY.md`, the privacy policy on the installers' licence page, the README section "Code signing policy" and links in the release notes.
 
 Steps for the owner:
 - [ ] Two-factor sign-in on GitHub (`jurecki007`), and later on SignPath.
-- [ ] Apply at <https://signpath.org/apply> once the PR above is merged and the repo is public.
+- [ ] Apply at <https://signpath.org/apply> once that branch is merged and the repo is public.
+- [ ] SignPath asks for "installation options to disable" network features. The update check can be turned off in the app (About) but not yet in the installer. If SignPath asks for it, add an installer checkbox (NSIS hook) that writes the setting.
 - [ ] After approval: add the SignPath signing step to `.github/workflows/release.yml` and store the credentials as repo secrets. Each release is then approved manually in SignPath before signing.
 
 ## Release process improvements

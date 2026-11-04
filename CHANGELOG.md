@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Windows app: "Check for updates automatically" under About (on by default). When it's off, the app never contacts GitHub on its own; "Check now" checks on request.
+- Privacy policy (PRIVACY.md), also shown on the installer's licence page.
+
 ## [1.1.0] - 2026-11-03
 
 ### Added

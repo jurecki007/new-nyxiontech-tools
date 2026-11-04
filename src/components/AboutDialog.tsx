@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bug, ExternalLink, Globe, Heart, X } from 'lucide-react';
+import { Bug, ExternalLink, Globe, Heart, RefreshCw, X } from 'lucide-react';
 import { GithubIcon } from './GithubIcon';
 import changelog from '../../CHANGELOG.md?raw';
 import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL, SPONSORS_URL } from '../config';
 import { externalLink, isDesktop } from '../lib/desktop';
-import { parseChangelog } from '../lib/updates';
+import { parseChangelog, type Updates } from '../lib/updates';
 
 export type AboutTab = 'about' | 'changes';
 
 /** "About" and "What's new" in one dialog. */
-export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onClose: () => void }) {
+export function AboutDialog({ initialTab, updates, onClose }: { initialTab: AboutTab; updates: Updates; onClose: () => void }) {
   const [tab, setTab] = useState<AboutTab>(initialTab);
   const releases = useMemo(() => parseChangelog(changelog), []);
 
@@ -88,6 +88,7 @@ export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onC
                 </a>
               )}
             </div>
+            {isDesktop && <UpdateSettings updates={updates} />}
           </div>
         ) : (
           <div className="changelog">
@@ -116,5 +117,48 @@ export function AboutDialog({ initialTab, onClose }: { initialTab: AboutTab; onC
         )}
       </div>
     </div>
+  );
+}
+
+type CheckState = { phase: 'idle' | 'checking' | 'latest' } | { phase: 'found'; version: string } | { phase: 'error'; message: string };
+
+/** Desktop app: turns the automatic update check on or off, and checks on request. */
+function UpdateSettings({ updates }: { updates: Updates }) {
+  const [state, setState] = useState<CheckState>({ phase: 'idle' });
+  const checkNow = () => {
+    setState({ phase: 'checking' });
+    updates.checkNow().then(
+      (u) => setState(u ? { phase: 'found', version: u.version } : { phase: 'latest' }),
+      (e: unknown) => setState({ phase: 'error', message: e instanceof Error ? e.message : String(e) }),
+    );
+  };
+  return (
+    <section className="about-updates">
+      <h4>Updates</h4>
+      <label className="check">
+        <input type="checkbox" checked={updates.autoCheck} onChange={(e) => updates.setAutoCheck(e.target.checked)} />
+        Check for updates automatically
+      </label>
+      <p className="muted">
+        The app asks GitHub Releases for the latest version number; nothing about you or your documents is sent. When this is off, the app only
+        contacts GitHub when you click "Check now". <a href={`${REPO_URL}/blob/master/PRIVACY.md`} {...externalLink}>Privacy policy</a>
+      </p>
+      <div className="about-check">
+        <button className="btn" disabled={state.phase === 'checking'} onClick={checkNow}>
+          <RefreshCw size={15} /> Check now
+        </button>
+        <span className="muted" role="status">
+          {state.phase === 'checking'
+            ? 'Checking…'
+            : state.phase === 'latest'
+              ? `You have the latest version (${APP_VERSION}).`
+              : state.phase === 'found'
+                ? `Version ${state.version} is available: see the banner to install it.`
+                : state.phase === 'error'
+                  ? `Could not check for updates: ${state.message}`
+                  : ''}
+        </span>
+      </div>
+    </section>
   );
 }
