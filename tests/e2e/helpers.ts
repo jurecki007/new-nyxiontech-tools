@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 import { unzipSync } from 'fflate';
 import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFHexString, PDFName, PDFRawStream, PDFString, type PDFObject } from 'pdf-lib';
+import { toolPath, type ToolId } from '../../src/utilities/routes';
 import { PDFDocument as CantooDocument, PDFHexString as CantooHexString, PDFString as CantooString, StandardFonts } from '@cantoo/pdf-lib';
 
 export const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.fixtures');
@@ -11,10 +12,10 @@ export const fixture = (name: string) => path.join(FIXTURES, name);
 /** Checked-in sample files (tests/fixtures), as opposed to the generated ones above. */
 export const staticFixture = (name: string) => path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', name);
 
-/** Opens a dashboard tool with fresh state. */
-export async function openTool(page: Page, id: string) {
+/** Opens a dashboard tool with fresh state, at its public address (e.g. /merge-pdf). */
+export async function openTool(page: Page, id: ToolId) {
   await page.goto('about:blank');
-  await page.goto(`/#/tool/${id}`);
+  await page.goto(toolPath(id, 'en'));
   await expect(page.locator('.tool-page')).toBeVisible();
 }
 

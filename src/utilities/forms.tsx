@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { fillForm, readForm, type FormFieldInfo, type FormValues } from '../lib/forms';
 import { baseName, pdfBlob } from '../lib/pdfTools';
+import { linkTo } from '../lib/route';
 import { Option, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
 
@@ -90,7 +91,7 @@ export const formsUtility: Utility = {
         <SinglePdfInput pdf={pdf} />
         {fields && fields.length === 0 && (
           <p className="hint">
-            This PDF has no fillable fields. To write on it anyway, use <a href="#/tool/edit">Edit PDF</a> and add text where needed.
+            This PDF has no fillable fields. To write on it anyway, use <a {...linkTo('edit')}>Edit PDF</a> and add text where needed.
           </p>
         )}
         {fields && fields.length > 0 && (

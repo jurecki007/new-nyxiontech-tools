@@ -97,7 +97,8 @@ test.describe('editor', () => {
     await openEditor(page);
     await page.locator('.snippet').first().click();
     await page.getByTitle('Back to dashboard').click();
-    await expect(page).toHaveURL(/#\/$/);
+    // Back on the dashboard's clean address.
+    await expect(page).toHaveURL(/:\d+\/$/);
     const card = page.locator('.card', { hasText: 'invoice_edited' }).first();
     await expect(card).toBeVisible();
     await expect(card).toContainText('1 edit');

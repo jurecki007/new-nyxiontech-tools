@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added
+- Every tool has its own address, such as tools.nyxiontech.com/merge-pdf or /compress-pdf, that can be bookmarked and shared, and a page search engines can find (title, description, how-to and questions for that tool). Old `#/tool/…` links still work and switch to the new address. The desktop app is unchanged.
+- Polish pages for every tool, such as /pl/polacz-pdf or /pl/kompresuj-pdf, and a Polish home page at /pl/. They open the same app.
+- Unknown addresses show a "Page not found" page with a 404 status instead of the dashboard.
+- The sitemap is generated from the list of tools and includes both languages.
 - Windows app: "Check for updates automatically" under About (on by default). When it's off, the app never contacts GitHub on its own; "Check now" checks on request.
 - Privacy policy (PRIVACY.md), also shown on the installer's licence page.
 - Tests cover PDFs with JPEG 2000 and JBIG2 images, checking that they actually render.

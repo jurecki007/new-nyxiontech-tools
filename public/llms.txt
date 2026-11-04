@@ -2,18 +2,52 @@
 
 > Free, open-source PDF and image tools that run entirely in the browser. Files are never uploaded: there is no server-side processing, no account, no tracking and no file limits. Made by Nyxiontech (https://nyxiontech.com), licensed AGPL-3.0. Also available as a Windows desktop app.
 
-Use it at https://tools.nyxiontech.com. Each tool has its own address, `https://tools.nyxiontech.com/#/tool/<id>`.
+Use it at https://tools.nyxiontech.com. Each tool has its own page, listed below; the page opens the tool. Polish versions of every page are under https://tools.nyxiontech.com/pl/ (the app itself is in English).
 
 ## Tools
 
-- Edit & sign: edit PDF (add text, white-out, highlight, shapes, images), sign PDF (draw, type or upload a signature, with white-background removal), fill PDF forms (with flattening), page numbers, watermark, edit metadata.
-- Organize: merge PDF, split PDF (every page, ranges or extract), organize pages (reorder, rotate, duplicate, delete), rotate PDF.
-- Optimize: compress PDF (lossless repack, or rasterize at three quality levels).
-- Convert: OCR to searchable PDF (Polish and English), images to PDF (including iPhone HEIC), PDF to images, PDF to text, PDF to Word, Word to PDF.
-- Security: protect PDF (AES-256 password and permissions), unlock PDF, redact PDF (find text, preset patterns such as e-mail addresses and IBANs, or draw boxes; redacted content is really removed).
-- Review: compare two PDFs (text diff and visual diff per page).
-- Images: compress and convert images (JPG, PNG, WebP; resize; strips EXIF), remove background (on-device AI or plain colour), HEIC to JPG.
-- Other: QR code generator (link, Wi-Fi, contact card, e-mail, text; PNG or SVG).
+Edit & sign:
+- [Edit PDF](https://tools.nyxiontech.com/edit-pdf): add text, white-out, highlights, boxes and images; reorder, rotate and delete pages.
+- [Sign PDF](https://tools.nyxiontech.com/sign-pdf): draw, type or upload a signature (white background removed) and place it on the page.
+- [Fill PDF form](https://tools.nyxiontech.com/fill-pdf-form): fill interactive form fields, optionally flatten them.
+- [Add page numbers](https://tools.nyxiontech.com/add-page-numbers-to-pdf): position, format, font, start number, skip the cover.
+- [Watermark PDF](https://tools.nyxiontech.com/watermark-pdf): text watermark on every page, diagonal or horizontal, once or tiled.
+- [Edit PDF metadata](https://tools.nyxiontech.com/edit-pdf-metadata): change or wipe title, author, subject, keywords, creator, producer.
+
+Organize:
+- [Merge PDF](https://tools.nyxiontech.com/merge-pdf): combine several PDFs in the order you choose.
+- [Split PDF](https://tools.nyxiontech.com/split-pdf): every page, by ranges, or extract selected pages.
+- [Organize PDF pages](https://tools.nyxiontech.com/organize-pdf-pages): reorder, rotate, duplicate, delete pages; insert pages from other PDFs.
+- [Rotate PDF](https://tools.nyxiontech.com/rotate-pdf): all or selected pages by 90°, 180° or 270°.
+
+Optimize:
+- [Compress PDF](https://tools.nyxiontech.com/compress-pdf): lossless repack, or rasterize at three quality levels (best for scans).
+
+Convert:
+- [OCR PDF](https://tools.nyxiontech.com/ocr-pdf): searchable PDF from scans or photos, Polish and English (Tesseract, on-device).
+- [Image to PDF](https://tools.nyxiontech.com/image-to-pdf): JPG, PNG, WebP, GIF or iPhone HEIC to one PDF.
+- [PDF to JPG](https://tools.nyxiontech.com/pdf-to-jpg): pages as JPG or PNG at 72, 150 or 300 dpi.
+- [PDF to text](https://tools.nyxiontech.com/pdf-to-text): extract text, copy or save as .txt.
+- [PDF to Word](https://tools.nyxiontech.com/pdf-to-word): .docx with text, paragraphs, bold and sizes (not tables, columns or images).
+- [Word to PDF](https://tools.nyxiontech.com/word-to-pdf): .docx to PDF through the browser's print dialog (basic layout).
+
+Security:
+- [Protect PDF](https://tools.nyxiontech.com/protect-pdf): AES-256 password and permissions.
+- [Unlock PDF](https://tools.nyxiontech.com/unlock-pdf): remove the password or restrictions from a PDF you can open (does not crack passwords).
+- [Redact PDF](https://tools.nyxiontech.com/redact-pdf): find text, preset patterns (e-mail, phone, IBAN, NIP/PESEL) or draw boxes; redacted content is really removed.
+
+Review:
+- [Compare PDF](https://tools.nyxiontech.com/compare-pdf): text diff and visual diff per page.
+
+Images:
+- [Image converter](https://tools.nyxiontech.com/image-converter): compress, resize and convert JPG, PNG, WebP in bulk; strips EXIF.
+- [Remove background](https://tools.nyxiontech.com/remove-background): on-device AI (U²-Net) or plain colour; transparent PNG.
+- [HEIC to JPG](https://tools.nyxiontech.com/heic-to-jpg): iPhone photos to JPG.
+
+Other:
+- [QR code generator](https://tools.nyxiontech.com/qr-code-generator): link, Wi-Fi, contact card, e-mail or text; PNG or SVG; static, no tracking.
+
+Polish pages (strony po polsku): [Narzędzia PDF](https://tools.nyxiontech.com/pl/), [Edytuj PDF](https://tools.nyxiontech.com/pl/edytuj-pdf), [Podpisz PDF](https://tools.nyxiontech.com/pl/podpisz-pdf), [Wypełnij formularz PDF](https://tools.nyxiontech.com/pl/wypelnij-formularz-pdf), [Numeracja stron](https://tools.nyxiontech.com/pl/numeracja-stron-pdf), [Znak wodny](https://tools.nyxiontech.com/pl/znak-wodny-pdf), [Metadane PDF](https://tools.nyxiontech.com/pl/edytuj-metadane-pdf), [Połącz PDF](https://tools.nyxiontech.com/pl/polacz-pdf), [Podziel PDF](https://tools.nyxiontech.com/pl/podziel-pdf), [Kolejność stron](https://tools.nyxiontech.com/pl/zmien-kolejnosc-stron-pdf), [Obróć PDF](https://tools.nyxiontech.com/pl/obroc-pdf), [Kompresuj PDF](https://tools.nyxiontech.com/pl/kompresuj-pdf), [OCR PDF](https://tools.nyxiontech.com/pl/ocr-pdf), [JPG do PDF](https://tools.nyxiontech.com/pl/jpg-do-pdf), [PDF do JPG](https://tools.nyxiontech.com/pl/pdf-do-jpg), [PDF do tekstu](https://tools.nyxiontech.com/pl/pdf-do-tekstu), [PDF do Word](https://tools.nyxiontech.com/pl/pdf-do-word), [Word do PDF](https://tools.nyxiontech.com/pl/word-do-pdf), [Zabezpiecz PDF hasłem](https://tools.nyxiontech.com/pl/zabezpiecz-pdf-haslem), [Odblokuj PDF](https://tools.nyxiontech.com/pl/odblokuj-pdf), [Anonimizuj PDF](https://tools.nyxiontech.com/pl/anonimizuj-pdf), [Porównaj PDF](https://tools.nyxiontech.com/pl/porownaj-pdf), [Kompresja zdjęć](https://tools.nyxiontech.com/pl/kompresuj-zdjecia), [Usuń tło](https://tools.nyxiontech.com/pl/usun-tlo), [HEIC do JPG](https://tools.nyxiontech.com/pl/heic-do-jpg), [Generator kodów QR](https://tools.nyxiontech.com/pl/generator-kodow-qr).
 
 ## Frequently asked questions
 

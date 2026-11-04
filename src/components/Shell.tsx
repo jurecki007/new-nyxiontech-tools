@@ -5,30 +5,20 @@ import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
+import { linkTo, useRoute } from '../lib/route';
 import { useUpdates, type AvailableUpdate, type InstallState } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
 import type { Project } from '../types';
 
-function useHash() {
-  const [hash, setHash] = useState(() => window.location.hash);
-  useEffect(() => {
-    const onChange = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', onChange);
-    return () => window.removeEventListener('hashchange', onChange);
-  }, []);
-  return hash;
-}
-
 /** Dashboard layout: tool navigation on the left, the dashboard or a tool page on the right. */
 export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: UtilityContext; onOpenProject: (p: Project) => void; error: string | null; onDismissError: () => void }) {
-  const hash = useHash();
+  const route = useRoute();
   const [query, setQuery] = useState('');
   const [about, setAbout] = useState<AboutTab | null>(null);
   const closeAbout = useCallback(() => setAbout(null), []);
   const updates = useUpdates();
   const update = updates.available;
-  const toolId = /^#\/tool\/([\w-]+)/.exec(hash)?.[1];
-  const utility = toolId ? getUtility(toolId) : undefined;
+  const utility = route.tool ? getUtility(route.tool) : undefined;
 
   useEffect(() => {
     document.querySelector('.shell-main')?.scrollTo(0, 0);
@@ -41,7 +31,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
   return (
     <div className="shell">
       <aside className="nav">
-        <a className="brand nav-brand" href="#/">
+        <a className="brand nav-brand" {...linkTo(null)}>
           NYXION<b>TECH</b>
           <i>.</i>
           <span>PDF</span>
@@ -52,7 +42,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
         </label>
         <nav className="nav-list">
           {!q && (
-            <a href="#/" className={`nav-item${!utility ? ' on' : ''}`}>
+            <a {...linkTo(null)} className={`nav-item${!utility ? ' on' : ''}`}>
               <LayoutDashboard size={17} /> Dashboard
             </a>
           )}
@@ -63,7 +53,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
               <div key={g.id} className="nav-section">
                 <div className="nav-group">{g.label}</div>
                 {items.map((u) => (
-                  <a key={u.id} href={`#/tool/${u.id}`} className={`nav-item${u.id === utility?.id ? ' on' : ''}`} onClick={() => setQuery('')}>
+                  <a key={u.id} {...linkTo(u.id, () => setQuery(''))} className={`nav-item${u.id === utility?.id ? ' on' : ''}`}>
                     <u.icon size={17} /> {u.label}
                   </a>
                 ))}

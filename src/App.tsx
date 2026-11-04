@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Editor } from './components/Editor';
 import { Shell } from './components/Shell';
 import { createProject } from './lib/files';
+import { navigate } from './lib/route';
 import { saveProject } from './lib/storage';
 import type { UtilityContext } from './utilities';
 import type { Project } from './types';
@@ -32,7 +33,7 @@ export function App() {
   if (editing) {
     const close = () => {
       // "Back to dashboard" lands on the dashboard, where the document now shows under Recent.
-      window.location.hash = '#/';
+      navigate(null);
       setEditing(null);
     };
     return <Editor key={editing.project.id} initial={editing.project} initialTool={editing.tool} onClose={close} />;

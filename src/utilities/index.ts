@@ -1,6 +1,7 @@
 // The dashboard tool registry. To add a tool, write a `Utility` (see types.ts and
-// ui.tsx for the shared building blocks) and list it here; the sidebar, the
-// dashboard grid and the URL route (#/tool/<id>) pick it up.
+// ui.tsx for the shared building blocks), list it here, and give its id a URL in
+// routes.ts and search-page copy in src/seo/content.ts; the sidebar, the dashboard
+// grid, the router, the static pages and the sitemap pick it up.
 import { backgroundUtility } from './background';
 import { compareUtility } from './compare';
 import { compressUtility, imagesToPdfUtility, pdfToImagesUtility, pdfToTextUtility } from './convert';
@@ -44,6 +45,8 @@ export const UTILITIES: Utility[] = [
 ];
 
 export const getUtility = (id: string) => UTILITIES.find((u) => u.id === id);
+
+export { TOOL_SLUGS, type ToolId } from './routes';
 
 export { UTILITY_GROUPS } from './types';
 export type { Utility, UtilityContext } from './types';

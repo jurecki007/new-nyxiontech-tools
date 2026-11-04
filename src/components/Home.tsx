@@ -3,6 +3,7 @@ import { Copy, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { Thumb } from './Thumb';
 import { pickFiles } from '../lib/files';
 import { storedFrom, storedIn } from '../lib/desktop';
+import { linkTo } from '../lib/route';
 import { loadFonts } from '../lib/fonts';
 import { usePageInfos, pageKey } from '../lib/hooks';
 import { clearProjects, deleteProject, listProjects, saveProject } from '../lib/storage';
@@ -70,7 +71,7 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
               <div className="tool-grid-label">{g.label}</div>
               <div className="tool-grid">
                 {items.map((u) => (
-                  <a key={u.id} className="tool-card" href={`#/tool/${u.id}`}>
+                  <a key={u.id} className="tool-card" {...linkTo(u.id)}>
                     <span className="tool-card-icon">
                       <u.icon size={20} />
                     </span>

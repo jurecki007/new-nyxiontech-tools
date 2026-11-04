@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import type { LucideIcon } from 'lucide-react';
+import type { ToolId } from './routes';
 
 export type UtilityGroup = 'organize' | 'edit' | 'optimize' | 'convert' | 'security' | 'review' | 'images' | 'other';
 
@@ -22,7 +23,8 @@ export interface UtilityContext {
 
 /** A stand-alone tool with its own page in the dashboard (merge, compress, QR, ...). */
 export interface Utility {
-  id: string;
+  /** Also picks its public URL: see TOOL_SLUGS in routes.ts. */
+  id: ToolId;
   label: string;
   /** One sentence, shown on the tool page and the dashboard card. */
   description: string;

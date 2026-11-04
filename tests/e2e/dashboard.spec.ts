@@ -22,7 +22,7 @@ test.describe('dashboard', () => {
   test('a tool card opens its page, URL and title', async ({ page }) => {
     await page.goto('/#/');
     await page.locator('.tool-card', { hasText: 'Merge PDF' }).click();
-    await expect(page).toHaveURL(/#\/tool\/merge$/);
+    await expect(page).toHaveURL(/\/merge-pdf$/);
     await expect(page.getByRole('heading', { name: 'Merge PDF' })).toBeVisible();
     await expect(page).toHaveTitle(/Merge PDF/);
     await expect(page.locator('.nav-item.on')).toHaveText(/Merge PDF/);
