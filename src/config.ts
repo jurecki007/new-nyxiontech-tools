@@ -9,7 +9,7 @@ export const APP_VERSION: string = __APP_VERSION__;
 export const COMPANY_NAME = 'Nyxiontech';
 export const COMPANY_URL = 'https://nyxiontech.com';
 
-export const REPO_URL = 'https://github.com/jurecki007/new-nyxiontech-tools';
+export const REPO_URL = 'https://github.com/jurecki007/nyxiontech-tools';
 export const ISSUES_URL = `${REPO_URL}/issues`;
 
 /**

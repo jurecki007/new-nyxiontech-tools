@@ -46,7 +46,7 @@ jobs:
             echo '---'
             echo 'Windows 10/11: `*_x64-setup.exe` installs for the current user; `*_x64_en-US.msi` is for IT rollout. Installed apps offer this update automatically.'
             echo
-            echo 'Privacy policy: [PRIVACY.md](https://github.com/jurecki007/new-nyxiontech-tools/blob/master/PRIVACY.md) · Code signing policy: [README](https://github.com/jurecki007/new-nyxiontech-tools#code-signing-policy)'
+            echo 'Privacy policy: [PRIVACY.md](https://github.com/jurecki007/nyxiontech-tools/blob/master/PRIVACY.md) · Code signing policy: [README](https://github.com/jurecki007/nyxiontech-tools#code-signing-policy)'
             echo 'NOTES_EOF'
           } >> "$GITHUB_OUTPUT"
 

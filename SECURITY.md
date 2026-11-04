@@ -4,7 +4,7 @@
 
 Please **do not open a public issue** for security problems.
 
-Report them privately through [GitHub's private vulnerability reporting](https://github.com/jurecki007/new-nyxiontech-tools/security/advisories/new), or contact Nyxiontech using the details on [nyxiontech.com](https://nyxiontech.com).
+Report them privately through [GitHub's private vulnerability reporting](https://github.com/jurecki007/nyxiontech-tools/security/advisories/new), or contact Nyxiontech using the details on [nyxiontech.com](https://nyxiontech.com).
 
 Please include the affected version (shown at the bottom of the sidebar), the steps to reproduce and the impact. We aim to acknowledge reports within a few working days.
 

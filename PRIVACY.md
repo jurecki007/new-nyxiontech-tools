@@ -32,4 +32,4 @@ In the web app, use "Clear all documents" on the dashboard, or clear the site's 
 
 ## Contact
 
-Questions about privacy: see the contact details on <https://nyxiontech.com>, or open an issue at <https://github.com/jurecki007/new-nyxiontech-tools/issues>.
+Questions about privacy: see the contact details on <https://nyxiontech.com>, or open an issue at <https://github.com/jurecki007/nyxiontech-tools/issues>.

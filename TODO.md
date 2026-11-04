@@ -4,7 +4,7 @@ Where the project stands and what is left. Last updated 2026-11-04.
 
 ## Status
 
-- **v1.1.0 is released**: web app, Windows installers (`.exe`, `.msi`) and signed update files on [GitHub Releases](https://github.com/jurecki007/new-nyxiontech-tools/releases/tag/v1.1.0).
+- **v1.1.0 is released**: web app, Windows installers (`.exe`, `.msi`) and signed update files on [GitHub Releases](https://github.com/jurecki007/nyxiontech-tools/releases/tag/v1.1.0).
 - **The repository is public** (since 2026-11-04): anyone can download the installers, and installed apps fetch updates from GitHub Releases.
 - **CI is green on `master`**: web tests on Linux, desktop build on Windows. Desktop smoke tests run for information only, see below.
 - **Donations**: Ko-fi live at `ko-fi.com/nyxiontech` (Stripe: card, Apple/Google Pay, Przelewy24, BLIK). GitHub Sponsors for `jurecki007` is under review.
@@ -38,6 +38,6 @@ Steps for the owner:
 ## Later / optional
 
 - [ ] Deploy a public web instance (for example tools.nyxiontech.com) and link it from nyxiontech.com.
-- [ ] Rename the repo to `nyxiontech-tools`; GitHub redirects the old URLs. Then update the links in `src/config.ts`, README, `package.json`, `Cargo.toml`, `tauri.conf.json` (updater endpoint) and the issue templates.
+- [x] Renamed the repo to `nyxiontech-tools` (2026-11-04). GitHub redirects the old URLs, so v1.1.0 still finds updates at its old address.
 - [ ] Ko-fi: profile picture (`src-tauri/icons/icon.png`), description, connect PayPal, currency EUR instead of USD.
 - [ ] Try a PDF with JPEG 2000 / JBIG2 images. pdf.js 6 decodes them, but no automated test covers it.

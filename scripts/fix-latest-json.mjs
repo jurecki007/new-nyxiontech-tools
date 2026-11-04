@@ -19,7 +19,7 @@ import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const REPO = 'jurecki007/new-nyxiontech-tools';
+const REPO = 'jurecki007/nyxiontech-tools';
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const tag = args.find((a) => !a.startsWith('--'));
@@ -27,6 +27,18 @@ const tag = args.find((a) => !a.startsWith('--'));
 if (!tag || !/^v\d+\.\d+\.\d+$/.test(tag)) {
   console.error('Usage: node scripts/fix-latest-json.mjs v1.2.0 [--dry-run]');
   process.exit(1);
+}
+
+// Use the repo owner's gh login even when another account is the active one.
+if (!process.env.GH_TOKEN) {
+  try {
+    process.env.GH_TOKEN = execFileSync('gh', ['auth', 'token', '--user', REPO.split('/')[0]], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    // Not logged in as the owner: fall back to the active account.
+  }
 }
 
 const gh = (...a) => execFileSync('gh', a, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
