@@ -8,6 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 - Windows app: "Check for updates automatically" under About (on by default). When it's off, the app never contacts GitHub on its own; "Check now" checks on request.
 - Privacy policy (PRIVACY.md), also shown on the installer's licence page.
+- Tests cover PDFs with JPEG 2000 and JBIG2 images, checking that they actually render.
 
 ## [1.1.0] - 2026-11-03
 

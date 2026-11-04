@@ -7,6 +7,8 @@ import { decodePDFRawStream, PDFDict, PDFDocument, PDFName, PDFRawStream } from 
 
 export const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.fixtures');
 export const fixture = (name: string) => path.join(FIXTURES, name);
+/** Checked-in sample files (tests/fixtures), as opposed to the generated ones above. */
+export const staticFixture = (name: string) => path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', name);
 
 /** Opens a dashboard tool with fresh state. */
 export async function openTool(page: Page, id: string) {

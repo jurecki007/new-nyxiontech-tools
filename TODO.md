@@ -40,4 +40,4 @@ Steps for the owner:
 - [ ] Deploy a public web instance (for example tools.nyxiontech.com) and link it from nyxiontech.com.
 - [x] Renamed the repo to `nyxiontech-tools` (2026-11-04). GitHub redirects the old URLs, so v1.1.0 still finds updates at its old address.
 - [ ] Ko-fi: profile picture (`src-tauri/icons/icon.png`), description, connect PayPal, currency EUR instead of USD.
-- [ ] Try a PDF with JPEG 2000 / JBIG2 images. pdf.js 6 decodes them, but no automated test covers it.
+- [x] PDFs with JPEG 2000 / JBIG2 images render correctly; covered by `tests/e2e/image-codecs.spec.ts` (samples from the pdf.js test corpus).
