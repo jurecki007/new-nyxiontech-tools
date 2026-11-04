@@ -1,0 +1,2 @@
+# Cloudflare Pages: same health endpoint as the nginx image.
+/health /health.json 200

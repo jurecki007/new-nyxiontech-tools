@@ -1,0 +1,26 @@
+# Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/).
+# The security headers must match nginx/security-headers.conf; scripts/check-pages-headers.mjs
+# checks that before every build.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; connect-src 'self' data: blob:; media-src 'self' blob:; object-src 'none'; frame-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+# Hashed build output never changes.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# OCR / ML / pdf.js assets change only with dependency updates.
+/vendor/*
+  Cache-Control: public, max-age=604800
+
+/version.json
+  Cache-Control: no-store
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/site.webmanifest
+  Content-Type: application/manifest+json
