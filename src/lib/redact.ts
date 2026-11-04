@@ -1,6 +1,19 @@
 // Redaction that really removes content: pages with redactions are re-rendered
 // as images with the boxes burnt in, so the hidden text no longer exists.
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef, PDFStream, type PDFContext, type PDFObject } from 'pdf-lib';
+import {
+  decodePDFRawStream,
+  PDFArray,
+  PDFDict,
+  PDFDocument,
+  PDFHexString,
+  PDFName,
+  PDFRawStream,
+  PDFRef,
+  PDFStream,
+  PDFString,
+  type PDFContext,
+  type PDFObject,
+} from 'pdf-lib';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import * as pdfjs from 'pdfjs-dist';
 import { closePdf, openPdf } from './pdfjs';
@@ -13,6 +26,11 @@ export interface Box {
   w: number;
   h: number;
 }
+
+/** What "Find text" or a preset searches for: literal text (any case) or a pattern. */
+export type RedactQuery = string | RegExp;
+
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const REDACT_PATTERNS: { id: string; label: string; regex: RegExp }[] = [
   { id: 'email', label: 'E-mail addresses', regex: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
@@ -45,7 +63,7 @@ function charOffsets(text: string, fontFamily: string): number[] | null {
  * Finds text on every page and returns boxes around each match. Matches are
  * found within pdf.js text runs; a phrase split across runs is not found.
  */
-export async function findTextBoxes(doc: PDFDocumentProxy, query: string | RegExp): Promise<Box[][]> {
+export async function findTextBoxes(doc: PDFDocumentProxy, query: RedactQuery): Promise<Box[][]> {
   const result: Box[][] = [];
   for (let n = 1; n <= doc.numPages; n++) {
     const page = await doc.getPage(n);
@@ -56,7 +74,7 @@ export async function findTextBoxes(doc: PDFDocumentProxy, query: string | RegEx
       if (!('str' in item) || !item.str) continue;
       const regex =
         typeof query === 'string'
-          ? new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
+          ? new RegExp(escapeRegex(query), 'gi')
           : new RegExp(query.source, query.flags.includes('g') ? query.flags : query.flags + 'g');
       const tx = pdfjs.Util.transform(viewport.transform, item.transform);
       const height = Math.hypot(tx[2], tx[3]);
@@ -82,16 +100,29 @@ export async function findTextBoxes(doc: PDFDocumentProxy, query: string | RegEx
   return result;
 }
 
-export async function redactPdf(bytes: Uint8Array, boxesByPage: Box[][], dpi: number, onProgress?: (done: number, total: number) => void): Promise<Uint8Array> {
+/**
+ * Redacts the boxes (pages with boxes become images, which drops all their comments and
+ * form fields) and, on the pages copied as they are, removes comments and clears form
+ * field values that contain any of `queries` (the text and patterns that were searched).
+ */
+export async function redactPdf(
+  bytes: Uint8Array,
+  boxesByPage: Box[][],
+  dpi: number,
+  onProgress?: (done: number, total: number) => void,
+  queries: RedactQuery[] = [],
+): Promise<Uint8Array> {
   const src = await loadPdf(bytes);
   const render = await openPdf(bytes);
   const out = await PDFDocument.create();
+  const copied: number[] = [];
   try {
     for (let i = 0; i < src.getPageCount(); i++) {
       const boxes = boxesByPage[i] ?? [];
       if (!boxes.length) {
         const [copy] = await out.copyPages(src, [i]);
         out.addPage(copy);
+        copied.push(i);
       } else {
         const page = await render.getPage(i + 1);
         const scale = dpi / 72;
@@ -118,10 +149,184 @@ export async function redactPdf(bytes: Uint8Array, boxesByPage: Box[][], dpi: nu
     void closePdf(render);
   }
   await out.flush();
+  cleanAnnotations(out, copied, queries, true);
   dropOrphanPages(out);
   pruneUnreachable(out.context);
   // Metadata can leak too (author, title), so the output starts clean.
   return out.save();
+}
+
+/** What cleanAnnotations removes (or would remove). */
+export interface AnnotationCleanup {
+  /** Comments and other annotations removed, with their replies (popups not counted). */
+  comments: number;
+  /** Form field widgets whose value is cleared or that are removed. */
+  fields: number;
+}
+
+const name = (s: string) => PDFName.of(s);
+
+/** Decoded text of a string, a stream (rich text), or an array of them. */
+function texts(context: PDFContext, value: PDFObject | undefined, out: string[] = []): string[] {
+  const obj = value instanceof PDFRef ? context.lookup(value) : value;
+  if (obj instanceof PDFString || obj instanceof PDFHexString) out.push(obj.decodeText());
+  else if (obj instanceof PDFArray) for (const v of obj.asArray()) texts(context, v, out);
+  else if (obj instanceof PDFRawStream) {
+    try {
+      const b = decodePDFRawStream(obj).decode();
+      const utf16 = b[0] === 0xfe && b[1] === 0xff;
+      out.push(new TextDecoder(utf16 ? 'utf-16be' : 'utf-8').decode(utf16 ? b.subarray(2) : b));
+    } catch {
+      // an unsupported filter: nothing readable to match
+    }
+  }
+  return out;
+}
+
+/** Rich text (/RC, /RV) is XHTML: match its plain text too, where tags could split a match. */
+const plain = (xhtml: string) =>
+  xhtml
+    .replace(/<[^>]*>/g, '')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d: string) => String.fromCodePoint(Number(d)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+
+/**
+ * Comments, links and form fields keep their own text, which the page-text search never
+ * sees, so a page copied as it is could still hold what was redacted elsewhere. On the
+ * given pages this finds every annotation whose text matches one of the queries (literal
+ * text in any case, like "Find text", or a preset pattern):
+ * - a comment (any annotation but a form field) is removed when its text (/Contents),
+ *   author (/T), subject (/Subj), rich text (/RC), link URI or attached file name matches,
+ *   together with its popup and the replies to it (/IRT), which would otherwise point at it;
+ * - a form field loses a matching value (/V, /DV, /RV), tooltip (/TU) or /Contents, and the
+ *   appearance of its widgets (which shows the value); a field whose name, options or
+ *   caption matches cannot be cleared, so its widget is removed.
+ * Dates, IDs and other bookkeeping entries are not searched, so presets like phone numbers
+ * do not match timestamps. With `apply` false it only counts.
+ */
+export function cleanAnnotations(doc: PDFDocument, pageIndices: number[], queries: RedactQuery[], apply: boolean): AnnotationCleanup {
+  const result: AnnotationCleanup = { comments: 0, fields: 0 };
+  const regexes = queries.map((q) => (typeof q === 'string' ? new RegExp(escapeRegex(q), 'i') : new RegExp(q.source, q.flags.replace(/[gy]/g, ''))));
+  if (!regexes.length) return result;
+  const context = doc.context;
+  const hit = (list: string[]) => list.some((t) => regexes.some((r) => r.test(t)));
+  const dictOf = (v: PDFObject | undefined) => {
+    const obj = v instanceof PDFRef ? context.lookup(v) : v;
+    return obj instanceof PDFDict ? obj : undefined;
+  };
+
+  const pages = doc.getPages();
+  const entries: { dict: PDFDict; ref?: PDFRef }[] = [];
+  for (const i of pageIndices) {
+    for (const v of pages[i]?.node.Annots()?.asArray() ?? []) {
+      const dict = dictOf(v);
+      if (dict) entries.push({ dict, ref: v instanceof PDFRef ? v : undefined });
+    }
+  }
+  const isWidget = (d: PDFDict) => d.get(name('Subtype')) === name('Widget');
+  const isPopup = (d: PDFDict) => d.get(name('Subtype')) === name('Popup');
+
+  // Comments.
+  const removed = new Set<PDFDict>();
+  const remove = (d: PDFDict | undefined) => {
+    if (!d || removed.has(d)) return false;
+    removed.add(d);
+    remove(dictOf(d.get(name('Popup'))));
+    return true;
+  };
+  for (const { dict } of entries) {
+    if (isWidget(dict)) continue;
+    const found: string[] = [];
+    for (const key of ['Contents', 'T', 'Subj', 'RC']) texts(context, dict.get(name(key)), found);
+    const rich = texts(context, dict.get(name('RC')));
+    found.push(...rich.map(plain));
+    texts(context, dictOf(dict.get(name('A')))?.get(name('URI')), found);
+    const fs = dict.get(name('FS'));
+    texts(context, fs, found);
+    for (const key of ['F', 'UF', 'Desc']) texts(context, dictOf(fs)?.get(name(key)), found);
+    if (!hit(found)) continue;
+    remove(dict);
+    // A popup shows its parent's text: the parent goes too.
+    if (isPopup(dict)) remove(dictOf(dict.get(name('Parent'))));
+  }
+  // Replies to a removed comment (and replies to those), and popups of removed comments.
+  for (let grew = removed.size > 0; grew; ) {
+    grew = false;
+    for (const { dict } of entries) {
+      if (removed.has(dict) || isWidget(dict)) continue;
+      const irt = dictOf(dict.get(name('IRT')));
+      const parent = isPopup(dict) ? dictOf(dict.get(name('Parent'))) : undefined;
+      if ((irt && removed.has(irt)) || (parent && removed.has(parent))) grew = remove(dict) || grew;
+    }
+  }
+  result.comments = entries.filter(({ dict }) => removed.has(dict) && !isPopup(dict)).length;
+
+  // Form fields: a widget, then the field dictionaries above it (values are inherited).
+  const deletes: [PDFDict, string][] = [];
+  const blank = new Set<PDFDict>();
+  const dropFields = new Set<PDFRef>();
+  for (const { dict } of entries) {
+    if (!isWidget(dict) || removed.has(dict)) continue;
+    let touched = false;
+    let drop = false;
+    const chain: { dict: PDFDict; ref?: PDFRef }[] = [{ dict }];
+    for (let p = dict.get(name('Parent')); p; ) {
+      const d = dictOf(p);
+      if (!d || chain.some((c) => c.dict === d)) break;
+      chain.push({ dict: d, ref: p instanceof PDFRef ? p : undefined });
+      p = d.get(name('Parent'));
+    }
+    for (const link of chain) {
+      for (const key of ['V', 'DV', 'RV', 'TU', 'Contents']) {
+        const found = texts(context, link.dict.get(name(key)));
+        if (key === 'RV') found.push(...found.map(plain));
+        if (!hit(found)) continue;
+        touched = true;
+        deletes.push([link.dict, key]);
+        if (key !== 'TU' && key !== 'Contents') blank.add(link.dict);
+      }
+      const fixed = [...texts(context, link.dict.get(name('T'))), ...texts(context, link.dict.get(name('TM'))), ...texts(context, link.dict.get(name('Opt')))];
+      if (hit(fixed)) {
+        drop = true;
+        if (link.ref) dropFields.add(link.ref);
+      }
+    }
+    const mk = dictOf(dict.get(name('MK')));
+    if (mk && hit(['CA', 'RC', 'AC'].flatMap((k) => texts(context, mk.get(name(k)))))) drop = true;
+    if (drop) removed.add(dict);
+    if (touched || drop) result.fields++;
+  }
+  if (!apply) return result;
+
+  for (const [d, key] of deletes) d.delete(name(key));
+  // The appearance of a field shows its value: blank every widget of a cleared field.
+  const seen = new Set<PDFDict>();
+  const blankAll = (d: PDFDict | undefined) => {
+    if (!d || seen.has(d)) return;
+    seen.add(d);
+    d.delete(name('AP'));
+    for (const kid of d.lookupMaybe(name('Kids'), PDFArray)?.asArray() ?? []) blankAll(dictOf(kid));
+  };
+  for (const d of blank) blankAll(d);
+
+  for (const i of pageIndices) {
+    const annots = pages[i]?.node.Annots();
+    if (!annots) continue;
+    for (let k = annots.size() - 1; k >= 0; k--) {
+      const d = dictOf(annots.get(k));
+      if (d && removed.has(d)) annots.remove(k);
+    }
+  }
+  // Delete them outright: anything still pointing at them (a reply elsewhere, a field's
+  // /Kids) would otherwise keep them, and their text, in the file. Those references become null.
+  for (const { dict, ref } of entries) if (ref && removed.has(dict)) context.delete(ref);
+  for (const ref of dropFields) context.delete(ref);
+  return result;
 }
 
 /**

@@ -3,18 +3,22 @@ import { PDFDocument } from 'pdf-lib';
 
 export const isHeic = (f: File) => /\.(heic|heif)$/i.test(f.name) || /image\/hei[cf]/.test(f.type);
 
-/** Turns iPhone HEIC photos into JPEG blobs; other files pass through. */
-async function toBrowserReadable(file: File): Promise<Blob> {
-  if (!isHeic(file)) return file;
-  const { default: heic2any } = await import('heic2any');
-  const out = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
-  return Array.isArray(out) ? out[0] : out;
+/**
+ * Decodes an iPhone HEIC/HEIF photo straight to pixels (libheif applies the
+ * photo's rotation itself). Loaded on demand. The `csp` build is libheif compiled
+ * without `eval`/`new Function`, so it runs under the app's Content-Security-Policy;
+ * it decodes in a blob: worker (allowed by worker-src) and needs no extra files.
+ */
+async function decodeHeic(file: File): Promise<ImageBitmap> {
+  const { heicTo } = await import('heic-to/csp');
+  return heicTo({ blob: file, type: 'bitmap' });
 }
 
 /** Decodes any supported image, honouring EXIF orientation (phone photos). */
 export async function decodeImage(file: File): Promise<ImageBitmap> {
   try {
-    return await createImageBitmap(await toBrowserReadable(file), { imageOrientation: 'from-image' });
+    if (isHeic(file)) return await decodeHeic(file);
+    return await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
     throw new Error(`Could not read ${file.name} as an image.`);
   }

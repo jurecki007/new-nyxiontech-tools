@@ -1,5 +1,6 @@
+import fs from 'node:fs';
 import { expect, test } from '@playwright/test';
-import { alphaStats, makePng, openTool, runAndDownload } from './helpers';
+import { alphaStats, cspViolations, expectRedBlue, imageHalves, makePng, openTool, runAndDownload, staticFixture } from './helpers';
 
 test.describe('images', () => {
   test('convert PNG to WebP', async ({ page }) => {
@@ -25,6 +26,20 @@ test.describe('images', () => {
       return [bmp.width, bmp.height];
     }, bytes.toString('base64'));
     expect(size).toEqual([300, 200]);
+  });
+
+  test('HEIC to JPG decodes an iPhone photo under the Content-Security-Policy', async ({ page }) => {
+    const csp = cspViolations(page);
+    await openTool(page, 'heic-to-jpg');
+    // 320×160 px, left half red, right half blue (see tests/fixtures/README.md).
+    await page.locator('.file-drop input').setInputFiles({ name: 'IMG_0001.HEIC', mimeType: 'image/heic', buffer: fs.readFileSync(staticFixture('sample.heic')) });
+    const { name, bytes } = await runAndDownload(page);
+    expect(name).toBe('IMG_0001.jpg');
+    expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+    const halves = await imageHalves(page, bytes);
+    expect([halves.width, halves.height]).toEqual([320, 160]);
+    expectRedBlue(halves);
+    expect(csp).toEqual([]);
   });
 
   test('remove a plain background colour', async ({ page }) => {

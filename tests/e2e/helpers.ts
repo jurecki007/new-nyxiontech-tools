@@ -253,3 +253,48 @@ export async function alphaStats(page: Page, png: Buffer): Promise<{ transparent
     return { transparent: t / n, opaque: o / n };
   }, png.toString('base64'));
 }
+
+/**
+ * Decodes an image (JPEG/PNG/WebP bytes) in the browser and returns its size and
+ * the average colour of its left and right quarters (used for the red|blue HEIC sample).
+ */
+export async function imageHalves(page: Page, bytes: Uint8Array, mime = 'image/jpeg') {
+  return page.evaluate(
+    async ({ b64, mime }) => {
+      const bmp = await createImageBitmap(await (await fetch(`data:${mime};base64,${b64}`)).blob());
+      const c = document.createElement('canvas');
+      c.width = bmp.width;
+      c.height = bmp.height;
+      const x = c.getContext('2d')!;
+      x.drawImage(bmp, 0, 0);
+      const avg = (x0: number) => {
+        const d = x.getImageData(x0, Math.round(c.height / 4), Math.round(c.width / 4), Math.round(c.height / 2)).data;
+        const sum = [0, 0, 0];
+        for (let i = 0; i < d.length; i += 4) for (let k = 0; k < 3; k++) sum[k] += d[i + k];
+        return sum.map((s) => Math.round(s / (d.length / 4)));
+      };
+      return { width: bmp.width, height: bmp.height, left: avg(Math.round(c.width / 8)), right: avg(Math.round((c.width * 5) / 8)) };
+    },
+    { b64: Buffer.from(bytes).toString('base64'), mime },
+  );
+}
+
+/** Asserts a decoded HEIC sample is the left-red / right-blue picture from tests/fixtures. */
+export function expectRedBlue(halves: { left: number[]; right: number[] }) {
+  const [lr, lg, lb] = halves.left;
+  const [rr, rg, rb] = halves.right;
+  // Source colours: (220, 30, 30) and (30, 60, 220); allow for HEIC/JPEG compression.
+  expect(lr).toBeGreaterThan(180);
+  expect(Math.max(lg, lb)).toBeLessThan(80);
+  expect(rb).toBeGreaterThan(180);
+  expect(Math.max(rr, rg)).toBeLessThan(100);
+}
+
+/** Collects Content-Security-Policy violations the page reports in its console. */
+export function cspViolations(page: Page): string[] {
+  const found: string[] = [];
+  page.on('console', (m) => {
+    if (/Content Security Policy|unsafe-eval/i.test(m.text())) found.push(m.text());
+  });
+  return found;
+}

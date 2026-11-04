@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { decodePDFRawStream, PDFArray, PDFDocument, PDFName, PDFRawStream, PDFStream, StandardFonts, type PDFDict } from 'pdf-lib';
 import { POLISH } from '../fixture-data';
-import { downloadResult, fixture, imageSize, loadPdf, makePng, openTool, pdfText, run, runAndDownload, staticFixture, unzip } from './helpers';
+import { cspViolations, downloadResult, expectRedBlue, fixture, imageHalves, imageSize, loadPdf, makePng, openTool, pdfText, run, runAndDownload, staticFixture, unzip } from './helpers';
 
 const drop = (page: Page) => page.locator('.file-drop input');
 const radio = (page: Page, name: string) => page.getByRole('radio', { name, exact: true });
@@ -56,6 +56,8 @@ async function imagePages(bytes: Uint8Array) {
       filter: String(img.dict.get(PDFName.of('Filter'))),
       px: { w: Number(String(img.dict.get(PDFName.of('Width')))), h: Number(String(img.dict.get(PDFName.of('Height')))) },
       smask: img.dict.has(PDFName.of('SMask')),
+      /** Raw stream bytes (for DCTDecode, the JPEG file itself). */
+      data: img instanceof PDFRawStream ? img.contents : undefined,
     };
   });
 }
@@ -219,26 +221,26 @@ test.describe('Images to PDF', () => {
     expect(pages.map((p) => p.smask)).toEqual([false, true, false]);
   });
 
-  // BUG: HEIC never converts in the built app. heic2any's Emscripten/embind code calls
-  // `new Function(...)`, which the app's own Content-Security-Policy (script-src 'self'
-  // 'wasm-unsafe-eval', nginx/security-headers.conf) blocks; the page logs an
-  // 'unsafe-eval' CSP violation and the job stays on "Working…" forever, with no error.
-  // Same for "HEIC to JPG" and HEIC photos in OCR. Needs an eval-free HEIC decoder
-  // (or a CSP change), so it is not fixed here.
+  // HEIC is decoded by heic-to's CSP build (libheif without eval/new Function), so it
+  // works under the app's real Content-Security-Policy that `vite preview` serves.
   test('iPhone HEIC photo becomes a page', async ({ page }) => {
-    test.fail();
-    test.setTimeout(45_000);
+    const csp = cspViolations(page);
     await openTool(page, 'images-to-pdf');
     await radio(page, 'Same as image').click();
     await radio(page, 'None').click();
-    // 320×160 px, generated with pillow-heif (see tests/fixtures/README.md).
+    // 320×160 px, left half red, right half blue; generated with pillow-heif (see tests/fixtures/README.md).
     await drop(page).setInputFiles({ name: 'sample.heic', mimeType: 'image/heic', buffer: fs.readFileSync(staticFixture('sample.heic')) });
-    await page.locator('.run-bar .btn.primary').click();
-    await expect(page.locator('.results, .run-bar .error-text').first()).toBeVisible({ timeout: 30_000 });
-    const [p] = await imagePages((await downloadResult(page)).bytes);
+    const out = await runAndDownload(page);
+    expect(out.name).toBe('sample.pdf');
+    const [p] = await imagePages(out.bytes);
     expect(p.page).toEqual({ w: 240, h: 120 });
     expect(p.px).toEqual({ w: 320, h: 160 });
     expect(p.filter).toBe('/DCTDecode');
+    // The embedded JPEG really holds the photo, not a blank or garbled frame.
+    const halves = await imageHalves(page, p.data!);
+    expect([halves.width, halves.height]).toEqual([320, 160]);
+    expectRedBlue(halves);
+    expect(csp).toEqual([]);
   });
 
   test('a corrupt image gives a clear error and no result', async ({ page }) => {
@@ -748,6 +750,24 @@ test.describe('OCR', () => {
     const text = await pdfText(bytes);
     expect(text[0]).toContain('OMEGA');
     expect(text[1]).toContain('ALPHA');
+  });
+
+  test('an iPhone HEIC photo is accepted next to other photos', async ({ page }) => {
+    test.setTimeout(180_000);
+    await openTool(page, 'ocr');
+    await drop(page).setInputFiles([
+      { name: 'sample.heic', mimeType: 'image/heic', buffer: fs.readFileSync(staticFixture('sample.heic')) },
+      await makePng(page, 'second.png', 'text', 'OMEGA PAGE'),
+    ]);
+    await radio(page, 'Fast').click();
+    const { name, bytes } = await runAndDownload(page);
+    expect(name).toBe('sample_ocr.pdf');
+    await expect(page.locator('.text-output')).toHaveValue(/OMEGA/);
+    // The 320×160 px HEIC becomes a 240×120 pt page (96 dpi), followed by the text photo.
+    expect((await loadPdf(bytes)).getPages().map((p) => p.getSize())).toEqual([
+      { width: 240, height: 120 },
+      { width: 1050, height: 300 },
+    ]);
   });
 
   test('input rules: one PDF at a time, and not mixed with photos', async ({ page }) => {

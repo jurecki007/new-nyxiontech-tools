@@ -95,7 +95,7 @@ npm run test:e2e:report   # opens the HTML report
 - Tests run with one worker, because OCR and the AI model use a lot of memory.
 - `vite preview` sends the same security headers as nginx (read from `nginx/security-headers.conf`), so the tests run under the production Content-Security-Policy. The dev server (`npm run dev`) cannot send it: React Fast Refresh needs an inline script.
 
-Not covered: the print dialog itself in "Word to PDF" (the tests check the document handed to it). HEIC conversion has a test with a synthetic sample (`tests/fixtures/sample.heic`), marked as an expected failure: heic2any needs `eval`, which the Content-Security-Policy blocks. For the desktop app see below.
+Not covered: the print dialog itself in "Word to PDF" (the tests check the document handed to it). HEIC conversion (Images to PDF, HEIC to JPG, OCR) is tested with a synthetic sample (`tests/fixtures/sample.heic`) under the real Content-Security-Policy. For the desktop app see below.
 
 ## Self-hosting
 
@@ -193,7 +193,7 @@ Results can be downloaded one by one or as a .zip, and PDFs can be sent straight
 ### How the heavier tools work
 
 - **OCR**: Tesseract (tesseract.js) recognises each page; the words are added as an invisible text layer over the untouched page, so the PDF looks identical but becomes searchable. About 10 s per page at 300 dpi.
-- **Redact**: pages with redactions are re-rendered as images with the boxes burnt in, so the hidden text is really gone. Pages without redactions stay as they are.
+- **Redact**: pages with redactions are re-rendered as images with the boxes burnt in, so the hidden text is really gone (with all their comments and form fields). Pages without redactions stay as they are, except that comments (with their popups and replies) whose text matches a searched text or preset are removed, and matching form field values are cleared; boxes drawn by hand do not affect other pages.
 - **Remove background**: U²-Net (small) runs on-device with ONNX Runtime Web; the plain-colour mode flood-fills from the image edges.
 - **Word**: PDF to Word keeps text, paragraphs, bold and sizes but not tables, columns or images. Word to PDF converts .docx to HTML (mammoth) and uses the browser's print dialog ("Save as PDF"). Neither reproduces complex layouts exactly; that needs Word or LibreOffice.
 
@@ -230,7 +230,7 @@ OCR and background removal load a worker, WebAssembly, language data and a model
 | Fonts (on screen and embedded as subsets) | `dejavu-fonts-ttf` (Bitstream Vera), `@expo-google-fonts/*` (SIL OFL) |
 | Local storage | `idb-keyval` |
 | Password protect / unlock | `@cantoo/pdf-lib` (maintained pdf-lib fork, loaded on demand) |
-| HEIC photos | `heic2any` (loaded on demand; contains libheif/libde265, LGPL-3.0) |
+| HEIC photos | `heic-to`, CSP build without `eval` (loaded on demand; LGPL-3.0, contains libheif/libde265, LGPL-3.0) |
 | Zip, QR codes | `fflate`, `qrcode` |
 | OCR | `tesseract.js` + `tesseract.js-core` + `@tesseract.js-data/pol`, `/eng` |
 | Background removal | `onnxruntime-web` + U²-Net small (`assets/models`) |

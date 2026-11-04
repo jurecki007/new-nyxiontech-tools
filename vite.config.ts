@@ -36,6 +36,7 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   server: { port: 5180 },
   preview: { headers: securityHeaders },
-  // pdf.js and the embedded fonts are large; this is a local tool, so one bundle is fine.
-  build: { chunkSizeWarningLimit: 2500 },
+  // pdf.js, the embedded fonts and the on-demand HEIC decoder (~3.2 MB, libheif
+  // compiled to plain JS) are large; this is a local tool, so big chunks are fine.
+  build: { chunkSizeWarningLimit: 3300 },
 });

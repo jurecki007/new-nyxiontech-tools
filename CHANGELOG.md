@@ -19,6 +19,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Protect and Unlock keep the document's producer and dates, like the other tools.
 - Word to PDF: "Change file" also clears the old preview.
 - PDF to text points scanned PDFs to the OCR tool.
+- HEIC (iPhone) photos convert again in Images to PDF, HEIC to JPG and OCR. The old decoder needed `eval`, which the app's security policy blocks, so jobs hung on "Working…". It is replaced by heic-to's build without `eval` (LGPL-3.0, libheif inside).
+- Redact: comments and form field values that contain the searched text or a selected pattern are now removed from the pages that aren't redacted too. Before, a secret in a comment on another page stayed in the file. The counter shows how many comments will be removed.
 
 ## [1.1.0] - 2026-11-03
 

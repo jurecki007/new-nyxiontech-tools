@@ -66,6 +66,13 @@ export const PATTERN_PAGES: { preset: string; lines: PatternLine[] }[] = [
 /** Planted in many places of secrets.pdf; none of them may survive redaction. */
 export const SECRET = 'TOPSECRET-4471';
 
+/** Comments and form fields of comments.pdf that do not contain SECRET (see tests/global-setup.ts). */
+export const COMMENTS = {
+  keepNote: 'KEEP-THIS-NOTE',
+  email: 'reviewer.mail@example.org',
+  keepField: 'KEEP-FIELD-VALUE',
+};
+
 /** Polish text of polish.pdf (pages 1 and 3; page 2 is empty). */
 export const POLISH = {
   heading: 'Zażółć gęślą jaźń',

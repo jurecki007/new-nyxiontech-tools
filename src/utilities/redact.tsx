@@ -1,13 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EyeOff, Search, Trash2 } from 'lucide-react';
+import type { PDFDocument } from 'pdf-lib';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { closePdf, openPdf } from '../lib/pdfjs';
-import { baseName, pdfBlob } from '../lib/pdfTools';
-import { findTextBoxes, redactPdf, REDACT_PATTERNS, type Box } from '../lib/redact';
+import { baseName, loadPdf, pdfBlob } from '../lib/pdfTools';
+import { cleanAnnotations, findTextBoxes, redactPdf, REDACT_PATTERNS, type AnnotationCleanup, type Box, type RedactQuery } from '../lib/redact';
 import { Option, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
 
 const PREVIEW_WIDTH = 640;
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** "1 comment will be removed · 2 form fields will be cleared", or '' when there is nothing. */
+function cleanupText({ comments, fields }: AnnotationCleanup): string {
+  const parts: string[] = [];
+  if (comments) parts.push(`${plural(comments, 'comment', 'comments')} will be removed`);
+  if (fields) parts.push(`${plural(fields, 'form field', 'form fields')} will be cleared`);
+  return parts.join(' · ');
+}
 
 /** One page with its redaction boxes; drag to add a box, click a box to remove it. */
 function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; index: number; boxes: Box[]; onChange: (b: Box[]) => void }) {
@@ -95,6 +106,10 @@ export const redactUtility: Utility = {
     const pdf = useSinglePdf();
     const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
     const [boxes, setBoxes] = useState<Box[][]>([]);
+    // pdf-lib's view of the file, to find comments and form fields that match a search.
+    const [lib, setLib] = useState<PDFDocument | null>(null);
+    // Every text or preset marked so far: comments and form fields that match them are removed too.
+    const [queries, setQueries] = useState<RedactQuery[]>([]);
     const [query, setQuery] = useState('');
     const [found, setFound] = useState<string | null>(null);
     const [out, setOut] = useState<OutputFile[]>([]);
@@ -103,26 +118,43 @@ export const redactUtility: Utility = {
     useEffect(() => {
       setDoc(null);
       setBoxes([]);
+      setQueries([]);
+      setLib(null);
       setOut([]);
       if (!pdf.bytes || !pdf.pages) return;
       let d: PDFDocumentProxy | null = null;
+      let cancelled = false;
+      void loadPdf(pdf.bytes).then(
+        (x) => !cancelled && setLib(x),
+        () => undefined,
+      );
       void openPdf(pdf.bytes).then((x) => {
         d = x;
         setDoc(x);
         setBoxes(Array.from({ length: x.numPages }, () => []));
       });
-      return () => void (d && closePdf(d));
+      return () => {
+        cancelled = true;
+        if (d) void closePdf(d);
+      };
     }, [pdf.bytes, pdf.pages]);
 
-    const addMatches = async (q: string | RegExp, label: string) => {
+    const allPages = (d: PDFDocument) => d.getPages().map((_, i) => i);
+
+    const addMatches = async (q: RedactQuery, label: string) => {
       if (!doc) return;
       const matches = await findTextBoxes(doc, q);
       const count = matches.reduce((n, m) => n + m.length, 0);
       setBoxes((prev) => prev.map((b, i) => [...b, ...(matches[i] ?? [])]));
-      setFound(`${label}: ${count} ${count === 1 ? 'match' : 'matches'} marked.`);
+      setQueries((prev) => [...prev, q]);
+      const extra = lib ? cleanupText(cleanAnnotations(lib, allPages(lib), [q], false)) : '';
+      setFound(`${label}: ${count} ${count === 1 ? 'match' : 'matches'} marked.${extra ? ` Also ${extra.replace(/ · /g, ', ')}.` : ''}`);
     };
 
     const total = boxes.reduce((n, b) => n + b.length, 0);
+    const cleanup = useMemo(() => (lib ? cleanAnnotations(lib, allPages(lib), queries, false) : { comments: 0, fields: 0 }), [lib, queries]);
+    const extra = cleanupText(cleanup);
+    const anything = total > 0 || extra !== '';
 
     return (
       <ToolPage utility={redactUtility}>
@@ -149,8 +181,16 @@ export const redactUtility: Utility = {
               <b>
                 {total} {total === 1 ? 'area' : 'areas'} to redact
               </b>
+              {extra && <span className="muted redact-extra">· {extra}</span>}
               <span className="spacer" />
-              <button className="btn ghost" disabled={!total} onClick={() => setBoxes(boxes.map(() => []))}>
+              <button
+                className="btn ghost"
+                disabled={!anything}
+                onClick={() => {
+                  setBoxes(boxes.map(() => []));
+                  setQueries([]);
+                }}
+              >
                 <Trash2 size={15} /> Clear all
               </button>
             </div>
@@ -163,11 +203,11 @@ export const redactUtility: Utility = {
         )}
         <RunBar
           label="Redact and save"
-          disabled={!doc || !total}
+          disabled={!doc || !anything}
           {...task}
           onRun={() =>
             task.run(async (progress) => {
-              const bytes = await redactPdf(pdf.bytes!, boxes, 200, progress);
+              const bytes = await redactPdf(pdf.bytes!, boxes, 200, progress, queries);
               setOut([{ name: `${baseName(pdf.file!.name)}_redacted.pdf`, blob: pdfBlob(bytes) }]);
             })
           }
@@ -176,7 +216,7 @@ export const redactUtility: Utility = {
           files={out}
           zipName="redacted.zip"
           ctx={ctx}
-          note="Pages with redactions are saved as images (their text is gone); other pages are unchanged. Document properties are cleared."
+          note="Pages with redactions are saved as images (their text is gone); other pages are unchanged, except that comments and form field values containing the searched text are removed. Document properties are cleared."
         />
       </ToolPage>
     );

@@ -22,7 +22,7 @@ import {
 } from 'docx';
 import { fontkitAdapter } from '../src/lib/fontkitAdapter';
 import { FIXTURES, lockedPdf } from './e2e/helpers';
-import { PATTERN_LAYOUT, PATTERN_PAGES, POLISH, SECRET } from './fixture-data';
+import { COMMENTS, PATTERN_LAYOUT, PATTERN_PAGES, POLISH, SECRET } from './fixture-data';
 
 async function invoice(total: string): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
@@ -234,6 +234,53 @@ async function secretComment(): Promise<Uint8Array> {
 }
 
 /** Opens without a password, but printing and copying need the owner password. */
+/**
+ * The secret in page 1's text only. Page 2 (no secret in its text) has eight annotations,
+ * in this order: a comment with the secret in lower case and its popup, a reply to that
+ * comment, a comment to keep, a FreeText box whose rich text splits the secret with a tag,
+ * a square whose subject is the secret, a comment whose author is the secret, and a
+ * comment with an e-mail address. Page 3 has two form fields: "account" holds the secret
+ * (with a tooltip repeating it), "note" holds a value to keep.
+ */
+async function comments(): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const p1 = doc.addPage([595, 842]);
+  const p2 = doc.addPage([595, 842]);
+  const p3 = doc.addPage([595, 842]);
+  p1.drawText(`Client: ${SECRET}`, { x: 50, y: 780, size: 12, font });
+  p2.drawText('Reviewer notes', { x: 50, y: 780, size: 12, font });
+  p3.drawText('Form page', { x: 50, y: 780, size: 12, font });
+
+  const ctx = doc.context;
+  // A modification date full of digits: presets must not take it for a phone number.
+  const M = PDFString.of("D:20261104120000+01'00'");
+  const rect = (y: number) => [300, y, 320, y + 20];
+  const note = ctx.nextRef();
+  const popup = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Popup', Rect: [320, 600, 480, 700], Parent: note, Open: false }));
+  ctx.assign(note, ctx.obj({ Type: 'Annot', Subtype: 'Text', Rect: rect(700), T: PDFHexString.fromText('Alice'), M, Contents: PDFHexString.fromText(`please check ${SECRET.toLowerCase()}`), Popup: popup }));
+  const reply = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Text', Rect: rect(700), T: PDFString.of('Bob'), M, Contents: PDFString.of('Agreed'), IRT: note, RT: 'R' }));
+  const keep = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Text', Rect: rect(650), T: PDFString.of('Carol'), M, Contents: PDFString.of(COMMENTS.keepNote) }));
+  const rich = `<?xml version="1.0"?><body xmlns="http://www.w3.org/1999/xhtml"><p>Call <b>${SECRET.slice(0, 9)}</b>${SECRET.slice(9)}</p></body>`;
+  const freeText = ctx.register(
+    ctx.obj({ Type: 'Annot', Subtype: 'FreeText', Rect: [50, 500, 250, 530], DA: PDFString.of('/Helv 12 Tf 0 g'), M, Contents: PDFString.of('See box'), RC: PDFString.of(rich) }),
+  );
+  const square = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Square', Rect: [50, 400, 150, 450], M, Subj: PDFString.of(SECRET), Contents: PDFString.of('square') }));
+  const author = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Text', Rect: rect(600), T: PDFString.of(SECRET), M, Contents: PDFString.of('by name') }));
+  const mail = ctx.register(ctx.obj({ Type: 'Annot', Subtype: 'Text', Rect: rect(550), T: PDFString.of('Dave'), M, Contents: PDFString.of(`Mail ${COMMENTS.email}`) }));
+  p2.node.set(PDFName.of('Annots'), ctx.obj([note, popup, reply, keep, freeText, square, author, mail]));
+
+  const form = doc.getForm();
+  const account = form.createTextField('account');
+  account.setText(SECRET);
+  account.acroField.dict.set(PDFName.of('TU'), PDFHexString.fromText(`Account ${SECRET}`));
+  account.addToPage(p3, { x: 50, y: 600, width: 200, height: 24 });
+  const kept = form.createTextField('note');
+  kept.setText(COMMENTS.keepField);
+  kept.addToPage(p3, { x: 50, y: 500, width: 200, height: 24 });
+  return doc.save({ useObjectStreams: false });
+}
+
 function ownerOnly(): Promise<Uint8Array> {
   return lockedPdf({ user: '', owner: 'Owner#1', text: 'Restricted but readable', info: { title: 'Owner-only title' } });
 }
@@ -333,6 +380,7 @@ export default async function globalSetup() {
   fs.writeFileSync(path.join(FIXTURES, 'patterns.pdf'), await patterns());
   fs.writeFileSync(path.join(FIXTURES, 'secrets.pdf'), await secrets());
   fs.writeFileSync(path.join(FIXTURES, 'secret-comment.pdf'), await secretComment());
+  fs.writeFileSync(path.join(FIXTURES, 'comments.pdf'), await comments());
   fs.writeFileSync(path.join(FIXTURES, 'owner-only.pdf'), await ownerOnly());
   fs.writeFileSync(path.join(FIXTURES, 'rich.docx'), await richDocx());
 }

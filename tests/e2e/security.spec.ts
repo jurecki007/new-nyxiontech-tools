@@ -16,7 +16,7 @@ import {
   PDFString,
   StandardFonts,
 } from 'pdf-lib';
-import { PATTERN_LAYOUT, PATTERN_PAGES, SECRET } from '../fixture-data';
+import { COMMENTS, PATTERN_LAYOUT, PATTERN_PAGES, SECRET } from '../fixture-data';
 import {
   downloadResult,
   fileContains,
@@ -432,6 +432,50 @@ function boxesOn(page: Page, i: number): Promise<Rect[]> {
     );
 }
 
+/** Subtype and text of every annotation on page `i` (order kept). */
+async function annotsOn(bytes: Uint8Array, i: number) {
+  const doc = await loadPdf(bytes);
+  const annots = doc.getPage(i).node.Annots()?.asArray() ?? [];
+  return annots.map((v) => {
+    const d = doc.context.lookup(v, PDFDict);
+    const contents = d.lookup(PDFName.of('Contents'));
+    return {
+      subtype: (d.get(PDFName.of('Subtype')) as PDFName).decodeText(),
+      contents: contents instanceof PDFString || contents instanceof PDFHexString ? contents.decodeText() : undefined,
+    };
+  });
+}
+
+/** Form fields of page `i` by name: value, tooltip and whether the widget still has an appearance. */
+async function fieldsOn(bytes: Uint8Array, i: number) {
+  const doc = await loadPdf(bytes);
+  const fields: Record<string, { value?: string; tooltip?: string; appearance: boolean }> = {};
+  const text = (o: unknown) => (o instanceof PDFString || o instanceof PDFHexString ? o.decodeText() : undefined);
+  for (const v of doc.getPage(i).node.Annots()?.asArray() ?? []) {
+    const w = doc.context.lookup(v, PDFDict);
+    if (w.get(PDFName.of('Subtype')) !== PDFName.of('Widget')) continue;
+    const field = w.lookupMaybe(PDFName.of('Parent'), PDFDict) ?? w;
+    fields[text(field.lookup(PDFName.of('T')))!] = {
+      value: text(field.lookup(PDFName.of('V'))),
+      tooltip: text(field.lookup(PDFName.of('TU'))),
+      appearance: w.has(PDFName.of('AP')),
+    };
+  }
+  return fields;
+}
+
+/** The eight annotations on page 2 of comments.pdf, as annotsOn reports them. */
+const COMMENT_ANNOTS = {
+  note: { subtype: 'Text', contents: `please check ${SECRET.toLowerCase()}` },
+  popup: { subtype: 'Popup', contents: undefined },
+  reply: { subtype: 'Text', contents: 'Agreed' },
+  keep: { subtype: 'Text', contents: COMMENTS.keepNote },
+  freeText: { subtype: 'FreeText', contents: 'See box' },
+  square: { subtype: 'Square', contents: 'square' },
+  author: { subtype: 'Text', contents: 'by name' },
+  mail: { subtype: 'Text', contents: `Mail ${COMMENTS.email}` },
+};
+
 /** Pixels of the single image that makes up a redacted page. */
 async function pageRaster(bytes: Uint8Array, index: number) {
   const doc = await loadPdf(bytes);
@@ -663,19 +707,110 @@ test.describe('Redact PDF', () => {
     expect(text[1]).toBe('Untouched page text');
   });
 
-  // BUG: "Find text" only searches the page text. The same string in a comment on a page
-  // without redactions is not marked, and that page is copied as it is, so the redacted
-  // text stays in the output file (the comment's /Contents). Found by this test.
+  // Page 2 gets no redaction box, so it is copied as it is; its comment repeating the found
+  // text must not be (this used to leave the secret in the comment's /Contents).
   test('a comment on another page that repeats the found text does not keep it in the file', async ({ page }) => {
-    test.fail();
     await openRedact(page, fixture('secret-comment.pdf'));
     const input = page.getByPlaceholder('e.g. a name or account number');
     await input.fill(SECRET);
     await input.press('Enter');
     await expect(page.locator('.redact-toolbar b')).toHaveText('1 area to redact');
+    await expect(page.locator('.redact-toolbar .redact-extra')).toHaveText('· 1 comment will be removed');
+    await expect(page.locator('.option span.hint')).toHaveText(`"${SECRET}": 1 match marked. Also 1 comment will be removed.`);
     const { bytes } = await runAndDownload(page);
     expect((await pdfText(bytes))[1]).toBe('Reviewer notes');
+    expect(await annotsOn(bytes, 1)).toEqual([]);
     expect(await fileContains(bytes, SECRET)).toBe(false);
+  });
+
+  test('find text removes every comment that mentions it, in any case and any field, with its popup and replies; other comments stay', async ({ page }) => {
+    const original = fs.readFileSync(fixture('comments.pdf'));
+    expect(await annotsOn(original, 1)).toEqual(Object.values(COMMENT_ANNOTS));
+    await openRedact(page, fixture('comments.pdf'));
+    const input = page.getByPlaceholder('e.g. a name or account number');
+    await input.fill(SECRET);
+    await input.press('Enter');
+    await expect(page.locator('.redact-toolbar b')).toHaveText('1 area to redact');
+    // The note (lower case), its reply, the FreeText (rich text only), the square (subject), the author's comment.
+    await expect(page.locator('.redact-toolbar .redact-extra')).toHaveText('· 5 comments will be removed · 1 form field will be cleared');
+    const { bytes } = await runAndDownload(page);
+
+    expect(await pdfText(bytes)).toEqual(['', 'Reviewer notes', 'Form page']);
+    expect(await annotsOn(bytes, 1)).toEqual([COMMENT_ANNOTS.keep, COMMENT_ANNOTS.mail]);
+    for (const s of [SECRET, SECRET.toLowerCase(), SECRET.slice(0, 9), 'please check', 'Agreed', 'See box']) expect(await fileContains(bytes, s), s).toBe(false);
+    expect(await fileContains(bytes, COMMENTS.keepNote)).toBe(true);
+  });
+
+  test('a form field on an untouched page loses a matching value, tooltip and appearance; other fields keep theirs', async ({ page }) => {
+    const before = await fieldsOn(fs.readFileSync(fixture('comments.pdf')), 2);
+    expect(before).toEqual({
+      account: { value: SECRET, tooltip: `Account ${SECRET}`, appearance: true },
+      note: { value: COMMENTS.keepField, tooltip: undefined, appearance: true },
+    });
+    await openRedact(page, fixture('comments.pdf'));
+    const input = page.getByPlaceholder('e.g. a name or account number');
+    await input.fill(SECRET.toLowerCase());
+    await page.getByRole('button', { name: 'Mark' }).click();
+    const { bytes } = await runAndDownload(page);
+
+    expect(await fieldsOn(bytes, 2)).toEqual({
+      account: { value: undefined, tooltip: undefined, appearance: false },
+      note: { value: COMMENTS.keepField, tooltip: undefined, appearance: true },
+    });
+    expect(await fileContains(bytes, SECRET)).toBe(false);
+    expect(await fileContains(bytes, COMMENTS.keepField)).toBe(true);
+  });
+
+  test('a preset that only matches a comment removes that comment and changes nothing else', async ({ page }) => {
+    await openRedact(page, fixture('comments.pdf'));
+    const runButton = page.locator('.run-bar .btn.primary');
+    await expect(runButton).toBeDisabled();
+    await page.locator('.chip', { hasText: 'E-mail addresses' }).click();
+    await expect(page.locator('.option span.hint')).toHaveText('E-mail addresses: 0 matches marked. Also 1 comment will be removed.');
+    // The comments' modification dates are not searched, so this finds nothing more.
+    await page.locator('.chip', { hasText: 'Phone numbers' }).click();
+    await expect(page.locator('.option span.hint')).toHaveText('Phone numbers: 0 matches marked.');
+    await expect(page.locator('.redact-toolbar b')).toHaveText('0 areas to redact');
+    await expect(page.locator('.redact-toolbar .redact-extra')).toHaveText('· 1 comment will be removed');
+    await expect(runButton).toBeEnabled();
+    const { name, bytes } = await runAndDownload(page);
+
+    expect(name).toBe('comments_redacted.pdf');
+    // No page was turned into an image: all the text is still there.
+    expect(await pdfText(bytes)).toEqual([`Client: ${SECRET}`, 'Reviewer notes', 'Form page']);
+    const { mail, ...rest } = COMMENT_ANNOTS;
+    expect(mail.contents).toContain(COMMENTS.email);
+    expect(await annotsOn(bytes, 1)).toEqual(Object.values(rest));
+    expect(await fileContains(bytes, COMMENTS.email)).toBe(false);
+    expect((await fieldsOn(bytes, 2)).account.value).toBe(SECRET);
+  });
+
+  test('drawn boxes alone leave comments and form fields on other pages alone; Clear all forgets searches', async ({ page }) => {
+    await openRedact(page, fixture('comments.pdf'));
+    const counter = page.locator('.redact-toolbar b');
+    const extra = page.locator('.redact-toolbar .redact-extra');
+    const runButton = page.locator('.run-bar .btn.primary');
+    // A search that matches only comments enables the run; Clear all forgets it.
+    await page.locator('.chip', { hasText: 'E-mail addresses' }).click();
+    await expect(extra).toHaveText('· 1 comment will be removed');
+    await page.getByRole('button', { name: 'Clear all' }).click();
+    await expect(extra).toHaveCount(0);
+    await expect(runButton).toBeDisabled();
+
+    const svg = page.locator('.redact-page').first().locator('svg');
+    const box = (await svg.boundingBox())!;
+    const s = box.width / 595;
+    await page.mouse.move(box.x + 45 * s, box.y + 48 * s);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250 * s, box.y + 68 * s, { steps: 5 });
+    await page.mouse.up();
+    await expect(counter).toHaveText('1 area to redact');
+    await expect(extra).toHaveCount(0);
+    const { bytes } = await runAndDownload(page);
+
+    expect(await pdfText(bytes)).toEqual(['', 'Reviewer notes', 'Form page']);
+    expect(await annotsOn(bytes, 1)).toEqual(Object.values(COMMENT_ANNOTS));
+    expect((await fieldsOn(bytes, 2)).account).toEqual({ value: SECRET, tooltip: `Account ${SECRET}`, appearance: true });
   });
 
   test('a password-protected PDF cannot be redacted until unlocked', async ({ page }) => {
