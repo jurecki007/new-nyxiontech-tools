@@ -83,8 +83,8 @@ export function renderPage(
  * Opens arbitrary bytes with pdf.js, outside the source cache. The caller owns
  * the result and should `closePdf()` it when done.
  */
-export function openPdf(bytes: Uint8Array, password?: string): Promise<PDFDocumentProxy> {
-  return pdfjs.getDocument({ data: bytes.slice(), password, ...assetOptions }).promise;
+export function openPdf(bytes: Uint8Array, password?: string, options: { fontExtraProperties?: boolean } = {}): Promise<PDFDocumentProxy> {
+  return pdfjs.getDocument({ data: bytes.slice(), password, ...assetOptions, ...options }).promise;
 }
 
 /** Frees a document from `openPdf` (pdf.js 5+ destroys via the loading task). */
@@ -103,8 +103,9 @@ export async function renderPageToBlob(
   const page = await doc.getPage(pageNumber);
   const viewport = page.getViewport({ scale: dpi / 72 });
   const canvas = document.createElement('canvas');
-  canvas.width = Math.ceil(viewport.width);
-  canvas.height = Math.ceil(viewport.height);
+  // Round up partial pixels, but not floating-point noise (792 pt × 150/72 is 1650.0000000000002).
+  canvas.width = Math.ceil(viewport.width - 1e-6);
+  canvas.height = Math.ceil(viewport.height - 1e-6);
   const ctx = canvas.getContext('2d')!;
   // JPEG has no transparency; give pages a white background like a viewer would.
   ctx.fillStyle = '#ffffff';

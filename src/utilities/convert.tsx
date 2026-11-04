@@ -245,7 +245,7 @@ export const pdfToTextUtility: Utility = {
             {text.trim() ? (
               <textarea className="text-output" readOnly value={text} />
             ) : (
-              <p className="hint">This PDF has no text layer; it is probably a scan. Text recognition (OCR) is on the roadmap.</p>
+              <p className="hint">This PDF has no text layer; it is probably a scan. Run it through “OCR: searchable PDF” first to make its text readable.</p>
             )}
           </section>
         )}

@@ -303,7 +303,8 @@ export interface ProtectOptions {
 
 export async function protectPdf(bytes: Uint8Array, o: ProtectOptions): Promise<Uint8Array> {
   const cantoo = await import('@cantoo/pdf-lib');
-  const doc = await cantoo.PDFDocument.load(bytes).catch(() => {
+  // updateMetadata: false keeps the producer and dates, like loadPdf() does for every other tool.
+  const doc = await cantoo.PDFDocument.load(bytes, { updateMetadata: false }).catch(() => {
     throw new Error('This PDF is already password-protected. Unlock it first.');
   });
   doc.encrypt({
@@ -371,7 +372,7 @@ export async function unlockPdf(bytes: Uint8Array, password: string): Promise<Ui
   const { PDFDocument: CantooDocument } = await import('@cantoo/pdf-lib');
   let doc;
   try {
-    doc = await CantooDocument.load(bytes, { password });
+    doc = await CantooDocument.load(bytes, { password, updateMetadata: false });
   } catch {
     throw new Error('Wrong password, or this PDF could not be decrypted.');
   }

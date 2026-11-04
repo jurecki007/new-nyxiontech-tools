@@ -3,7 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 import { unzipSync } from 'fflate';
-import { decodePDFRawStream, PDFDict, PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
+import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFHexString, PDFName, PDFRawStream, PDFString, type PDFObject } from 'pdf-lib';
+import { PDFDocument as CantooDocument, PDFHexString as CantooHexString, PDFString as CantooString, StandardFonts } from '@cantoo/pdf-lib';
 
 export const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.fixtures');
 export const fixture = (name: string) => path.join(FIXTURES, name);
@@ -19,7 +20,10 @@ export async function openTool(page: Page, id: string) {
 
 /** Clicks the tool's run button and waits for results (fails on a shown error). */
 export async function run(page: Page) {
-  await page.locator('.run-bar .btn.primary').click();
+  const button = page.locator('.run-bar .btn.primary');
+  await button.click();
+  // On a re-run the previous results are still shown, so wait for the job itself to finish.
+  await expect(button).not.toHaveText('Working…', { timeout: 100_000 });
   await expect(page.locator('.results, .run-bar .error-text').first()).toBeVisible({ timeout: 100_000 });
   await expect(page.locator('.run-bar .error-text')).toHaveCount(0);
 }
@@ -48,6 +52,10 @@ export async function fileContains(bytes: Uint8Array, marker: string): Promise<b
   const chunks = [Buffer.from(bytes).toString('latin1')];
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
   for (const [, obj] of doc.context.enumerateIndirectObjects()) {
+    // Objects packed in compressed object streams are only readable once parsed:
+    // search every object's own text (dictionaries, strings, arrays) as well.
+    chunks.push(obj instanceof PDFRawStream ? obj.dict.toString() : obj.toString());
+    for (const s of strings(obj)) chunks.push(s);
     if (!(obj instanceof PDFRawStream)) continue;
     try {
       chunks.push(Buffer.from(decodePDFRawStream(obj).decode()).toString('latin1'));
@@ -58,6 +66,15 @@ export async function fileContains(bytes: Uint8Array, marker: string): Promise<b
   const haystack = chunks.join('\n').toLowerCase();
   const forms = [marker, Buffer.from(marker, 'latin1').toString('hex'), 'feff' + Buffer.from(marker, 'utf16le').swap16().toString('hex')];
   return forms.some((f) => haystack.includes(f.toLowerCase()));
+}
+
+/** Decoded text of every string inside an object (literal escapes and UTF-16 resolved). */
+function strings(obj: PDFObject | undefined, out: string[] = []): string[] {
+  if (obj instanceof PDFString || obj instanceof PDFHexString) out.push(obj.decodeText());
+  else if (obj instanceof PDFArray) for (const v of obj.asArray()) strings(v, out);
+  else if (obj instanceof PDFDict) for (const [, v] of obj.entries()) strings(v, out);
+  else if (obj instanceof PDFRawStream) strings(obj.dict, out);
+  return out;
 }
 
 /** Base font names of every font in the document (object streams included). */
@@ -98,9 +115,37 @@ export async function needsPassword(bytes: Uint8Array): Promise<boolean> {
   }
 }
 
+/** pdf.js permission flags (PermissionFlag values), or null when the file sets no restrictions. */
+export async function pdfjsPermissions(bytes: Uint8Array, password?: string): Promise<number[] | null> {
+  const doc = await openWithPdfjs(bytes, password);
+  const perms = await doc.getPermissions();
+  await doc.loadingTask.destroy();
+  return perms ? Array.from(perms) : null;
+}
+
+/** Pixel size of a PNG (IHDR) or JPEG (first SOFn marker). */
+export function imageSize(bytes: Uint8Array): { type: 'png' | 'jpeg'; width: number; height: number } {
+  const b = Buffer.from(bytes);
+  if (b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return { type: 'png', width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+  }
+  if (b[0] !== 0xff || b[1] !== 0xd8) throw new Error('Neither PNG nor JPEG');
+  for (let i = 2; i < b.length; ) {
+    if (b[i] !== 0xff) throw new Error(`Bad JPEG marker at ${i}`);
+    const marker = b[i + 1];
+    const len = b.readUInt16BE(i + 2);
+    // SOF0..SOF15 except DHT (C4), JPG (C8) and DAC (CC).
+    if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+      return { type: 'jpeg', height: b.readUInt16BE(i + 5), width: b.readUInt16BE(i + 7) };
+    }
+    i += 2 + len;
+  }
+  throw new Error('No JPEG frame header');
+}
+
 /** Text of every page, extracted with pdf.js in Node. */
-export async function pdfText(bytes: Uint8Array): Promise<string[]> {
-  const doc = await openWithPdfjs(bytes);
+export async function pdfText(bytes: Uint8Array, password?: string): Promise<string[]> {
+  const doc = await openWithPdfjs(bytes, password);
   const pages: string[] = [];
   for (let n = 1; n <= doc.numPages; n++) {
     const content = await (await doc.getPage(n)).getTextContent();
@@ -110,7 +155,40 @@ export async function pdfText(bytes: Uint8Array): Promise<string[]> {
   return pages;
 }
 
-export const unzip = (bytes: Uint8Array): Record<string, Uint8Array> => unzipSync(new Uint8Array(bytes));
+/**
+ * An AES-256 PDF locked outside the app (by @cantoo/pdf-lib directly), for testing Unlock
+ * on its own. That library encrypts streams but writes strings in clear text, which every
+ * reader then "decrypts" into garbage, so the document info strings are encrypted here with
+ * the object's key, as ISO 32000 requires (the app's Protect does the same for all strings).
+ */
+export async function lockedPdf(o: {
+  user: string;
+  owner: string;
+  text: string;
+  info?: { title?: string; author?: string; producer?: string };
+  permissions?: { printing?: boolean; copying?: boolean; modifying?: boolean };
+}): Promise<Uint8Array> {
+  const doc = await CantooDocument.create({ updateMetadata: false });
+  if (o.info?.title) doc.setTitle(o.info.title);
+  if (o.info?.author) doc.setAuthor(o.info.author);
+  if (o.info?.producer) doc.setProducer(o.info.producer);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  doc.addPage([595, 842]).drawText(o.text, { x: 50, y: 780, size: 12, font });
+  doc.encrypt({ userPassword: o.user, ownerPassword: o.owner, permissions: o.permissions ?? { printing: false, copying: false, modifying: false } });
+  const ref = doc.context.trailerInfo.Info as { objectNumber: number; generationNumber: number } | undefined;
+  if (ref) {
+    const info = doc.context.lookup(ref as never) as unknown as { entries(): [unknown, unknown][]; set(k: unknown, v: unknown): void };
+    const encrypt = doc.context.security!.getEncryptFn(ref.objectNumber, ref.generationNumber);
+    for (const [key, value] of info.entries()) {
+      if (value instanceof CantooString || value instanceof CantooHexString) {
+        info.set(key, CantooHexString.of(Buffer.from(encrypt(value.asBytes())).toString('hex')));
+      }
+    }
+  }
+  return doc.save({ useObjectStreams: false });
+}
+
+export const unzip =(bytes: Uint8Array): Record<string, Uint8Array> => unzipSync(new Uint8Array(bytes));
 
 /** Draws a PNG in the browser (Node has no canvas) and returns it as a file payload. */
 export async function makePng(page: Page, name: string, draw: 'text' | 'subject' | 'logo', text = '') {

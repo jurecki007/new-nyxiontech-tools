@@ -86,7 +86,7 @@ On Windows you can also double-click `start.bat`.
 End-to-end tests use Playwright (`tests/e2e`). They cover the dashboard, the editor and every tool, and check the downloaded files with pdf-lib and pdf.js.
 
 ```bash
-npm run test:e2e          # builds, serves the production build on :4173, runs the suite (~1–2 min)
+npm run test:e2e          # builds, serves the production build on :4173, runs the suite (~3 min)
 npm run test:e2e:report   # opens the HTML report
 ```
 
@@ -95,7 +95,7 @@ npm run test:e2e:report   # opens the HTML report
 - Tests run with one worker, because OCR and the AI model use a lot of memory.
 - `vite preview` sends the same security headers as nginx (read from `nginx/security-headers.conf`), so the tests run under the production Content-Security-Policy. The dev server (`npm run dev`) cannot send it: React Fast Refresh needs an inline script.
 
-Not covered: HEIC conversion (needs a sample iPhone photo) and the print dialog in "Word to PDF". For the desktop app see below.
+Not covered: the print dialog itself in "Word to PDF" (the tests check the document handed to it). HEIC conversion has a test with a synthetic sample (`tests/fixtures/sample.heic`), marked as an expected failure: heic2any needs `eval`, which the Content-Security-Policy blocks. For the desktop app see below.
 
 ## Self-hosting
 

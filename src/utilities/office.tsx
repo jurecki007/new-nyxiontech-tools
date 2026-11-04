@@ -69,7 +69,16 @@ export const wordToPdfUtility: Utility = {
             <span className="file-name">{file.name}</span>
             <span className="muted">{formatBytes(file.size)}</span>
             <span className="spacer" />
-            <button className="btn ghost" onClick={() => setFile(null)}>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                // Also drop the old preview: it would stay on screen, and "Save as PDF" needs the file name.
+                setFile(null);
+                setHtml(null);
+                setWarnings([]);
+                task.setError(null);
+              }}
+            >
               Change file
             </button>
           </div>

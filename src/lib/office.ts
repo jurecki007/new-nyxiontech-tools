@@ -8,32 +8,48 @@ import { closePdf, openPdf } from './pdfjs';
  */
 export async function pdfToDocx(bytes: Uint8Array): Promise<Blob> {
   const { Document, Packer, Paragraph, TextRun, PageBreak } = await import('docx');
-  const src = await openPdf(bytes);
+  // fontExtraProperties gives each loaded font its real name (e.g. "Helvetica-Bold");
+  // text content alone only has ids like "g_d0_f1" and generic families.
+  const src = await openPdf(bytes, undefined, { fontExtraProperties: true });
   try {
     const paragraphs: InstanceType<typeof Paragraph>[] = [];
     for (let n = 1; n <= src.numPages; n++) {
       const page = await src.getPage(n);
+      // Loads the page's fonts into commonObjs, where their names can be looked up.
+      await page.getOperatorList();
       const content = await page.getTextContent();
+      const fontName = (id: string): string => {
+        try {
+          return (page.commonObjs.get(id) as { name?: string } | null)?.name ?? '';
+        } catch {
+          return '';
+        }
+      };
       let runs: InstanceType<typeof TextRun>[] = [];
       let lastY: number | null = null;
+      let lineEnded = false;
       const flush = (gap: boolean) => {
         if (runs.length) paragraphs.push(new Paragraph({ children: runs, spacing: { after: gap ? 160 : 0 } }));
         runs = [];
       };
       for (const item of content.items) {
         if (!('str' in item)) continue;
-        const y = item.transform[5];
-        const size = Math.hypot(item.transform[2], item.transform[3]);
-        // A big vertical jump means a new paragraph rather than a wrapped line.
-        if (lastY !== null && runs.length && Math.abs(lastY - y) > size * 1.8) flush(true);
-        const font = content.styles[item.fontName]?.fontFamily ?? '';
         if (item.str) {
-          runs.push(new TextRun({ text: item.str, size: Math.round(Math.min(72, Math.max(6, size)) * 2), bold: /bold/i.test(item.fontName + font) }));
+          const y = item.transform[5];
+          const size = Math.hypot(item.transform[2], item.transform[3]);
+          // One paragraph per line; a big vertical jump means a new paragraph rather
+          // than a wrapped line, so the previous one gets space after it. The jump is
+          // only known at the next line, hence the line is flushed here, not at its end.
+          const gap = lastY !== null && Math.abs(lastY - y) > size * 1.8;
+          if (lineEnded || gap) flush(gap);
+          lineEnded = false;
+          const font = content.styles[item.fontName]?.fontFamily ?? '';
+          runs.push(
+            new TextRun({ text: item.str, size: Math.round(Math.min(72, Math.max(6, size)) * 2), bold: /bold/i.test(fontName(item.fontName) + item.fontName + font) }),
+          );
+          lastY = y;
         }
-        if (item.hasEOL) {
-          flush(false);
-        }
-        lastY = y;
+        if (item.hasEOL) lineEnded = true;
       }
       flush(true);
       if (n < src.numPages) paragraphs.push(new Paragraph({ children: [new PageBreak()] }));

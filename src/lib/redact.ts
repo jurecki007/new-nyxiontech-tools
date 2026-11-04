@@ -16,10 +16,30 @@ export interface Box {
 
 export const REDACT_PATTERNS: { id: string; label: string; regex: RegExp }[] = [
   { id: 'email', label: 'E-mail addresses', regex: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
-  { id: 'phone', label: 'Phone numbers', regex: /(?:\+\d{1,3}[\s-]?)?(?:\d[\s-]?){9,11}\d/g },
-  { id: 'iban', label: 'Bank account numbers', regex: /\b[A-Z]{2}\d{2}(?:\s?\d{4}){4,7}\b|\b\d{2}(?:\s?\d{4}){6}\b/g },
-  { id: 'nip', label: 'NIP / PESEL numbers', regex: /\b\d{3}-?\d{3}-?\d{2}-?\d{2}\b|\b\d{11}\b/g },
+  // 9 to 12 digits: Polish numbers have 9 ("600 123 456"), plus an optional country code.
+  { id: 'phone', label: 'Phone numbers', regex: /(?:\+\d{1,3}[\s-]?)?(?:\d[\s-]?){8,11}\d/g },
+  // IBAN: country, check digits, then groups of 4 letters or digits (GB29 NWBK …) and a
+  // shorter last group (DE…30 00); or a Polish 26-digit account number.
+  { id: 'iban', label: 'Bank account numbers', regex: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){2,7}(?:\s?[A-Z0-9]{1,3})?\b|\b\d{2}(?:\s?\d{4}){6}\b/g },
+  // NIP as 123-456-78-90 or 123-45-67-890 (or without dashes), PESEL as 11 digits.
+  { id: 'nip', label: 'NIP / PESEL numbers', regex: /\b\d{3}-?\d{3}-?\d{2}-?\d{2}\b|\b\d{3}-\d{2}-\d{2}-\d{3}\b|\b\d{11}\b/g },
 ];
+
+let measureCtx: CanvasRenderingContext2D | null = null;
+
+/**
+ * Horizontal offsets (as a share of the run's width) where each character of a text run
+ * starts, measured with a similar font. Characters differ a lot in width ("il" vs "WM"), so
+ * a box placed by average width can miss the start or end of a match and leave it readable.
+ */
+function charOffsets(text: string, fontFamily: string): number[] | null {
+  measureCtx ??= document.createElement('canvas').getContext('2d');
+  if (!measureCtx) return null;
+  measureCtx.font = `100px ${fontFamily || 'sans-serif'}`;
+  const total = measureCtx.measureText(text).width;
+  if (!(total > 0)) return null;
+  return Array.from({ length: text.length + 1 }, (_, i) => measureCtx!.measureText(text.slice(0, i)).width / total);
+}
 
 /**
  * Finds text on every page and returns boxes around each match. Matches are
@@ -41,11 +61,20 @@ export async function findTextBoxes(doc: PDFDocumentProxy, query: string | RegEx
       const tx = pdfjs.Util.transform(viewport.transform, item.transform);
       const height = Math.hypot(tx[2], tx[3]);
       const width = item.width * viewport.scale;
-      // Characters are assumed equally wide within a run, which is close enough for a cover box.
+      // pdf.js gives only the run's total width. Estimate where the match starts and ends
+      // both from measured character widths and from the average width, and cover both
+      // estimates, plus half a character on each side for fonts measured imperfectly: a box
+      // may be a little wider than the text, never narrower.
       const charW = width / item.str.length;
+      const pad = Math.max(1, charW / 2);
+      const offsets = charOffsets(item.str, content.styles[item.fontName]?.fontFamily ?? '');
       for (const m of item.str.matchAll(regex)) {
         if (!m[0]) continue;
-        boxes.push({ x: tx[4] + charW * m.index! - 1, y: tx[5] - height * 0.9 - 1, w: charW * m[0].length + 2, h: height * 1.15 + 2 });
+        const from = m.index!;
+        const to = from + m[0].length;
+        const x0 = Math.min(charW * from, offsets ? offsets[from] * width : Infinity);
+        const x1 = Math.max(charW * to, offsets ? offsets[to] * width : -Infinity);
+        boxes.push({ x: tx[4] + x0 - pad, y: tx[5] - height * 0.9 - 1, w: x1 - x0 + 2 * pad, h: height * 1.15 + 2 });
       }
     }
     result.push(boxes);
