@@ -14,10 +14,17 @@ export async function zipFiles(files: { name: string; blob: Blob }[]): Promise<B
   return new Blob([zipped], { type: 'application/zip' });
 }
 
+/** Fired on window after a result has been saved (see SupportNote). */
+export const FILE_SAVED_EVENT = 'nyxiontech:file-saved';
+const notifySaved = () => window.dispatchEvent(new Event(FILE_SAVED_EVENT));
+
 /** Saves a file: a "Save as" dialog in the desktop app, a download in the browser. */
 export function downloadBlob(blob: Blob, filename: string) {
   if (isDesktop) {
-    saveWithDialog(blob, filename).catch((e) => window.alert(String(e)));
+    saveWithDialog(blob, filename).then(
+      (saved) => saved && notifySaved(),
+      (e) => window.alert(String(e)),
+    );
     return;
   }
   const url = URL.createObjectURL(blob);
@@ -26,6 +33,7 @@ export function downloadBlob(blob: Blob, filename: string) {
   link.download = filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notifySaved();
 }
 
 export function formatBytes(n: number): string {

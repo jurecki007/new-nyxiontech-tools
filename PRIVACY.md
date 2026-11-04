@@ -6,6 +6,7 @@ there is no account, no tracking, no analytics and no advertising.
 ## Web app
 
 - Files are processed in your browser. Documents, snippets and settings are stored in the browser (IndexedDB and localStorage) and stay there until you delete them.
+  Among the settings: when you dismissed the "Star it on GitHub / Support on Ko-fi" note (so it stays away for a week), and, for the current browser session only (sessionStorage), that it has been shown. The desktop app keeps the same two values.
 - The app only talks to the server it was loaded from: it loads its own files (fonts, OCR language data, the background-removal model) and checks `/version.json` for a newer version.
   Nothing else is requested, and the page's Content-Security-Policy blocks requests to any other site.
 - Whoever runs the server can see the usual web server logs (for example your IP address and the files requested), but never your documents.
