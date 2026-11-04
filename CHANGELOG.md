@@ -12,8 +12,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The sitemap is generated from the list of tools and includes both languages.
 - Windows app: "Check for updates automatically" under About (on by default). When it's off, the app never contacts GitHub on its own; "Check now" checks on request.
 - Privacy policy (PRIVACY.md), also shown on the installer's licence page.
+- README: a short demo, a comparison with other PDF tools, and "Why does Windows warn me?" (the SmartScreen warning for the not yet code-signed installers, and how to check a download's SHA-256). The release notes on GitHub explain the warning too.
 - Tests cover PDFs with JPEG 2000 and JBIG2 images, checking that they actually render.
 - Detailed tests for the Convert and Security tools: every option's effect on the output file, AES-256 encryption details and permissions, and redaction leaks in text, file bytes, metadata, outlines, comments, form fields and attachments.
+- "Files stay on this device" in the sidebar opens a new Privacy tab in About: how the files stay local, the site's actual `connect-src` policy (read from the server configuration at build time), and how to check it yourself offline or in DevTools. When the connection drops, the line says so and that tools you've used still work.
+- After you save a result, a small note offers a GitHub star or a Ko-fi tip: at most once per browser session, and not again for a week once dismissed. The sidebar's GitHub link now reads "Star on GitHub".
+- `vite preview` sends the same Cache-Control as nginx for `/assets/` and `/vendor/`, so tests see what browsers cache in production.
 
 ### Fixed
 - Redact: a box could start too far right after narrow letters (such as "il"), leaving the start of an e-mail address or number readable. Boxes are now placed from measured character widths and never come out narrower than the text.

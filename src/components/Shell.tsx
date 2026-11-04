@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, Sparkles } from 'lucide-react';
 import { AboutDialog, type AboutTab } from './AboutDialog';
 import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
+import { PrivacyIndicator } from './Privacy';
+import { SupportNote } from './SupportNote';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
 import { linkTo, useRoute } from '../lib/route';
@@ -63,9 +65,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
           {q && !UTILITIES.some((u) => matches(u.label, u.description)) && <p className="hint nav-empty">No tool matches “{query}”.</p>}
         </nav>
         <div className="nav-foot">
-          <div className="nav-privacy">
-            <ShieldCheck size={15} /> Files never leave this computer
-          </div>
+          <PrivacyIndicator onOpen={() => setAbout('privacy')} />
           <div className="nav-links">
             <button onClick={() => setAbout('changes')} title="What's new in this version">
               <Sparkles size={13} /> What's new
@@ -73,8 +73,8 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
             <button onClick={() => setAbout('about')} title={`About ${APP_NAME}`}>
               <Info size={13} /> About
             </button>
-            <a href={REPO_URL} {...externalLink} title="Source code on GitHub">
-              <GithubIcon size={13} /> GitHub
+            <a href={REPO_URL} {...externalLink} title="Source code on GitHub. A star helps other people find it.">
+              <GithubIcon size={13} /> Star on GitHub
             </a>
             <a href={COMPANY_URL} {...externalLink} title="Made by Nyxiontech">
               <Globe size={13} /> nyxiontech.com
@@ -99,6 +99,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
         {utility ? <utility.Component key={utility.id} ctx={ctx} /> : <Home ctx={ctx} onOpenProject={onOpenProject} />}
       </main>
       {about && <AboutDialog initialTab={about} updates={updates} onClose={closeAbout} />}
+      <SupportNote />
     </div>
   );
 }

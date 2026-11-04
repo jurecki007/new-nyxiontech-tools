@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bug, ExternalLink, Globe, Heart, RefreshCw, X } from 'lucide-react';
 import { GithubIcon } from './GithubIcon';
+import { PrivacyPanel } from './Privacy';
 import changelog from '../../CHANGELOG.md?raw';
 import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL, SPONSORS_URL } from '../config';
 import { externalLink, isDesktop } from '../lib/desktop';
 import { parseChangelog, type Updates } from '../lib/updates';
 
-export type AboutTab = 'about' | 'changes';
+export type AboutTab = 'about' | 'privacy' | 'changes';
 
-/** "About" and "What's new" in one dialog. */
+const TAB_LABELS: Record<AboutTab, string> = { about: 'About', privacy: 'Privacy', changes: "What's new" };
+
+/** "About", "Privacy" and "What's new" in one dialog. */
 export function AboutDialog({ initialTab, updates, onClose }: { initialTab: AboutTab; updates: Updates; onClose: () => void }) {
   const [tab, setTab] = useState<AboutTab>(initialTab);
   const releases = useMemo(() => parseChangelog(changelog), []);
@@ -28,7 +31,7 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal about" role="dialog" aria-label={tab === 'about' ? `About ${APP_NAME}` : "What's new"}>
+      <div className="modal about" role="dialog" aria-modal="true" aria-label={tab === 'about' ? `About ${APP_NAME}` : TAB_LABELS[tab]}>
         <header className="modal-head">
           <b>{APP_NAME}</b>
           <span className="version-pill">v{APP_VERSION}</span>
@@ -38,15 +41,16 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
         </header>
 
         <div className="segmented">
-          <button className={tab === 'about' ? 'on' : ''} onClick={() => setTab('about')}>
-            About
-          </button>
-          <button className={tab === 'changes' ? 'on' : ''} onClick={() => setTab('changes')}>
-            What's new
-          </button>
+          {(Object.keys(TAB_LABELS) as AboutTab[]).map((t) => (
+            <button key={t} className={tab === t ? 'on' : ''} aria-pressed={tab === t} onClick={() => setTab(t)}>
+              {TAB_LABELS[t]}
+            </button>
+          ))}
         </div>
 
-        {tab === 'about' ? (
+        {tab === 'privacy' ? (
+          <PrivacyPanel />
+        ) : tab === 'about' ? (
           <div className="about-body">
             <p>
               Free, open-source PDF and image tools that run entirely {isDesktop ? 'on your computer' : 'in your browser'}. Files are never uploaded:
