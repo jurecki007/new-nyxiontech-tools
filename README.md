@@ -26,7 +26,7 @@ Built and maintained by [Nyxiontech](https://nyxiontech.com), which builds AI im
 
 ## Download
 
-- **Web:** run it yourself (below) or use a hosted copy.
+- **Web:** use it at **[tools.nyxiontech.com](https://tools.nyxiontech.com)**, or host it yourself (below).
 - **Windows 10/11:** get the installer from the [latest release](https://github.com/jurecki007/nyxiontech-tools/releases/latest):
   - `Nyxiontech.PDF.Tools_<version>_x64-setup.exe`: installs for the current user, no admin rights needed.
   - `…_x64_en-US.msi`: per-machine installer for IT rollout (Intune, Group Policy).
@@ -111,6 +111,8 @@ docker run --rm -p 8080:80 nyxiontech-pdf-tools   # http://localhost:8080
 - Hashed `/assets/*` are cached for a year, `/vendor/*` (OCR and ML files) for a week, and `index.html` is always revalidated.
 - A strict Content-Security-Policy allows only this origin, plus WebAssembly and blob workers (`nginx/security-headers.conf`).
 - There is no backend: documents never reach the server.
+
+**Hosted copy:** [tools.nyxiontech.com](https://tools.nyxiontech.com) runs on Cloudflare Pages, built from `master` on every push (build command `npm run build`, output `dist`, Node version from `.nvmrc`). `public/_headers` sends the same security headers as the nginx image, and the build fails if they drift apart (`scripts/check-pages-headers.mjs`). `public/_redirects` provides `/health`. The site also serves `robots.txt`, `sitemap.xml`, `llms.txt` (a summary for AI assistants), a web manifest and `.well-known/security.txt`; the canonical URL and structured data are in `index.html`.
 
 ### Windows desktop app
 

@@ -37,7 +37,9 @@ Steps for the owner:
 
 ## Later / optional
 
-- [ ] Deploy a public web instance (for example tools.nyxiontech.com) and link it from nyxiontech.com.
+- [x] Public web instance at https://tools.nyxiontech.com (Cloudflare Pages, auto-deploys from `master`), with SEO / AI-search metadata.
+- [ ] Link tools.nyxiontech.com from the nyxiontech.com website.
+- [ ] Submit `https://tools.nyxiontech.com/sitemap.xml` in Google Search Console and Bing Webmaster Tools.
 - [x] Renamed the repo to `nyxiontech-tools` (2026-11-04). GitHub redirects the old URLs, so v1.1.0 still finds updates at its old address.
 - [ ] Ko-fi: profile picture (`src-tauri/icons/icon.png`), description, connect PayPal, currency EUR instead of USD.
 - [x] PDFs with JPEG 2000 / JBIG2 images render correctly; covered by `tests/e2e/image-codecs.spec.ts` (samples from the pdf.js test corpus).
