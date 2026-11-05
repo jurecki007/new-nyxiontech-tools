@@ -53,12 +53,12 @@ function rectTool(opts: {
           ctx.dispatch({ type: 'apply', fn: ops.updateAnnot(annot.id, patch), history: false });
         },
         end: () => {
+          // The tool stays active so several areas can be drawn in a row (Esc or V switches back to Select).
+          // The new rectangle stays selected, so its style can be adjusted or it can be deleted right away.
           if (size.w < 3 || size.h < 3) {
             // A click without a drag: forget the empty rectangle.
             ctx.dispatch({ type: 'rollback' });
             ctx.select(null);
-          } else {
-            ctx.setTool('select');
           }
         },
       };
@@ -71,7 +71,7 @@ export const whiteoutTool = rectTool({
   label: 'Whiteout',
   icon: Eraser,
   shortcut: 'W',
-  hint: 'Drag over content to hide it. Match the colour if the background is not white.',
+  hint: 'Drag over content to hide it; draw as many as you need. Match the colour if the background is not white. Esc to stop.',
   Options: ({ value, onChange }) => (
     <ColorField label="Cover colour" value={value.fill ?? '#ffffff'} onChange={(fill) => onChange({ fill })} />
   ),
@@ -82,7 +82,7 @@ export const highlightTool = rectTool({
   label: 'Highlight',
   icon: Highlighter,
   shortcut: 'H',
-  hint: 'Drag over text to highlight it.',
+  hint: 'Drag over text to highlight it; draw as many as you need. Esc to stop.',
   Options: ({ value, onChange }) => (
     <div className="row">
       <ColorField label="Colour" value={value.fill ?? '#ffe066'} onChange={(fill) => onChange({ fill })} />
@@ -102,7 +102,7 @@ export const boxTool = rectTool({
   label: 'Box',
   icon: Square,
   shortcut: 'B',
-  hint: 'Drag to draw a frame around something.',
+  hint: 'Drag to draw a frame around something; draw as many as you need. Esc to stop.',
   Options: ({ value, onChange }) => (
     <div className="row">
       <ColorField label="Border" value={value.stroke ?? '#d32f2f'} onChange={(stroke) => onChange({ stroke })} />

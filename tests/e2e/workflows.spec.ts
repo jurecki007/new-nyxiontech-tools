@@ -42,6 +42,30 @@ test.describe('editor workflows', () => {
     expect(doc.getPage(0).node.Resources()?.lookup(PDFName.of('XObject'))).toBeTruthy();
   });
 
+  test('highlight, whiteout and box stay active for several areas; Esc switches back to Select', async ({ page }) => {
+    await openEditor(page);
+    for (const [key, label] of [['h', 'Highlight'], ['w', 'Whiteout'], ['b', 'Box']] as const) {
+      await page.keyboard.press(key);
+      await expect(page.locator('.tool-item.on')).toContainText(label);
+    }
+    await page.keyboard.press('h');
+    await dragOnPage(page, [60, 60], [300, 80]);
+    await dragOnPage(page, [60, 100], [300, 120]);
+    await dragOnPage(page, [60, 140], [300, 160]);
+    await expect(page.locator('.overlay .annot')).toHaveCount(3);
+    await expect(page.locator('.tool-item.on')).toContainText('Highlight');
+
+    // A plain click (no drag) still adds nothing and keeps the tool.
+    await dragOnPage(page, [200, 250], [201, 250]);
+    await expect(page.locator('.overlay .annot')).toHaveCount(3);
+    await expect(page.locator('.tool-item.on')).toContainText('Highlight');
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.tool-item.on')).toContainText('Select');
+    await dragOnPage(page, [60, 300], [300, 320]);
+    await expect(page.locator('.overlay .annot')).toHaveCount(3);
+  });
+
   test('Add PDF appends pages from another file', async ({ page }) => {
     await openEditor(page);
     const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.locator('.topbar').getByRole('button', { name: 'Add PDF' }).click()]);

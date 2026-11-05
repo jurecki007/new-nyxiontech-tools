@@ -19,6 +19,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - After you save a result, a small note offers a GitHub star or a Ko-fi tip: at most once per browser session, and not again for a week once dismissed. The sidebar's GitHub link now reads "Star on GitHub".
 - `vite preview` sends the same Cache-Control as nginx for `/assets/` and `/vendor/`, so tests see what browsers cache in production.
 
+### Changed
+
+- Editor: Highlight, Whiteout and Box stay active after drawing, so several areas can be marked in a row. Esc or V switches back to Select.
+
 ### Fixed
 - Redact: a box could start too far right after narrow letters (such as "il"), leaving the start of an e-mail address or number readable. Boxes are now placed from measured character widths and never come out narrower than the text.
 - Redact presets: phone numbers now include 9-digit Polish numbers; bank accounts include IBANs with letters (GB29 NWBK …) and lengths that aren't a multiple of 4; NIP also matches the 123-45-67-890 layout.

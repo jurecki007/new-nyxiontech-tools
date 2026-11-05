@@ -252,7 +252,7 @@ OCR and background removal load a worker, WebAssembly, language data and a model
   - Handwriting: Dancing Script, Great Vibes, Caveat
 
   Arimo, Tinos and Cousine have the same metrics as Arial, Times and Courier, so added text matches typical generated invoices. New text defaults to Arimo.
-- **Whiteout / Highlight / Box**: drag to draw. To "change" existing text, whiteout the old text and type over it.
+- **Whiteout / Highlight / Box**: drag to draw. The tool stays active, so you can mark several areas in a row; press Esc (or V) to go back to Select. To "change" existing text, whiteout the old text and type over it.
 - **Images & stamps**: PNG, JPEG, WebP, GIF or SVG (converted to PNG). Resizing keeps the aspect ratio; hold Shift to resize freely.
 - **Snippets**: reusable text stamps, stored in localStorage. "Approved for payment" and "Copy – original on file" are included by default. Save any selected text as a snippet with the stamp button.
 - **Pages**: drag to reorder; rotate, duplicate or delete pages; append pages from other PDFs.
