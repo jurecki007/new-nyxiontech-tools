@@ -869,7 +869,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
     related: ['metadata', 'protect', 'compare', 'edit'],
     en: {
       name: 'Redact PDF',
-      title: 'Redact PDF free: really remove text | Nyxiontech PDF Tools',
+      title: 'Redact PDF without uploading | Nyxiontech PDF Tools',
       description: 'Black out names, e-mails, phone numbers, IBANs or any text in a PDF. Redacted pages are re-rendered, so the hidden text is removed, not just covered. Free.',
       h1: 'Redact a PDF: remove sensitive data for good',
       intro: [
@@ -889,7 +889,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
     },
     pl: {
       name: 'Anonimizuj PDF',
-      title: 'Anonimizacja PDF: trwale usuń dane | Nyxiontech',
+      title: 'Anonimizacja PDF (RODO) bez wysyłania | Nyxiontech',
       description: 'Zaczernij nazwiska, e-maile, telefony, numery kont, NIP, PESEL lub dowolny tekst w PDF. Dane są naprawdę usuwane, a nie tylko zakrywane. Za darmo.',
       h1: 'Anonimizuj PDF: trwale usuń dane osobowe',
       intro: [

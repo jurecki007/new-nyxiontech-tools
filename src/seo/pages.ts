@@ -96,7 +96,7 @@ const organization = {
   '@type': 'Organization',
   '@id': ORG_ID,
   name: 'Nyxiontech',
-  url: 'https://www.nyxiontech.com',
+  url: 'https://nyxiontech.com',
   logo: `${SITE}/icon-512.png`,
 };
 const website = { '@type': 'WebSite', '@id': WEBSITE_ID, name: 'Nyxiontech PDF Tools', url: `${SITE}/`, publisher: { '@id': ORG_ID } };
@@ -307,9 +307,6 @@ export function sitemap(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.join('\n')}
-  <url>
-    <loc>${SITE}/llms.txt</loc>
-  </url>
 </urlset>
 `;
 }

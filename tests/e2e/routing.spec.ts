@@ -67,7 +67,7 @@ test.describe('static tool pages', () => {
     expect(res.status()).toBe(200);
     const xml = await res.text();
     const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    const expected = [homePath('en'), homePath('pl'), ...TOOL_IDS.flatMap((id) => LANGS.map((l) => toolPath(id, l))), '/llms.txt'].map((p) => SITE + p);
+    const expected = [homePath('en'), homePath('pl'), ...TOOL_IDS.flatMap((id) => LANGS.map((l) => toolPath(id, l)))].map((p) => SITE + p);
     expect(locs.sort()).toEqual(expected.sort());
     for (const id of TOOL_IDS) expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="pl" href="${SITE}${toolPath(id, 'pl')}" />`);
   });
