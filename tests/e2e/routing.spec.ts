@@ -71,6 +71,12 @@ test.describe('static tool pages', () => {
     const expected = [homePath('en'), homePath('pl'), ...TOOL_IDS.flatMap((id) => LANGS.map((l) => toolPath(id, l))), ...GUIDES.map((g) => g.path)].map((p) => SITE + p);
     expect(locs.sort()).toEqual(expected.sort());
     for (const id of TOOL_IDS) expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="pl" href="${SITE}${toolPath(id, 'pl')}" />`);
+    expect(GUIDES.map((g) => g.path).sort()).toEqual([
+      '/guides/check-pdf-redaction',
+      '/pl/poradnik/anonimizacja-bip-szkola',
+      '/pl/poradnik/anonimizacja-pdf-rodo',
+      '/pl/poradnik/ocr-i-laczenie-dokumentow-bez-chmury',
+    ]);
     // A guide exists in one language only: no alternates.
     for (const g of GUIDES) expect(xml).toContain(`<url>\n    <loc>${SITE}${g.path}</loc>\n  </url>`);
   });
