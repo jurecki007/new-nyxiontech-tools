@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, Sparkles } from 'lucide-react';
+import { Download, Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, Sparkles } from 'lucide-react';
 import { AboutDialog, type AboutTab } from './AboutDialog';
 import { GithubIcon } from './GithubIcon';
 import { Home } from './Home';
@@ -7,6 +7,7 @@ import { PrivacyIndicator } from './Privacy';
 import { SupportNote } from './SupportNote';
 import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_URL } from '../config';
 import { externalLink, storedIn } from '../lib/desktop';
+import { useInstallPrompt } from '../lib/pwa';
 import { linkTo, useRoute } from '../lib/route';
 import { useUpdates, type AvailableUpdate, type InstallState } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
@@ -19,6 +20,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
   const [about, setAbout] = useState<AboutTab | null>(null);
   const closeAbout = useCallback(() => setAbout(null), []);
   const updates = useUpdates();
+  const install = useInstallPrompt();
   const update = updates.available;
   const utility = route.tool ? getUtility(route.tool) : undefined;
 
@@ -73,6 +75,11 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
             <button onClick={() => setAbout('about')} title={`About ${APP_NAME}`}>
               <Info size={13} /> About
             </button>
+            {install && (
+              <button className="install" onClick={install} title="Install this app to open PDFs from your computer or phone">
+                <Download size={13} /> Install app
+              </button>
+            )}
             <a href={REPO_URL} {...externalLink} title="Source code on GitHub. A star helps other people find it.">
               <GithubIcon size={13} /> Star on GitHub
             </a>

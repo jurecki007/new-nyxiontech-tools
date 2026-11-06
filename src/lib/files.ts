@@ -3,6 +3,8 @@ import { uid } from './doc';
 import { pageCount } from './pdfjs';
 
 export const isPdf = (f: File) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+/** An image that Images to PDF can read (JPG, PNG, WebP, GIF, HEIC). */
+export const isImage = (f: File) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name);
 
 export async function readSources(files: File[]): Promise<Source[]> {
   return Promise.all(

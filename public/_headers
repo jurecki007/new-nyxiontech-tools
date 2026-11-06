@@ -19,6 +19,10 @@
 /version.json
   Cache-Control: no-store
 
+# The installed app's service worker (receives shared files; caches nothing). Always revalidated.
+/sw.js
+  Cache-Control: no-cache
+
 /llms.txt
   Content-Type: text/plain; charset=utf-8
 
