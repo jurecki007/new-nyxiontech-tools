@@ -1,5 +1,6 @@
 // Image decoding/encoding in the browser, shared by the image tools and Images → PDF.
 import { PDFDocument } from 'pdf-lib';
+import { tr } from '../i18n';
 
 export const isHeic = (f: File) => /\.(heic|heif)$/i.test(f.name) || /image\/hei[cf]/.test(f.type);
 
@@ -20,7 +21,7 @@ export async function decodeImage(file: File): Promise<ImageBitmap> {
     if (isHeic(file)) return await decodeHeic(file);
     return await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
-    throw new Error(`Could not read ${file.name} as an image.`);
+    throw new Error(tr().errors.notAnImage(file.name));
   }
 }
 
@@ -51,7 +52,7 @@ export async function encodeImage(bitmap: ImageBitmap, o: EncodeOptions): Promis
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(bitmap, 0, 0, width, height);
   const blob = await new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode image'))), `image/${o.format}`, o.quality),
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(tr().errors.encodeImage))), `image/${o.format}`, o.quality),
   );
   return { blob, width, height };
 }

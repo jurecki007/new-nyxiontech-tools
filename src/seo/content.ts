@@ -146,7 +146,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       h1: 'Wypełnij formularz PDF',
       intro: [
         'Wnioski, oświadczenia i zamówienia często przychodzą jako interaktywne pliki PDF. Otwórz taki plik, a zobaczysz listę wszystkich pól: tekstowych, pól wyboru, przycisków opcji i list rozwijanych. Wpisz odpowiedzi i zapisz wypełnioną kopię.',
-        'Zaznacz „Lock the answers (flatten)”, aby zamienić pola w zwykły tekst na stronie: odbiorca zobaczy dokładnie to, co wpisałeś, i nie da się tego zmienić. Jeśli PDF nie ma pól do wypełnienia, użyj edytora i wpisz tekst bezpośrednio na stronie.',
+        'Zaznacz „Zablokuj odpowiedzi (spłaszcz)”, aby zamienić pola w zwykły tekst na stronie: odbiorca zobaczy dokładnie to, co wpisałeś, i nie da się tego zmienić. Jeśli PDF nie ma pól do wypełnienia, użyj edytora i wpisz tekst bezpośrednio na stronie.',
       ],
       steps: [
         'Upuść formularz PDF; jego pola zostaną odczytane i wyświetlone.',
@@ -195,11 +195,11 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wybierz pozycję i format, a w razie potrzeby zmień czcionkę, rozmiar, margines i kolor.',
-        'Kliknij „Add page numbers” i pobierz ponumerowany PDF.',
+        'Kliknij „Dodaj numery stron” i pobierz ponumerowany PDF.',
       ],
       faq: [
-        ['Czy mogę pominąć okładkę?', 'Tak. Zaznacz „Skip the first page (cover)”; numeracja zacznie się od drugiej strony.'],
-        ['Czy numeracja może zaczynać się od innej liczby niż 1?', 'Tak. Ustaw „Start at” na dowolną liczbę, na przykład gdy PDF to jeden rozdział dłuższego dokumentu.'],
+        ['Czy mogę pominąć okładkę?', 'Tak. Zaznacz „Pomiń pierwszą stronę (okładkę)”; numeracja zacznie się od drugiej strony.'],
+        ['Czy numeracja może zaczynać się od innej liczby niż 1?', 'Tak. Ustaw „Zacznij od” na dowolną liczbę, na przykład gdy PDF to jeden rozdział dłuższego dokumentu.'],
         ['Czy treść dokumentu się zmienia?', 'Nie. Numery są dodawane na wierzchu strony, reszta pozostaje bez zmian.'],
       ],
     },
@@ -239,7 +239,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wpisz tekst znaku wodnego i ustaw jego wygląd oraz układ.',
-        'Kliknij „Add watermark” i pobierz wynik.',
+        'Kliknij „Dodaj znak wodny” i pobierz wynik.',
       ],
       faq: [
         ['Czy mogę wpisać własny tekst?', 'Tak, dowolny, także z polskimi znakami, w jednej z 21 czcionek.'],
@@ -282,8 +282,8 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść PDF; zobaczysz jego obecne właściwości.',
-        'Zmień pola albo kliknij „Clear all fields”.',
-        'Kliknij „Save metadata” i pobierz plik.',
+        'Zmień pola albo kliknij „Wyczyść wszystkie pola”.',
+        'Kliknij „Zapisz metadane” i pobierz plik.',
       ],
       faq: [
         ['Po co usuwać metadane?', 'Pola autora i programu mogą zdradzić Twoje nazwisko, firmę albo używane oprogramowanie. Wyczyszczenie ich przed udostępnieniem dokumentu chroni prywatność.'],
@@ -327,7 +327,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść dwa lub więcej plików PDF albo kliknij, żeby je wybrać.',
         'Przeciągnij pliki w wybranej kolejności.',
-        'Kliknij „Merge” i pobierz połączony PDF albo otwórz go w edytorze.',
+        'Kliknij „Połącz PDF” i pobierz połączony PDF albo otwórz go w edytorze.',
       ],
       faq: [
         ['Czy jest limit plików lub rozmiaru?', 'Nie ma sztucznego limitu. Pliki są przetwarzane w przeglądarce, więc ogranicza je tylko pamięć urządzenia.'],
@@ -370,12 +370,12 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść plik PDF.',
-        'Wybierz „Every page”, „By ranges” lub „Extract pages” i wpisz strony.',
-        'Kliknij „Split PDF” i pobierz pliki albo archiwum zip.',
+        'Wybierz „Każda strona”, „Według zakresów” lub „Wyodrębnij strony” i wpisz strony.',
+        'Kliknij „Podziel PDF” i pobierz pliki albo archiwum zip.',
       ],
       faq: [
         ['Jak wpisać zakresy stron?', 'Oddziel je przecinkami: „1-3, 4-6” daje dwa pliki. Otwarty zakres, np. „7-”, sięga do ostatniej strony.'],
-        ['Jak wyciągnąć kilka stron z PDF?', 'Wybierz „Extract pages” i wypisz strony, np. „2, 5-7”. Trafią do jednego nowego pliku, a oryginał się nie zmieni.'],
+        ['Jak wyciągnąć kilka stron z PDF?', 'Wybierz „Wyodrębnij strony” i wypisz strony, np. „2, 5-7”. Trafią do jednego nowego pliku, a oryginał się nie zmieni.'],
         ['Czy dzielenie obniża jakość?', 'Nie. Strony są kopiowane bez zmian.'],
       ],
     },
@@ -415,11 +415,11 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść jeden lub kilka plików PDF; otworzą się w edytorze z panelem stron.',
         'Przeciągaj miniatury, żeby zmienić kolejność; przyciskami strony obracaj, duplikuj lub usuwaj.',
-        'Przyciskiem „Add PDF pages” wstaw inne pliki, a potem pobierz wynik.',
+        'Przyciskiem „Dodaj strony PDF” wstaw inne pliki, a potem pobierz wynik.',
       ],
       faq: [
         ['Jak usunąć stronę z PDF?', 'Zaznacz stronę w panelu stron i kliknij usuń, a potem pobierz plik. W razie potrzeby cofnij zmianę.'],
-        ['Czy mogę połączyć strony z różnych plików?', 'Tak. Upuść kilka plików naraz albo użyj „Add PDF pages”, żeby wstawić strony z innego pliku.'],
+        ['Czy mogę połączyć strony z różnych plików?', 'Tak. Upuść kilka plików naraz albo użyj „Dodaj strony PDF”, żeby wstawić strony z innego pliku.'],
         ['Czy praca zapisze się po zamknięciu karty?', 'Tak. Dokument zapisuje się automatycznie w przeglądarce i jest widoczny w ostatnich dokumentach.'],
       ],
     },
@@ -459,10 +459,10 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wybierz kąt obrotu oraz to, czy dotyczy wszystkich stron, czy tylko wybranych.',
-        'Kliknij „Rotate” i pobierz PDF.',
+        'Kliknij „Obróć” i pobierz PDF.',
       ],
       faq: [
-        ['Czy mogę obrócić tylko jedną stronę?', 'Tak. Wybierz „Selected” i wpisz numer strony albo kilka stron, np. „2, 5-6”.'],
+        ['Czy mogę obrócić tylko jedną stronę?', 'Tak. Wybierz „Wybrane” i wpisz numer strony albo kilka stron, np. „2, 5-6”.'],
         ['Czy obrót jest trwały?', 'Tak. Zapisuje się w pliku PDF, a nie tylko w przeglądarce.'],
         ['Czy obracanie obniża jakość?', 'Nie. Zmienia się tylko orientacja strony, treść nie jest przetwarzana na nowo.'],
       ],
@@ -497,17 +497,17 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       description: 'Zmniejsz PDF do wysłania e-mailem lub przez formularz, w przeglądarce: bezstratnie albo mocniej (dla skanów). Widać rozmiar przed i po. Za darmo.',
       h1: 'Zmniejsz rozmiar pliku PDF',
       intro: [
-        'Dwa podejścia. Tryb bezstratny (Lossless) zapisuje plik na nowo i zachowuje tekst oraz jakość; oszczędność jest zwykle niewielka. Poziomy Light, Recommended i Strong zamieniają każdą stronę w skompresowany obraz (150, 120 lub 85 dpi), co mocno zmniejsza zeskanowane dokumenty.',
+        'Dwa podejścia. Poziom „Bezstratnie” zapisuje plik na nowo i zachowuje tekst oraz jakość; oszczędność jest zwykle niewielka. Poziomy „Lekko”, „Zalecane” i „Mocno” zamieniają każdą stronę w skompresowany obraz (150, 120 lub 85 dpi), co mocno zmniejsza zeskanowane dokumenty.',
         'Mocniejsze poziomy najlepiej sprawdzają się przy skanach i zdjęciach: po nich tekstu nie da się już zaznaczać ani wyszukiwać. Widzisz rozmiar przed i po, więc jeśli zysk jest mały, możesz zostać przy oryginale.',
       ],
       steps: [
         'Upuść plik PDF.',
-        'Wybierz poziom: Lossless dla dokumentów z tekstem, Recommended lub Strong dla skanów.',
-        'Kliknij „Compress”, porównaj rozmiary i pobierz plik.',
+        'Wybierz poziom: „Bezstratnie” dla dokumentów z tekstem, „Zalecane” lub „Mocno” dla skanów.',
+        'Kliknij „Kompresuj”, porównaj rozmiary i pobierz plik.',
       ],
       faq: [
-        ['Który poziom wybrać?', 'Dla PDF z Worda lub strony internetowej najpierw spróbuj Lossless. Dla skanów i zdjęć dokumentów Recommended zwykle daje najlepszy kompromis między rozmiarem a czytelnością.'],
-        ['Dlaczego po kompresji nie mogę zaznaczyć tekstu?', 'Poziomy Light, Recommended i Strong zamieniają strony w obrazy. Jeśli potrzebujesz tekstu, przepuść wynik przez OCR albo użyj Lossless.'],
+        ['Który poziom wybrać?', 'Dla PDF z Worda lub strony internetowej najpierw spróbuj poziomu „Bezstratnie”. Dla skanów i zdjęć dokumentów poziom „Zalecane” zwykle daje najlepszy kompromis między rozmiarem a czytelnością.'],
+        ['Dlaczego po kompresji nie mogę zaznaczyć tekstu?', 'Poziomy „Lekko”, „Zalecane” i „Mocno” zamieniają strony w obrazy. Jeśli potrzebujesz tekstu, przepuść wynik przez OCR albo użyj poziomu „Bezstratnie”.'],
         ['Plik się nie zmniejszył. Dlaczego?', 'Był już dobrze skompresowany. Spróbuj mocniejszego poziomu albo zostaw oryginał.'],
       ],
     },
@@ -547,7 +547,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść zeskanowany PDF albo kilka zdjęć stron (powstanie z nich jeden PDF w podanej kolejności).',
         'Wybierz język i jakość.',
-        'Kliknij „Recognise text” i pobierz przeszukiwalny PDF albo skopiuj rozpoznany tekst.',
+        'Kliknij „Rozpoznaj tekst” i pobierz przeszukiwalny PDF albo skopiuj rozpoznany tekst.',
       ],
       faq: [
         ['Jakie języki są obsługiwane?', 'Polski i angielski, osobno lub razem.'],
@@ -591,7 +591,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść zdjęcia.',
         'Ułóż je w kolejności i wybierz rozmiar strony, orientację i margines.',
-        'Kliknij „Create PDF” i pobierz plik.',
+        'Kliknij „Utwórz PDF” i pobierz plik.',
       ],
       faq: [
         ['Czy mogę zamienić zdjęcia z iPhone’a (HEIC)?', 'Tak. Zdjęcia HEIC są dekodowane w przeglądarce, bez instalowania aplikacji i bez wysyłania.'],
@@ -635,12 +635,12 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wybierz JPG lub PNG, rozdzielczość i opcjonalnie strony.',
-        'Kliknij „Convert” i pobierz obrazy albo archiwum zip.',
+        'Kliknij „Konwertuj” i pobierz obrazy albo archiwum zip.',
       ],
       faq: [
         ['JPG czy PNG?', 'JPG daje mniejsze pliki i pasuje do zdjęć i skanów. PNG zachowuje idealnie ostry tekst i grafikę, ale pliki są większe.'],
         ['Jaką rozdzielczość wybrać?', '150 dpi wystarcza na ekran i do dokumentów; jeśli obrazy będą drukowane, wybierz 300 dpi.'],
-        ['Czy mogę zamienić tylko jedną stronę?', 'Tak. Wpisz jej numer w polu Pages.'],
+        ['Czy mogę zamienić tylko jedną stronę?', 'Tak. Wpisz jej numer w polu „Strony”.'],
       ],
     },
   },
@@ -678,7 +678,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść plik PDF.',
-        'Kliknij „Extract text”.',
+        'Kliknij „Wyciągnij tekst”.',
         'Skopiuj tekst albo pobierz go jako plik .txt.',
       ],
       faq: [
@@ -722,7 +722,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść plik PDF.',
-        'Kliknij „Convert to Word”.',
+        'Kliknij „Konwertuj na Word”.',
         'Pobierz plik .docx i otwórz go w edytorze tekstu.',
       ],
       faq: [
@@ -766,7 +766,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść plik .docx i sprawdź podgląd.',
-        'Kliknij „Save as PDF…”.',
+        'Kliknij „Zapisz jako PDF” pod podglądem.',
         'W oknie drukowania wybierz drukarkę „Zapisz jako PDF” i zapisz plik.',
       ],
       faq: [
@@ -811,7 +811,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wpisz hasło dwa razy i wybierz uprawnienia.',
-        'Kliknij „Protect PDF” i pobierz zaszyfrowany plik.',
+        'Kliknij „Zabezpiecz PDF” i pobierz zaszyfrowany plik.',
       ],
       faq: [
         ['Jak mocne jest zabezpieczenie?', 'Plik jest szyfrowany AES-256, najmocniejszą metodą dostępną w formacie PDF. Najważniejsze jest długie, unikalne hasło.'],
@@ -855,7 +855,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść zabezpieczony PDF.',
         'Wpisz hasło albo zostaw puste pole, jeśli plik blokuje tylko drukowanie lub kopiowanie.',
-        'Kliknij „Unlock PDF” i pobierz odblokowaną kopię.',
+        'Kliknij „Odblokuj PDF” i pobierz odblokowaną kopię.',
       ],
       faq: [
         ['Czy otworzy PDF, jeśli nie znam hasła?', 'Nie. Usuwa zabezpieczenie tylko z plików, które możesz otworzyć, przy użyciu wpisanego hasła.'],
@@ -899,7 +899,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść plik PDF.',
         'Wyszukaj tekst, zaznacz wzorce albo przeciągnij prostokąty nad obszarami do ukrycia; sprawdź podgląd.',
-        'Kliknij „Redact and save” i pobierz zanonimizowany PDF.',
+        'Kliknij „Anonimizuj i zapisz” i pobierz zanonimizowany PDF.',
       ],
       faq: [
         ['Czy usunięty tekst da się odzyskać?', 'Nie. Strony z zaczernieniami są odtwarzane z obrazu z wtopionymi prostokątami; oryginalnego tekstu, komentarzy i pól formularza z tych stron nie ma w pliku wynikowym.'],
@@ -942,8 +942,8 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Wybierz oryginalny PDF i zmieniony PDF.',
-        'Kliknij „Compare”.',
-        'Przełączaj „Text changes” i „Visual changes”, żeby przejrzeć każdą stronę.',
+        'Kliknij „Porównaj”.',
+        'Przełączaj „Zmiany w tekście” i „Zmiany wizualne”, żeby przejrzeć każdą stronę.',
       ],
       faq: [
         ['Czy działa ze skanami?', 'Porównanie wizualne tak. Porównanie tekstu wymaga tekstu w PDF; skany najpierw przepuść przez OCR.'],
@@ -987,7 +987,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść zdjęcia.',
         'Wybierz JPG, WebP lub PNG, jakość i maksymalny rozmiar, jeśli chcesz zmniejszyć wymiary.',
-        'Kliknij „Convert” i pobierz zdjęcia albo archiwum zip.',
+        'Kliknij „Konwertuj” i pobierz zdjęcia albo archiwum zip.',
       ],
       faq: [
         ['Jaką jakość wybrać?', '70–85% zwykle nie różni się wizualnie od oryginału, a plik jest dużo mniejszy.'],
@@ -1030,8 +1030,8 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       ],
       steps: [
         'Upuść jedno lub kilka zdjęć (JPG, PNG, WebP lub HEIC).',
-        'Wybierz „AI: photos” albo „Plain colour: logos, scans” oraz tło przezroczyste lub kolorowe.',
-        'Kliknij „Remove background” i pobierz pliki PNG.',
+        'Wybierz „AI: zdjęcia” albo „Jednolity kolor: logo, skany” oraz tło przezroczyste lub kolorowe.',
+        'Kliknij „Usuń tło” i pobierz pliki PNG.',
       ],
       faq: [
         ['Czy zdjęcia trafiają do jakiejś usługi AI?', 'Nie. Model działa w przeglądarce na Twoim urządzeniu; zdjęcia go nie opuszczają.'],
@@ -1075,7 +1075,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
       steps: [
         'Upuść zdjęcia HEIC.',
         'Zostaw JPG albo zmień jakość i maksymalny rozmiar.',
-        'Kliknij „Convert” i pobierz pliki JPG albo archiwum zip.',
+        'Kliknij „Konwertuj” i pobierz pliki JPG albo archiwum zip.',
       ],
       faq: [
         ['Czy muszę coś instalować?', 'Nie. Dekoder HEIC działa w przeglądarce.'],
@@ -1117,7 +1117,7 @@ export const TOOL_PAGES: Record<ToolId, ToolPage> = {
         'Kody są statyczne: treść jest zapisana w samym kodzie, a nie za przekierowaniem. Nigdy nie wygasają i nikt nie śledzi, kto je skanuje.',
       ],
       steps: [
-        'Wybierz typ: Link, Wi-Fi, Contact, E-mail lub Text.',
+        'Wybierz typ: Link, Wi-Fi, Kontakt, E-mail lub Tekst.',
         'Wypełnij pola i w razie potrzeby zmień wygląd.',
         'Pobierz kod jako PNG lub SVG.',
       ],
@@ -1182,7 +1182,7 @@ export const HOME_PL = {
   h1: 'Narzędzia PDF Nyxiontech',
   intro: [
     'Darmowe narzędzia do PDF i zdjęć, które działają w całości w przeglądarce. Pliki nigdy nie są wysyłane na serwer: nie ma konta, śledzenia ani limitów. Projekt jest otwartoźródłowy (AGPL-3.0) i dostępny także jako aplikacja na Windows, która działa bez internetu.',
-    'Interfejs aplikacji jest po angielsku, ale wszystkie narzędzia obsługują polskie znaki, a OCR rozpoznaje tekst po polsku.',
+    'Aplikacja ma polski interfejs, wszystkie narzędzia obsługują polskie znaki, a OCR rozpoznaje tekst po polsku.',
   ],
   faq: [
     ['Czy moje pliki są wysyłane?', 'Nie. Każde narzędzie działa w przeglądarce na Twoim urządzeniu, więc pliki go nie opuszczają. Nie ma konta ani śledzenia.'],

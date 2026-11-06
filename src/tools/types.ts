@@ -2,27 +2,25 @@ import type { Dispatch, FC, ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { HistoryAction } from '../lib/doc';
 import type { Annot, PageRef } from '../types';
+import type { Messages } from '../i18n/en';
 
 export type Point = { x: number; y: number };
 export type Size = { w: number; h: number };
 
 export type ToolGroup = 'general' | 'annotate' | 'insert';
 
-export const TOOL_GROUPS: { id: ToolGroup; label: string }[] = [
-  { id: 'general', label: 'General' },
-  { id: 'annotate', label: 'Annotate' },
-  { id: 'insert', label: 'Insert' },
-];
+/** Sidebar sections, in order. Their names are in the dictionaries (src/i18n, `editor.groups`). */
+export const TOOL_GROUPS: { id: ToolGroup }[] = [{ id: 'general' }, { id: 'annotate' }, { id: 'insert' }];
+
+/** Every editor tool. Each has a name and a hint in the dictionaries (src/i18n, `editor.tools`). */
+export type EditorToolId = keyof Messages['editor']['tools'];
 
 interface ToolBase {
-  id: string;
-  label: string;
+  id: EditorToolId;
   icon: LucideIcon;
   group: ToolGroup;
   /** Single key, shown in the sidebar and handled by the editor. */
   shortcut?: string;
-  /** One-line explanation shown under the tool options. */
-  hint?: string;
 }
 
 /** Everything a mode tool may use while handling a pointer on a page. */

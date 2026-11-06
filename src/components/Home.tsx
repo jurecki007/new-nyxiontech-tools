@@ -2,31 +2,32 @@ import { useEffect, useState } from 'react';
 import { Copy, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { Thumb } from './Thumb';
 import { pickFiles } from '../lib/files';
-import { storedFrom, storedIn } from '../lib/desktop';
 import { linkTo } from '../lib/route';
 import { loadFonts } from '../lib/fonts';
 import { usePageInfos, pageKey } from '../lib/hooks';
 import { clearProjects, deleteProject, listProjects, saveProject } from '../lib/storage';
 import { UTILITIES, UTILITY_GROUPS, type UtilityContext } from '../utilities';
 import type { Project } from '../types';
+import { storedFrom, storedIn, useLang, useT, type Messages } from '../i18n';
 
-function timeAgo(t: number) {
-  const s = (Date.now() - t) / 1000;
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
-  return new Date(t).toLocaleDateString();
+function timeAgo(time: number, t: Messages, lang: string) {
+  const s = (Date.now() - time) / 1000;
+  if (s < 60) return t.home.justNow;
+  if (s < 3600) return t.home.minutesAgo(Math.floor(s / 60));
+  if (s < 86400) return t.home.hoursAgo(Math.floor(s / 3600));
+  return new Date(time).toLocaleDateString(lang);
 }
 
 export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProject: (p: Project) => void }) {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const t = useT();
 
   const refresh = () => void listProjects().then(setProjects, () => setProjects([]));
   useEffect(refresh, []);
 
   async function duplicate(p: Project) {
-    const copy: Project = { ...p, id: crypto.randomUUID(), name: `${p.name} (copy)`, createdAt: Date.now(), updatedAt: Date.now() };
+    const copy: Project = { ...p, id: crypto.randomUUID(), name: t.home.copyName(p.name), createdAt: Date.now(), updatedAt: Date.now() };
     await saveProject(copy);
     refresh();
   }
@@ -35,8 +36,8 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
     <div className="home">
       <header className="home-header">
         <div>
-          <h1>Dashboard</h1>
-          <p className="muted">Everything runs {storedIn}: no uploads, no accounts, no limits.</p>
+          <h1>{t.home.title}</h1>
+          <p className="muted">{t.home.subtitle(storedIn(t))}</p>
         </div>
       </header>
 
@@ -56,19 +57,19 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
       >
         <Upload size={30} />
         <div>
-          <h2>Open PDF in the editor</h2>
-          <p className="muted">Drop files here or click to choose. Several files are merged into one document.</p>
+          <h2>{t.home.openTitle}</h2>
+          <p className="muted">{t.home.openHint}</p>
         </div>
       </section>
 
       <section className="tool-grid-section">
-        <h3>Tools</h3>
+        <h3>{t.home.tools}</h3>
         {UTILITY_GROUPS.map((g) => {
           const items = UTILITIES.filter((u) => u.group === g.id);
           if (!items.length) return null;
           return (
             <div key={g.id} className="tool-grid-group">
-              <div className="tool-grid-label">{g.label}</div>
+              <div className="tool-grid-label">{t.groups[g.id]}</div>
               <div className="tool-grid">
                 {items.map((u) => (
                   <a key={u.id} className="tool-card" {...linkTo(u.id)}>
@@ -76,8 +77,8 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
                       <u.icon size={20} />
                     </span>
                     <span>
-                      <b>{u.label}</b>
-                      <span className="muted">{u.description}</span>
+                      <b>{t.tools[u.id].label}</b>
+                      <span className="muted">{t.tools[u.id].description}</span>
                     </span>
                   </a>
                 ))}
@@ -90,23 +91,23 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
       <section className="recent">
         <div className="recent-head">
           <h3>
-            Recent documents {projects && projects.length > 0 && <span className="count">{projects.length}</span>}
+            {t.home.recent} {projects && projects.length > 0 && <span className="count">{projects.length}</span>}
           </h3>
           {projects && projects.length > 0 && (
             <button
               className="btn ghost danger"
               onClick={() => {
-                if (confirm(`Delete all ${projects.length} documents ${storedFrom}? This cannot be undone.`)) void clearProjects().then(refresh);
+                if (confirm(t.home.confirmClearAll(projects.length, storedFrom(t)))) void clearProjects().then(refresh);
               }}
             >
-              <Trash2 size={15} /> Clear all documents
+              <Trash2 size={15} /> {t.home.clearAll}
             </button>
           )}
         </div>
         {projects === null ? (
-          <p className="muted">Loading…</p>
+          <p className="muted">{t.common.loading}</p>
         ) : projects.length === 0 ? (
-          <p className="muted">Nothing here yet. Open a PDF to start; your work is saved automatically.</p>
+          <p className="muted">{t.home.empty}</p>
         ) : (
           <div className="cards">
             {projects.map((p) => (
@@ -116,7 +117,7 @@ export function Home({ ctx, onOpenProject }: { ctx: UtilityContext; onOpenProjec
                 onOpen={() => onOpenProject(p)}
                 onDuplicate={() => void duplicate(p)}
                 onDelete={() => {
-                  if (confirm(`Delete “${p.name}” ${storedFrom}?`)) void deleteProject(p.id).then(refresh);
+                  if (confirm(t.home.confirmDelete(p.name, storedFrom(t)))) void deleteProject(p.id).then(refresh);
                 }}
               />
             ))}
@@ -143,6 +144,8 @@ function ProjectCard({
   const info = first && infos[pageKey(first)];
   const source = first && p.sources.find((s) => s.id === first.sourceId);
   const edits = p.doc.annots.length;
+  const t = useT();
+  const lang = useLang();
 
   // Register the fonts used by the thumbnail's text; the browser repaints once they load.
   useEffect(() => {
@@ -161,17 +164,17 @@ function ProjectCard({
       <div className="card-body">
         <b title={p.name}>{p.name}</b>
         <span className="muted">
-          {p.doc.pages.length} {p.doc.pages.length === 1 ? 'page' : 'pages'} · {edits} {edits === 1 ? 'edit' : 'edits'} · {timeAgo(p.updatedAt)}
+          {t.common.pages(p.doc.pages.length)} · {t.home.edits(edits)} · {timeAgo(p.updatedAt, t, lang)}
         </span>
       </div>
       <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-        <button className="icon-btn" title="Open" onClick={onOpen}>
+        <button className="icon-btn" title={t.home.open} onClick={onOpen}>
           <FolderOpen size={16} />
         </button>
-        <button className="icon-btn" title="Duplicate" onClick={onDuplicate}>
+        <button className="icon-btn" title={t.home.duplicate} onClick={onDuplicate}>
           <Copy size={16} />
         </button>
-        <button className="icon-btn danger" title="Delete" onClick={onDelete}>
+        <button className="icon-btn danger" title={t.home.delete} onClick={onDelete}>
           <Trash2 size={16} />
         </button>
       </div>

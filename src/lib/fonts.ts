@@ -18,12 +18,8 @@ export interface FontDef {
   faces: Partial<Record<Face, string>> & { regular: string };
 }
 
-export const FONT_CATEGORIES: { id: FontDef['category']; label: string }[] = [
-  { id: 'sans', label: 'Sans-serif' },
-  { id: 'serif', label: 'Serif' },
-  { id: 'mono', label: 'Monospace' },
-  { id: 'script', label: 'Handwriting' },
-];
+/** Font menu sections, in order. Their names are in the dictionaries (src/i18n, `editor.fontCategories`). */
+export const FONT_CATEGORIES: { id: FontDef['category'] }[] = [{ id: 'sans' }, { id: 'serif' }, { id: 'mono' }, { id: 'script' }];
 
 export const FONTS = FONT_LIST;
 

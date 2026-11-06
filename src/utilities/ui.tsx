@@ -4,8 +4,10 @@ import { ArrowDown, ArrowUp, Download, FileArchive, FilePenLine, Upload, X } fro
 import { downloadBlob, formatBytes, zipFiles } from '../lib/zip';
 import { pageCountOf } from '../lib/pdfTools';
 import type { Utility, UtilityContext } from './types';
+import { useT } from '../i18n';
 
 export function ToolPage({ utility, children }: { utility: Utility; children: ReactNode }) {
+  const text = useT().tools[utility.id];
   return (
     <div className="tool-page">
       <header className="tool-page-head">
@@ -13,8 +15,8 @@ export function ToolPage({ utility, children }: { utility: Utility; children: Re
           <utility.icon size={22} />
         </div>
         <div>
-          <h1>{utility.label}</h1>
-          <p className="muted">{utility.description}</p>
+          <h1>{text.label}</h1>
+          <p className="muted">{text.description}</p>
         </div>
       </header>
       {children}
@@ -88,6 +90,7 @@ export function FileList({
   reorderable?: boolean;
   extra?: (file: File) => ReactNode;
 }) {
+  const t = useT();
   const move = (i: number, d: number) => {
     const next = [...files];
     [next[i], next[i + d]] = [next[i + d], next[i]];
@@ -105,15 +108,15 @@ export function FileList({
           <span className="muted file-size">{formatBytes(f.size)}</span>
           {reorderable && (
             <>
-              <button className="icon-btn" title="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+              <button className="icon-btn" title={t.ui.moveUp} disabled={i === 0} onClick={() => move(i, -1)}>
                 <ArrowUp size={15} />
               </button>
-              <button className="icon-btn" title="Move down" disabled={i === files.length - 1} onClick={() => move(i, 1)}>
+              <button className="icon-btn" title={t.ui.moveDown} disabled={i === files.length - 1} onClick={() => move(i, 1)}>
                 <ArrowDown size={15} />
               </button>
             </>
           )}
-          <button className="icon-btn danger" title="Remove" onClick={() => onChange(files.filter((_, j) => j !== i))}>
+          <button className="icon-btn danger" title={t.common.remove} onClick={() => onChange(files.filter((_, j) => j !== i))}>
             <X size={15} />
           </button>
         </li>
@@ -139,31 +142,30 @@ export function Results({
   ctx?: UtilityContext;
   note?: ReactNode;
 }) {
+  const t = useT();
   if (!files.length) return null;
   const pdfs = files.filter((f) => f.blob.type === 'application/pdf');
   return (
     <section className="results">
       <div className="results-head">
-        <b>
-          Done: {files.length} {files.length === 1 ? 'file' : 'files'}
-        </b>
+        <b>{t.ui.done(t.common.files(files.length))}</b>
         <span className="spacer" />
         {ctx && pdfs.length > 0 && (
           <button
             className="btn ghost"
             onClick={() => ctx.openInEditor(pdfs.map((f) => new File([f.blob], f.name, { type: 'application/pdf' })))}
           >
-            <FilePenLine size={16} /> Open in editor
+            <FilePenLine size={16} /> {t.ui.openInEditor}
           </button>
         )}
         {files.length > 1 && (
           <button className="btn ghost" onClick={() => void zipFiles(files).then((zip) => downloadBlob(zip, zipName))}>
-            <FileArchive size={16} /> Download all (.zip)
+            <FileArchive size={16} /> {t.ui.downloadAll}
           </button>
         )}
         {files.length === 1 && (
           <button className="btn primary" onClick={() => downloadBlob(files[0].blob, files[0].name)}>
-            <Download size={16} /> Download
+            <Download size={16} /> {t.common.download}
           </button>
         )}
       </div>
@@ -176,7 +178,7 @@ export function Results({
                 {f.name}
               </span>
               <span className="muted file-size">{formatBytes(f.blob.size)}</span>
-              <button className="icon-btn" title="Download" onClick={() => downloadBlob(f.blob, f.name)}>
+              <button className="icon-btn" title={t.common.download} onClick={() => downloadBlob(f.blob, f.name)}>
                 <Download size={15} />
               </button>
             </li>
@@ -225,10 +227,11 @@ export function RunBar({
   progress: { done: number; total: number } | null;
   error: string | null;
 }) {
+  const t = useT();
   return (
     <div className="run-bar">
       <button className="btn primary big" disabled={busy || disabled} onClick={onRun}>
-        {busy ? 'Working…' : label}
+        {busy ? t.common.working : label}
       </button>
       {busy && progress && (
         <div className="progress">
@@ -315,8 +318,10 @@ export function useSinglePdf() {
 }
 
 /** Standard "pick one PDF" block with the file name, page count and a change button. */
-export function SinglePdfInput({ pdf, title = 'Choose a PDF' }: { pdf: ReturnType<typeof useSinglePdf>; title?: string }) {
-  if (!pdf.file) return <FileDrop accept="application/pdf,.pdf" multiple={false} onFiles={([f]) => pdf.setFile(f)} title={title} hint="or drop it here" />;
+export function SinglePdfInput({ pdf, title }: { pdf: ReturnType<typeof useSinglePdf>; title?: string }) {
+  const t = useT();
+  if (!pdf.file)
+    return <FileDrop accept="application/pdf,.pdf" multiple={false} onFiles={([f]) => pdf.setFile(f)} title={title ?? t.common.chooseAPdf} hint={t.common.orDropItHere} />;
   return (
     <div className="single-file">
       <span className="file-name" title={pdf.file.name}>
@@ -324,11 +329,11 @@ export function SinglePdfInput({ pdf, title = 'Choose a PDF' }: { pdf: ReturnTyp
       </span>
       <span className="muted">
         {formatBytes(pdf.file.size)}
-        {pdf.pages !== null && ` · ${pdf.pages} ${pdf.pages === 1 ? 'page' : 'pages'}`}
+        {pdf.pages !== null && ` · ${t.common.pages(pdf.pages)}`}
       </span>
       <span className="spacer" />
       <button className="btn ghost" onClick={() => pdf.setFile(null)}>
-        Change file
+        {t.common.changeFile}
       </button>
       {pdf.error && <p className="error-text full">{pdf.error}</p>}
     </div>

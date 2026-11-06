@@ -25,6 +25,42 @@
   margin-left: 8px;
   letter-spacing: 0.08em;
 }
+.nav-version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* EN / PL: links to the same page in the other language (buttons in the desktop app). */
+.lang-switch {
+  display: inline-flex;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lang-switch a,
+.lang-switch button {
+  padding: 3px 7px;
+  border: none;
+  background: none;
+  color: #9aa1ad;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
+}
+.lang-switch a:hover,
+.lang-switch button:hover {
+  color: #fff;
+}
+.lang-switch .on {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
 .nav-search {
   display: flex;
   align-items: center;
@@ -195,6 +231,10 @@
   }
   .nav-links {
     flex-wrap: nowrap;
+  }
+  /* The language switch comes first in that row, so it is visible without scrolling. */
+  .nav-version-row {
+    order: -1;
   }
   .nav-item {
     white-space: nowrap;

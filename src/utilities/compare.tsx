@@ -5,26 +5,26 @@ import { closePdf, openPdf } from '../lib/pdfjs';
 import { formatBytes } from '../lib/zip';
 import { FileDrop, Option, RunBar, Segmented, ToolPage, useTask } from './ui';
 import type { Utility } from './types';
+import { useT } from '../i18n';
 
 function PickOne({ label, file, onFile }: { label: string; file: File | null; onFile: (f: File | null) => void }) {
+  const t = useT();
   return file ? (
     <div className="single-file">
       <span className="badge">{label}</span>
       <span className="file-name">{file.name}</span>
       <span className="muted">{formatBytes(file.size)}</span>
       <button className="btn ghost" onClick={() => onFile(null)}>
-        Change
+        {t.common.change}
       </button>
     </div>
   ) : (
-    <FileDrop accept="application/pdf,.pdf" multiple={false} compact onFiles={([f]) => onFile(f)} title={`${label}: choose a PDF`} />
+    <FileDrop accept="application/pdf,.pdf" multiple={false} compact onFiles={([f]) => onFile(f)} title={t.compare.choose(label)} />
   );
 }
 
 export const compareUtility: Utility = {
   id: 'compare',
-  label: 'Compare PDFs',
-  description: 'Spot the differences between two versions of a document: changed text and changed areas on each page.',
   icon: GitCompareArrows,
   group: 'review',
   Component: function Compare() {
@@ -34,16 +34,17 @@ export const compareUtility: Utility = {
     const [text, setText] = useState<DiffLine[][] | null>(null);
     const [pages, setPages] = useState<PageVisualDiff[] | null>(null);
     const task = useTask();
+    const t = useT().compare;
 
     const changedText = text?.reduce((n, p) => n + p.filter((l) => l.kind !== 'same').length, 0) ?? 0;
     const changedPages = pages?.filter(pageChanged) ?? [];
 
     return (
       <ToolPage utility={compareUtility}>
-        <PickOne label="Original" file={a} onFile={setA} />
-        <PickOne label="Changed" file={b} onFile={setB} />
+        <PickOne label={t.original} file={a} onFile={setA} />
+        <PickOne label={t.changed} file={b} onFile={setB} />
         <RunBar
-          label="Compare"
+          label={t.run}
           disabled={!a || !b}
           {...task}
           onRun={() =>
@@ -71,23 +72,23 @@ export const compareUtility: Utility = {
             <div className="results-head">
               <b>
                 {changedText === 0 && changedPages.length === 0
-                  ? 'No differences found.'
-                  : `${changedText} changed ${changedText === 1 ? 'line' : 'lines'}; ${changedPages.length} of ${pages.length} pages look different.`}
+                  ? t.noDifferences
+                  : t.summary(changedText, changedPages.length, pages.length)}
               </b>
               <span className="spacer" />
               <Segmented<'text' | 'visual'>
                 value={view}
                 onChange={setView}
                 options={[
-                  { value: 'text', label: 'Text changes' },
-                  { value: 'visual', label: 'Visual changes' },
+                  { value: 'text', label: t.textChanges },
+                  { value: 'visual', label: t.visualChanges },
                 ]}
               />
             </div>
             {view === 'text' &&
               text.map((lines, i) =>
                 lines.some((l) => l.kind !== 'same') ? (
-                  <Option key={i} label={`Page ${i + 1}`}>
+                  <Option key={i} label={t.page(i + 1)}>
                     <div className="diff">
                       {lines.map((l, j) =>
                         l.kind === 'same' ? null : (
@@ -104,16 +105,16 @@ export const compareUtility: Utility = {
             {view === 'visual' && (
               <>
                 <p className="hint">
-                  <span className="legend red" /> only in the original <span className="legend green" /> only in the changed version
+                  <span className="legend red" /> {t.onlyInOriginal} <span className="legend green" /> {t.onlyInChanged}
                 </p>
                 <div className="redact-pages">
                   {pages.map((p) => (
                     <div key={p.page} className="redact-page">
                       <div className="muted">
-                        Page {p.page}
-                        {p.missingIn ? ` · only in the ${p.missingIn === 'a' ? 'changed' : 'original'} file` : pageChanged(p) ? ' · changed' : ' · no visible change'}
+                        {t.page(p.page)}
+                        {p.missingIn ? t.onlyInFile(p.missingIn === 'a' ? 'changed' : 'original') : pageChanged(p) ? t.pageChanged : t.noChange}
                       </div>
-                      <img className="diff-image" src={p.image} alt={`Differences on page ${p.page}`} />
+                      <img className="diff-image" src={p.image} alt={t.imageAlt(p.page)} />
                     </div>
                   ))}
                 </div>

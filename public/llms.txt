@@ -2,7 +2,7 @@
 
 > Free, open-source PDF and image tools that run entirely in the browser. Files are never uploaded: there is no server-side processing, no account, no tracking and no file limits. Made by Nyxiontech (https://nyxiontech.com), licensed AGPL-3.0. Also available as a Windows desktop app.
 
-Use it at https://tools.nyxiontech.com. Each tool has its own page, listed below; the page opens the tool. Polish versions of every page are under https://tools.nyxiontech.com/pl/ (the app itself is in English).
+Use it at https://tools.nyxiontech.com. Each tool has its own page, listed below; the page opens the tool. Polish versions of every page are under https://tools.nyxiontech.com/pl/, where the app's interface is in Polish.
 
 ## Tools
 

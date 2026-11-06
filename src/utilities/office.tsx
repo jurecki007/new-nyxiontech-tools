@@ -5,26 +5,26 @@ import { baseName } from '../lib/pdfTools';
 import { formatBytes } from '../lib/zip';
 import { FileDrop, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { useT } from '../i18n';
 
 export const pdfToWordUtility: Utility = {
   id: 'pdf-to-word',
-  label: 'PDF to Word',
-  description: 'Turn a PDF into an editable .docx with its text and paragraphs (basic layout).',
   icon: FileType2,
   group: 'convert',
   Component: function PdfToWord() {
     const pdf = useSinglePdf();
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().pdfToWord;
     return (
       <ToolPage utility={pdfToWordUtility}>
         <SinglePdfInput pdf={pdf} />
         <ul className="tips">
-          <li>Text, paragraphs, bold and font sizes are kept; tables, columns and images are not.</li>
-          <li>Scanned PDFs have no text: run them through OCR first.</li>
+          <li>{t.tipKept}</li>
+          <li>{t.tipScans}</li>
         </ul>
         <RunBar
-          label="Convert to Word"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>
@@ -42,8 +42,6 @@ export const pdfToWordUtility: Utility = {
 
 export const wordToPdfUtility: Utility = {
   id: 'word-to-pdf',
-  label: 'Word to PDF',
-  description: 'Open a .docx and save it as a PDF through the print dialog (basic layout).',
   icon: Printer,
   group: 'convert',
   Component: function WordToPdf() {
@@ -51,6 +49,8 @@ export const wordToPdfUtility: Utility = {
     const [html, setHtml] = useState<string | null>(null);
     const [warnings, setWarnings] = useState<string[]>([]);
     const task = useTask();
+    const all = useT();
+    const t = all.wordToPdf;
 
     const load = (f: File) => {
       setFile(f);
@@ -79,22 +79,22 @@ export const wordToPdfUtility: Utility = {
                 task.setError(null);
               }}
             >
-              Change file
+              {all.common.changeFile}
             </button>
           </div>
         ) : (
-          <FileDrop accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple={false} onFiles={([f]) => load(f)} title="Choose a Word document (.docx)" hint="Older .doc files: save them as .docx in Word first" />
+          <FileDrop accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple={false} onFiles={([f]) => load(f)} title={t.choose} hint={t.chooseHint} />
         )}
         {task.error && <p className="error-text">{task.error}</p>}
         {html !== null && (
           <>
             <div className="run-bar">
               <button className="btn primary big" onClick={() => printHtml(html, baseName(file!.name))}>
-                <Printer size={18} /> Save as PDF…
+                <Printer size={18} /> {t.save}
               </button>
-              <span className="hint">In the print dialog, choose “Save as PDF” (or “Microsoft Print to PDF”) as the printer.</span>
+              <span className="hint">{t.printHint}</span>
             </div>
-            {warnings.length > 0 && <p className="hint">Some formatting could not be converted ({warnings.length} notes), for example custom styles.</p>}
+            {warnings.length > 0 && <p className="hint">{t.warnings(warnings.length)}</p>}
             <div className="doc-preview" dangerouslySetInnerHTML={{ __html: html }} />
           </>
         )}

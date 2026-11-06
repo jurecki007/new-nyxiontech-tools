@@ -5,6 +5,7 @@ import { ColorField, NumberField } from '../components/fields';
 import { downloadBlob } from '../lib/zip';
 import { Option, Segmented, ToolPage } from './ui';
 import type { Utility } from './types';
+import { useT, type Messages } from '../i18n';
 
 type Kind = 'url' | 'text' | 'wifi' | 'contact' | 'email';
 type Level = 'L' | 'M' | 'Q' | 'H';
@@ -39,33 +40,19 @@ function payload(kind: Kind, f: Record<string, string>): string {
   }
 }
 
-const FIELDS: Record<Kind, { key: string; label: string; type?: string; options?: string[] }[]> = {
-  url: [{ key: 'url', label: 'Link' }],
-  text: [{ key: 'text', label: 'Text', type: 'textarea' }],
-  wifi: [
-    { key: 'ssid', label: 'Network name' },
-    { key: 'password', label: 'Password' },
-    { key: 'security', label: 'Security', options: ['WPA', 'WEP', 'nopass'] },
-    { key: 'hidden', label: 'Hidden network', options: ['no', 'yes'] },
-  ],
-  email: [
-    { key: 'to', label: 'To' },
-    { key: 'subject', label: 'Subject' },
-    { key: 'body', label: 'Message', type: 'textarea' },
-  ],
-  contact: [
-    { key: 'name', label: 'Full name' },
-    { key: 'org', label: 'Company' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'email', label: 'E-mail' },
-    { key: 'website', label: 'Website' },
-  ],
+type FieldKey = keyof Messages['qr']['fields'];
+
+/** The form for each kind of code. Field names are in the dictionaries (src/i18n, `qr.fields`). */
+const FIELDS: Record<Kind, { key: FieldKey; type?: string; options?: string[] }[]> = {
+  url: [{ key: 'url' }],
+  text: [{ key: 'text', type: 'textarea' }],
+  wifi: [{ key: 'ssid' }, { key: 'password' }, { key: 'security', options: ['WPA', 'WEP', 'nopass'] }, { key: 'hidden', options: ['no', 'yes'] }],
+  email: [{ key: 'to' }, { key: 'subject' }, { key: 'body', type: 'textarea' }],
+  contact: [{ key: 'name' }, { key: 'org' }, { key: 'phone' }, { key: 'email' }, { key: 'website' }],
 };
 
 export const qrUtility: Utility = {
   id: 'qr',
-  label: 'QR code generator',
-  description: 'Make QR codes for links, Wi-Fi, contact cards, e-mails or text. No tracking, no expiry.',
   icon: QrCode,
   group: 'other',
   Component: function Qr() {
@@ -78,6 +65,8 @@ export const qrUtility: Utility = {
     const [level, setLevel] = useState<Level>('M');
     const [svg, setSvg] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const t = useT().qr;
+    const optionLabel = (o: string) => (o === 'nopass' ? t.noPassword : o === 'no' ? t.no : o === 'yes' ? t.yes : o);
 
     const data = useMemo(() => payload(kind, fields), [kind, fields]);
     const opts = { errorCorrectionLevel: level, margin, color: { dark: fg, light: bg } };
@@ -106,23 +95,23 @@ export const qrUtility: Utility = {
       <ToolPage utility={qrUtility}>
         <div className="qr-layout">
           <div className="qr-form">
-            <Option label="Type">
+            <Option label={t.type}>
               <Segmented<Kind>
                 value={kind}
                 onChange={setKind}
                 options={[
-                  { value: 'url', label: 'Link' },
-                  { value: 'wifi', label: 'Wi-Fi' },
-                  { value: 'contact', label: 'Contact' },
-                  { value: 'email', label: 'E-mail' },
-                  { value: 'text', label: 'Text' },
+                  { value: 'url', label: t.kinds.url },
+                  { value: 'wifi', label: t.kinds.wifi },
+                  { value: 'contact', label: t.kinds.contact },
+                  { value: 'email', label: t.kinds.email },
+                  { value: 'text', label: t.kinds.text },
                 ]}
               />
             </Option>
             {FIELDS[kind].map((f) => (
-              <Option key={f.key} label={f.label}>
+              <Option key={f.key} label={t.fields[f.key]}>
                 {f.options ? (
-                  <Segmented<string> value={fields[f.key] ?? f.options[0]} onChange={(v) => setFields({ ...fields, [f.key]: v })} options={f.options.map((o) => ({ value: o, label: o === 'nopass' ? 'none' : o }))} />
+                  <Segmented<string> value={fields[f.key] ?? f.options[0]} onChange={(v) => setFields({ ...fields, [f.key]: v })} options={f.options.map((o) => ({ value: o, label: optionLabel(o) }))} />
                 ) : f.type === 'textarea' ? (
                   <textarea className="text-field" rows={3} value={fields[f.key] ?? ''} onChange={(e) => setFields({ ...fields, [f.key]: e.target.value })} />
                 ) : (
@@ -130,41 +119,41 @@ export const qrUtility: Utility = {
                 )}
               </Option>
             ))}
-            <Option label="Style">
+            <Option label={t.style}>
               <div className="option-row">
-                <ColorField label="Code" value={fg} onChange={setFg} />
-                <ColorField label="Background" value={bg} onChange={setBg} />
-                <NumberField label="Quiet zone" value={margin} min={0} onChange={(n) => setMargin(Math.round(n))} />
+                <ColorField label={t.code} value={fg} onChange={setFg} />
+                <ColorField label={t.background} value={bg} onChange={setBg} />
+                <NumberField label={t.quietZone} value={margin} min={0} onChange={(n) => setMargin(Math.round(n))} />
               </div>
             </Option>
-            <Option label="Error correction" hint="Higher levels still scan when part of the code is damaged or covered by a logo, but make it denser.">
+            <Option label={t.errorCorrection} hint={t.errorCorrectionHint}>
               <Segmented<Level>
                 value={level}
                 onChange={setLevel}
                 options={[
-                  { value: 'L', label: 'Low' },
-                  { value: 'M', label: 'Medium' },
-                  { value: 'Q', label: 'High' },
-                  { value: 'H', label: 'Max' },
+                  { value: 'L', label: t.low },
+                  { value: 'M', label: t.medium },
+                  { value: 'Q', label: t.high },
+                  { value: 'H', label: t.max },
                 ]}
               />
             </Option>
           </div>
           <div className="qr-preview">
-            {svg ? <div className="qr-image" dangerouslySetInnerHTML={{ __html: svg }} /> : <div className="qr-image empty">Fill in the form</div>}
+            {svg ? <div className="qr-image" dangerouslySetInnerHTML={{ __html: svg }} /> : <div className="qr-image empty">{t.empty}</div>}
             {error && <p className="error-text">{error}</p>}
             <div className="option-row">
-              <NumberField label="PNG size (px)" value={size} min={64} step={64} onChange={(n) => setSize(Math.round(n))} />
+              <NumberField label={t.pngSize} value={size} min={64} step={64} onChange={(n) => setSize(Math.round(n))} />
             </div>
             <div className="row">
               <button className="btn primary" disabled={!svg} onClick={() => void downloadPng()}>
-                Download PNG
+                {t.downloadPng}
               </button>
               <button className="btn ghost" disabled={!svg} onClick={() => downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), 'qr-code.svg')}>
-                Download SVG
+                {t.downloadSvg}
               </button>
             </div>
-            <p className="hint">SVG scales to any size without blur, which is best for print.</p>
+            <p className="hint">{t.svgHint}</p>
           </div>
         </div>
       </ToolPage>

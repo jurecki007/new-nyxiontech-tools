@@ -5,6 +5,7 @@ import { baseName, extractText, parsePageRanges, pdfBlob, pdfToImages, rasterize
 import { downloadBlob, formatBytes } from '../lib/zip';
 import { FileDrop, FileList, Option, Results, RunBar, Segmented, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { useLang, useT } from '../i18n';
 
 type CompressLevel = 'lossless' | 'light' | 'recommended' | 'strong';
 
@@ -16,8 +17,6 @@ const LEVELS: Record<Exclude<CompressLevel, 'lossless'>, { dpi: number; quality:
 
 export const compressUtility: Utility = {
   id: 'compress',
-  label: 'Compress PDF',
-  description: 'Make a PDF smaller for e-mail or upload limits.',
   icon: Minimize2,
   group: 'optimize',
   Component: function Compress({ ctx }) {
@@ -27,30 +26,28 @@ export const compressUtility: Utility = {
     const task = useTask();
     const before = pdf.file?.size ?? 0;
     const after = out[0]?.blob.size ?? 0;
+    const all = useT();
+    const t = all.compress;
     return (
       <ToolPage utility={compressUtility}>
         <SinglePdfInput pdf={pdf} />
         <Option
-          label="Level"
-          hint={
-            level === 'lossless'
-              ? 'Keeps text and quality; repacks the file. Savings are usually small.'
-              : 'Pages are turned into images: big savings, but text can no longer be selected or searched. Best for scans.'
-          }
+          label={t.level}
+          hint={level === 'lossless' ? t.losslessHint : t.rasterHint}
         >
           <Segmented<CompressLevel>
             value={level}
             onChange={setLevel}
             options={[
-              { value: 'lossless', label: 'Lossless' },
-              { value: 'light', label: 'Light' },
-              { value: 'recommended', label: 'Recommended' },
-              { value: 'strong', label: 'Strong' },
+              { value: 'lossless', label: t.lossless },
+              { value: 'light', label: t.light },
+              { value: 'recommended', label: t.recommended },
+              { value: 'strong', label: t.strong },
             ]}
           />
         </Option>
         <RunBar
-          label="Compress"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>
@@ -68,11 +65,11 @@ export const compressUtility: Utility = {
             out.length > 0 &&
             (after < before ? (
               <>
-                {formatBytes(before)} → <b>{formatBytes(after)}</b> ({Math.round((1 - after / before) * 100)}% smaller)
+                <b>{all.common.sizeChange(formatBytes(before), formatBytes(after))}</b> ({all.common.smaller(Math.round((1 - after / before) * 100))})
               </>
             ) : (
               <>
-                {formatBytes(before)} → {formatBytes(after)}. This file is already compact; try a stronger level, or keep the original.
+                {all.common.sizeChange(formatBytes(before), formatBytes(after))}. {t.notSmaller}
               </>
             ))
           }
@@ -84,8 +81,6 @@ export const compressUtility: Utility = {
 
 export const imagesToPdfUtility: Utility = {
   id: 'images-to-pdf',
-  label: 'Images to PDF',
-  description: 'Turn JPG, PNG, WebP or iPhone HEIC photos into one PDF, one image per page.',
   icon: Images,
   group: 'convert',
   Component: function ImagesToPdf({ ctx }) {
@@ -95,6 +90,7 @@ export const imagesToPdfUtility: Utility = {
     const [margin, setMargin] = useState(20);
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().imagesToPdf;
     return (
       <ToolPage utility={imagesToPdfUtility}>
         <FileDrop
@@ -102,47 +98,47 @@ export const imagesToPdfUtility: Utility = {
           multiple
           compact={files.length > 0}
           onFiles={(f) => setFiles([...files, ...f])}
-          title="Add images"
+          title={t.add}
           hint="JPG, PNG, WebP, GIF, HEIC"
         />
         {files.length > 0 && <FileList files={files} onChange={setFiles} reorderable />}
-        <Option label="Page size">
+        <Option label={t.pageSize}>
           <Segmented<PageSizeOption>
             value={pageSize}
             onChange={setPageSize}
             options={[
               { value: 'a4', label: 'A4' },
-              { value: 'letter', label: 'Letter' },
-              { value: 'fit', label: 'Same as image' },
+              { value: 'letter', label: t.letter },
+              { value: 'fit', label: t.fit },
             ]}
           />
         </Option>
         {pageSize !== 'fit' && (
-          <Option label="Orientation">
+          <Option label={t.orientation}>
             <Segmented<OrientationOption>
               value={orientation}
               onChange={setOrientation}
               options={[
-                { value: 'auto', label: 'Auto' },
-                { value: 'portrait', label: 'Portrait' },
-                { value: 'landscape', label: 'Landscape' },
+                { value: 'auto', label: t.auto },
+                { value: 'portrait', label: t.portrait },
+                { value: 'landscape', label: t.landscape },
               ]}
             />
           </Option>
         )}
-        <Option label="Margin">
+        <Option label={t.margin}>
           <Segmented<number>
             value={margin}
             onChange={setMargin}
             options={[
-              { value: 0, label: 'None' },
-              { value: 20, label: 'Small' },
-              { value: 50, label: 'Large' },
+              { value: 0, label: t.none },
+              { value: 20, label: t.small },
+              { value: 50, label: t.large },
             ]}
           />
         </Option>
         <RunBar
-          label="Create PDF"
+          label={t.run}
           disabled={!files.length}
           {...task}
           onRun={() =>
@@ -160,8 +156,6 @@ export const imagesToPdfUtility: Utility = {
 
 export const pdfToImagesUtility: Utility = {
   id: 'pdf-to-images',
-  label: 'PDF to images',
-  description: 'Save every page, or selected pages, as JPG or PNG images.',
   icon: FileImage,
   group: 'convert',
   Component: function PdfToImages() {
@@ -171,28 +165,29 @@ export const pdfToImagesUtility: Utility = {
     const [pages, setPages] = useState('');
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().pdfToImages;
     return (
       <ToolPage utility={pdfToImagesUtility}>
         <SinglePdfInput pdf={pdf} />
-        <Option label="Format">
+        <Option label={t.format}>
           <Segmented<'jpeg' | 'png'> value={format} onChange={setFormat} options={[{ value: 'jpeg', label: 'JPG' }, { value: 'png', label: 'PNG' }]} />
         </Option>
-        <Option label="Resolution">
+        <Option label={t.resolution}>
           <Segmented<number>
             value={dpi}
             onChange={setDpi}
             options={[
-              { value: 72, label: 'Screen (72 dpi)' },
-              { value: 150, label: 'Standard (150 dpi)' },
-              { value: 300, label: 'Print (300 dpi)' },
+              { value: 72, label: t.screen },
+              { value: 150, label: t.standard },
+              { value: 300, label: t.print },
             ]}
           />
         </Option>
-        <Option label="Pages" hint="Leave empty for all pages.">
-          <input className="text-field" value={pages} onChange={(e) => setPages(e.target.value)} placeholder="e.g. 1, 3-5" />
+        <Option label={t.pages} hint={t.pagesHint}>
+          <input className="text-field" value={pages} onChange={(e) => setPages(e.target.value)} placeholder={t.pagesPlaceholder} />
         </Option>
         <RunBar
-          label="Convert"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>
@@ -214,38 +209,39 @@ export const pdfToImagesUtility: Utility = {
 
 export const pdfToTextUtility: Utility = {
   id: 'pdf-to-text',
-  label: 'PDF to text',
-  description: 'Pull the text out of a PDF to copy it or save it as a .txt file.',
   icon: FileText,
   group: 'convert',
   Component: function PdfToText() {
     const pdf = useSinglePdf();
     const [text, setText] = useState<string | null>(null);
     const task = useTask();
+    const all = useT();
+    const t = all.pdfToText;
+    const lang = useLang();
     return (
       <ToolPage utility={pdfToTextUtility}>
         <SinglePdfInput pdf={pdf} />
-        <RunBar label="Extract text" disabled={!pdf.bytes || !pdf.pages} {...task} onRun={() => task.run(async () => setText(await extractText(pdf.bytes!)))} />
+        <RunBar label={t.run} disabled={!pdf.bytes || !pdf.pages} {...task} onRun={() => task.run(async () => setText(await extractText(pdf.bytes!)))} />
         {text !== null && (
           <section className="results">
             <div className="results-head">
-              <b>{text.trim() ? `${text.length.toLocaleString()} characters` : 'No text found'}</b>
+              <b>{text.trim() ? t.characters(text.length.toLocaleString(lang)) : t.noText}</b>
               <span className="spacer" />
               <button className="btn ghost" disabled={!text} onClick={() => void navigator.clipboard.writeText(text)}>
-                <Copy size={16} /> Copy
+                <Copy size={16} /> {all.common.copy}
               </button>
               <button
                 className="btn primary"
                 disabled={!text}
                 onClick={() => downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${baseName(pdf.file!.name)}.txt`)}
               >
-                Download .txt
+                {t.downloadTxt}
               </button>
             </div>
             {text.trim() ? (
               <textarea className="text-output" readOnly value={text} />
             ) : (
-              <p className="hint">This PDF has no text layer; it is probably a scan. Run it through “OCR: searchable PDF” first to make its text readable.</p>
+              <p className="hint">{t.scanned}</p>
             )}
           </section>
         )}

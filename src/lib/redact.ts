@@ -32,15 +32,16 @@ export type RedactQuery = string | RegExp;
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export const REDACT_PATTERNS: { id: string; label: string; regex: RegExp }[] = [
-  { id: 'email', label: 'E-mail addresses', regex: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
+/** Presets in the Redact tool. Their names are in the dictionaries (src/i18n, `redact.patterns`). */
+export const REDACT_PATTERNS: { id: 'email' | 'phone' | 'iban' | 'nip'; regex: RegExp }[] = [
+  { id: 'email', regex: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
   // 9 to 12 digits: Polish numbers have 9 ("600 123 456"), plus an optional country code.
-  { id: 'phone', label: 'Phone numbers', regex: /(?:\+\d{1,3}[\s-]?)?(?:\d[\s-]?){8,11}\d/g },
+  { id: 'phone', regex: /(?:\+\d{1,3}[\s-]?)?(?:\d[\s-]?){8,11}\d/g },
   // IBAN: country, check digits, then groups of 4 letters or digits (GB29 NWBK …) and a
   // shorter last group (DE…30 00); or a Polish 26-digit account number.
-  { id: 'iban', label: 'Bank account numbers', regex: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){2,7}(?:\s?[A-Z0-9]{1,3})?\b|\b\d{2}(?:\s?\d{4}){6}\b/g },
+  { id: 'iban', regex: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){2,7}(?:\s?[A-Z0-9]{1,3})?\b|\b\d{2}(?:\s?\d{4}){6}\b/g },
   // NIP as 123-456-78-90 or 123-45-67-890 (or without dashes), PESEL as 11 digits.
-  { id: 'nip', label: 'NIP / PESEL numbers', regex: /\b\d{3}-?\d{3}-?\d{2}-?\d{2}\b|\b\d{3}-\d{2}-\d{2}-\d{3}\b|\b\d{11}\b/g },
+  { id: 'nip', regex: /\b\d{3}-?\d{3}-?\d{2}-?\d{2}\b|\b\d{3}-\d{2}-\d{2}-\d{3}\b|\b\d{11}\b/g },
 ];
 
 let measureCtx: CanvasRenderingContext2D | null = null;

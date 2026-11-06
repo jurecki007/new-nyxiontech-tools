@@ -4,6 +4,7 @@ import { Thumb } from './Thumb';
 import { ops, uid, viewSize, type HistoryAction } from '../lib/doc';
 import { pageKey } from '../lib/hooks';
 import type { Annot, Doc, PageInfo, PageRef, Source } from '../types';
+import { useT } from '../i18n';
 
 interface Props {
   pages: PageRef[];
@@ -19,13 +20,14 @@ interface Props {
 export function PagesPanel({ pages, sources, infos, annots, activeId, dispatch, onActivate, onAddPdf }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const t = useT();
 
   const apply = (fn: (d: Doc) => Doc) => dispatch({ type: 'apply', fn, history: true });
 
   return (
     <aside className="pages-panel">
       <div className="panel-title">
-        Pages <span className="count">{pages.length}</span>
+        {t.editor.pages} <span className="count">{pages.length}</span>
       </div>
       <div className="pages-list">
         {pages.map((page, i) => {
@@ -73,23 +75,23 @@ export function PagesPanel({ pages, sources, infos, annots, activeId, dispatch, 
                 <span className="page-no">{i + 1}</span>
                 <span className="page-actions" onClick={(e) => e.stopPropagation()}>
                   <button
-                    title="Rotate left"
+                    title={t.editor.rotateLeft}
                     disabled={!info}
                     onClick={() => info && apply(ops.rotatePage(page.id, false, viewSize(info, page)))}
                   >
                     <RotateCcw size={14} />
                   </button>
                   <button
-                    title="Rotate right"
+                    title={t.editor.rotateRight}
                     disabled={!info}
                     onClick={() => info && apply(ops.rotatePage(page.id, true, viewSize(info, page)))}
                   >
                     <RotateCw size={14} />
                   </button>
-                  <button title="Duplicate page" onClick={() => apply(ops.duplicatePage(page.id, uid()))}>
+                  <button title={t.editor.duplicatePage} onClick={() => apply(ops.duplicatePage(page.id, uid()))}>
                     <Copy size={14} />
                   </button>
-                  <button title="Delete page" className="danger" onClick={() => apply(ops.removePage(page.id))}>
+                  <button title={t.editor.deletePage} className="danger" onClick={() => apply(ops.removePage(page.id))}>
                     <Trash2 size={14} />
                   </button>
                 </span>
@@ -99,7 +101,7 @@ export function PagesPanel({ pages, sources, infos, annots, activeId, dispatch, 
         })}
       </div>
       <button className="btn add-pages" onClick={onAddPdf}>
-        <FilePlus2 size={16} /> Add PDF pages
+        <FilePlus2 size={16} /> {t.editor.addPdfPages}
       </button>
     </aside>
   );

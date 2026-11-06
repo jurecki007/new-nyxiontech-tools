@@ -211,7 +211,7 @@ Under the AGPL, a modified version that you let others use over a network must o
 
 ## Dashboard tools
 
-The sidebar on the main screen lists every tool, grouped and searchable. Each tool has its own address, such as `/merge-pdf`, and a Polish one, such as `/pl/polacz-pdf` (the app itself stays in English). In the desktop app tools use `#/tool/<id>` instead, and old `#/tool/<id>` links still work on the web.
+The sidebar on the main screen lists every tool, grouped and searchable. Each tool has its own address, such as `/merge-pdf`, and a Polish one, such as `/pl/polacz-pdf`, where the whole interface is in Polish. An EN / PL switch at the bottom of the sidebar opens the same page in the other language. In the desktop app tools use `#/tool/<id>` instead, and old `#/tool/<id>` links still work on the web.
 
 ![Nyxiontech PDF Tools dashboard: tool sidebar on the left, file drop zone and tool grid on the right](docs/screenshot.png)
 
@@ -302,6 +302,7 @@ src/
   lib/desktop.ts        desktop app (Tauri) detection and native Save dialog
   lib/route.ts          which tool the address names; clean URLs on the web, #/tool/<id> on desktop
   utilities/routes.ts   every tool's English and Polish address
+  i18n/                 interface strings: en.ts (reference), pl.ts, language choice (index.ts); see TRANSLATING.md
   seo/                  copy and builder for the static search pages, 404 page and sitemap
   config.ts             app name, links, donation URL
   components/           Shell (sidebar), Home (dashboard), Editor, AboutDialog, ToolSidebar, PageView, Inspector, ...
@@ -314,7 +315,8 @@ tests/desktop/          smoke tests of the built exe
 1. Write a `Utility` in `src/utilities/`. `ui.tsx` has the shared building blocks: file drop, file list, options, run button with progress, and results with zip download. PDF operations live in `src/lib/pdfTools.ts`, image ones in `src/lib/images.ts`.
 2. List it in `src/utilities/index.ts`.
 3. Give its id an English and a Polish address in `TOOL_SLUGS` (`src/utilities/routes.ts`). TypeScript rejects a `Utility` whose id isn't there.
-4. Write its search page in `TOOL_PAGES` (`src/seo/content.ts`): title (max 60 characters), description (max 155), heading, a short introduction, steps, questions and related tools, in English and Polish. Describe only what the tool really does.
+4. Give it a name and a one-sentence description in every dictionary (`tools` in `src/i18n/en.ts` and `pl.ts`); TypeScript rejects a dictionary that misses one. Put every other visible string of the tool in the dictionaries too.
+5. Write its search page in `TOOL_PAGES` (`src/seo/content.ts`): title (max 60 characters), description (max 155), heading, a short introduction, steps, questions and related tools, in English and Polish. Describe only what the tool really does.
 
 The sidebar, dashboard grid, router, static pages, sitemap and the e2e tests in `tests/e2e/routing.spec.ts` pick it up. Add the tool to `public/llms.txt` as well.
 
@@ -324,14 +326,16 @@ Search engines ignore everything after `#`, so each tool has a real page. After 
 
 Guides (`src/seo/guides.ts`, e.g. `/guides/check-pdf-redaction`) are articles about a task, each in one language, so they have no hreflang links. They are built from the same `index.html` but without the app's script and stylesheet, are listed in the sitemap, and the matching tool page links to them. Describe the tool only as the code behaves.
 
-In the browser, `src/lib/route.ts` reads the tool from the address, and in-app links switch tools with `history.pushState`, so the address bar always shows a shareable link. Pages under `/pl/` keep Polish addresses. The desktop app keeps `#/tool/<id>` routes, because its window always loads the bundled `index.html`.
+In the browser, `src/lib/route.ts` reads the tool from the address, and in-app links switch tools with `history.pushState`, so the address bar always shows a shareable link. Pages under `/pl/` keep Polish addresses and show the Polish interface (`src/i18n`). The desktop app keeps `#/tool/<id>` routes, because its window always loads the bundled `index.html`; it follows the system language, and the EN / PL switch overrides it.
+
+The Polish steps in `TOOL_PAGES` quote button labels (e.g. „Anonimizuj i zapisz”). When you rename a label in `src/i18n/pl.ts`, change the quote there too.
 
 ## Adding an editor tool
 
 1. Create a module in `src/tools/`. It exports either:
    - a `ModeTool`: stays active and handles pointer input on a page. `begin()` runs on pointer down and may return a drag session. Optional `defaults` and `Options` add per-tool settings to the sidebar.
    - an `ActionTool`: `run()` executes once when the tool is picked, for example to open a file dialog.
-2. Add it to `TOOLS` in `src/tools/index.ts`.
+2. Add it to `TOOLS` in `src/tools/index.ts`, and give its id a name and hint under `editor.tools` in every dictionary in `src/i18n`.
 
 The sidebar, keyboard shortcut and settings persistence pick it up automatically.
 Moving, resizing and selecting existing elements are handled by `PageView` for every tool.
@@ -346,7 +350,7 @@ To add a font, install a package that ships TTF files and add an entry to `src/l
 
 ## Contributing
 
-Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Please report security issues privately as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To translate the interface into another language, see [TRANSLATING.md](TRANSLATING.md). Please report security issues privately as described in [SECURITY.md](SECURITY.md).
 This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License

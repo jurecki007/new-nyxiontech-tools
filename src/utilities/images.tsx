@@ -6,6 +6,7 @@ import { formatBytes } from '../lib/zip';
 import { NumberField } from '../components/fields';
 import { FileDrop, FileList, Option, Results, RunBar, Segmented, ToolPage, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { useT } from '../i18n';
 
 function ImageConverter({ utility, initialFormat }: { utility: Utility; initialFormat: ImageFormat }) {
   const [files, setFiles] = useState<File[]>([]);
@@ -18,41 +19,43 @@ function ImageConverter({ utility, initialFormat }: { utility: Utility; initialF
   const task = useTask();
   const before = files.reduce((n, f) => n + f.size, 0);
   const after = out.reduce((n, f) => n + f.blob.size, 0);
+  const all = useT();
+  const t = all.images;
 
   return (
     <ToolPage utility={utility}>
-      <FileDrop accept="image/*,.heic,.heif" multiple compact={files.length > 0} onFiles={(f) => setFiles([...files, ...f])} title="Add images" hint="JPG, PNG, WebP, GIF, BMP, HEIC" />
+      <FileDrop accept="image/*,.heic,.heif" multiple compact={files.length > 0} onFiles={(f) => setFiles([...files, ...f])} title={t.add} hint="JPG, PNG, WebP, GIF, BMP, HEIC" />
       {files.length > 0 && <FileList files={files} onChange={setFiles} />}
-      <Option label="Save as">
+      <Option label={t.saveAs}>
         <Segmented<ImageFormat>
           value={format}
           onChange={setFormat}
           options={[
             { value: 'jpeg', label: 'JPG' },
-            { value: 'webp', label: 'WebP', hint: 'Smallest files; supported by all modern browsers' },
-            { value: 'png', label: 'PNG', hint: 'Lossless, keeps transparency; larger files' },
+            { value: 'webp', label: 'WebP', hint: t.webpHint },
+            { value: 'png', label: 'PNG', hint: t.pngHint },
           ]}
         />
       </Option>
       {format !== 'png' && (
-        <Option label={`Quality ${quality}%`} hint="70–85% is usually indistinguishable from the original.">
+        <Option label={t.quality(quality)} hint={t.qualityHint}>
           <input className="range" type="range" min={30} max={100} value={quality} onChange={(e) => setQuality(Number(e.target.value))} />
         </Option>
       )}
-      <Option label="Resize">
+      <Option label={t.resize}>
         <label className="check">
           <input type="checkbox" checked={resize} onChange={(e) => setResize(e.target.checked)} />
-          Shrink images larger than
+          {t.shrink}
         </label>
         {resize && (
           <div className="option-row narrow">
-            <NumberField label="Max width (px)" value={maxW} min={16} onChange={setMaxW} />
-            <NumberField label="Max height (px)" value={maxH} min={16} onChange={setMaxH} />
+            <NumberField label={t.maxWidth} value={maxW} min={16} onChange={setMaxW} />
+            <NumberField label={t.maxHeight} value={maxH} min={16} onChange={setMaxH} />
           </div>
         )}
       </Option>
       <RunBar
-        label={`Convert ${files.length || ''} ${files.length === 1 ? 'image' : 'images'}`}
+        label={t.run(files.length)}
         disabled={!files.length}
         {...task}
         onRun={() =>
@@ -80,8 +83,8 @@ function ImageConverter({ utility, initialFormat }: { utility: Utility; initialF
         note={
           out.length > 0 && (
             <>
-              {formatBytes(before)} → <b>{formatBytes(after)}</b>
-              {after < before && ` (${Math.round((1 - after / before) * 100)}% smaller)`}. Location and camera data (EXIF) are removed.
+              <b>{all.common.sizeChange(formatBytes(before), formatBytes(after))}</b>
+              {after < before && ` (${all.common.smaller(Math.round((1 - after / before) * 100))})`}. {t.exif}
             </>
           )
         }
@@ -92,8 +95,6 @@ function ImageConverter({ utility, initialFormat }: { utility: Utility; initialF
 
 export const imageConverterUtility: Utility = {
   id: 'image-converter',
-  label: 'Compress & convert images',
-  description: 'Shrink, resize and convert photos and graphics between JPG, PNG and WebP in bulk.',
   icon: ImageDown,
   group: 'images',
   Component: () => <ImageConverter utility={imageConverterUtility} initialFormat="jpeg" />,
@@ -101,8 +102,6 @@ export const imageConverterUtility: Utility = {
 
 export const heicUtility: Utility = {
   id: 'heic-to-jpg',
-  label: 'HEIC to JPG',
-  description: 'Convert iPhone photos (HEIC) to JPG that opens everywhere.',
   icon: Smartphone,
   group: 'images',
   Component: () => <ImageConverter utility={heicUtility} initialFormat="jpeg" />,

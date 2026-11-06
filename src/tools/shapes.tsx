@@ -4,6 +4,7 @@ import { ColorField, NumberField } from '../components/fields';
 import { ops, uid } from '../lib/doc';
 import type { RectAnnot } from '../types';
 import { defineModeTool, type ToolOptionsProps } from './types';
+import { useT } from '../i18n';
 
 export type RectStyle = Pick<RectAnnot, 'fill' | 'stroke' | 'strokeWidth' | 'opacity'>;
 
@@ -16,10 +17,8 @@ export const RECT_PRESETS = {
 /** Tools that draw a rectangle by dragging; they differ only in style. */
 function rectTool(opts: {
   id: keyof typeof RECT_PRESETS;
-  label: string;
   icon: LucideIcon;
   shortcut: string;
-  hint: string;
   Options: (props: ToolOptionsProps<RectStyle>) => ReactNode;
 }) {
   return defineModeTool<RectStyle>({
@@ -68,51 +67,46 @@ function rectTool(opts: {
 
 export const whiteoutTool = rectTool({
   id: 'whiteout',
-  label: 'Whiteout',
   icon: Eraser,
   shortcut: 'W',
-  hint: 'Drag over content to hide it; draw as many as you need. Match the colour if the background is not white. Esc to stop.',
-  Options: ({ value, onChange }) => (
-    <ColorField label="Cover colour" value={value.fill ?? '#ffffff'} onChange={(fill) => onChange({ fill })} />
-  ),
+  Options: function WhiteoutOptions({ value, onChange }) {
+    const t = useT();
+    return <ColorField label={t.editor.coverColour} value={value.fill ?? '#ffffff'} onChange={(fill) => onChange({ fill })} />;
+  },
 });
 
 export const highlightTool = rectTool({
   id: 'highlight',
-  label: 'Highlight',
   icon: Highlighter,
   shortcut: 'H',
-  hint: 'Drag over text to highlight it; draw as many as you need. Esc to stop.',
-  Options: ({ value, onChange }) => (
-    <div className="row">
-      <ColorField label="Colour" value={value.fill ?? '#ffe066'} onChange={(fill) => onChange({ fill })} />
-      <NumberField
-        label="Opacity %"
-        value={value.opacity * 100}
-        min={5}
-        step={5}
-        onChange={(n) => onChange({ opacity: Math.min(100, n) / 100 })}
-      />
-    </div>
-  ),
+  Options: function HighlightOptions({ value, onChange }) {
+    const t = useT();
+    return (
+      <div className="row">
+        <ColorField label={t.editor.colour} value={value.fill ?? '#ffe066'} onChange={(fill) => onChange({ fill })} />
+        <NumberField
+          label={t.editor.opacityPercent}
+          value={value.opacity * 100}
+          min={5}
+          step={5}
+          onChange={(n) => onChange({ opacity: Math.min(100, n) / 100 })}
+        />
+      </div>
+    );
+  },
 });
 
 export const boxTool = rectTool({
   id: 'box',
-  label: 'Box',
   icon: Square,
   shortcut: 'B',
-  hint: 'Drag to draw a frame around something; draw as many as you need. Esc to stop.',
-  Options: ({ value, onChange }) => (
-    <div className="row">
-      <ColorField label="Border" value={value.stroke ?? '#d32f2f'} onChange={(stroke) => onChange({ stroke })} />
-      <NumberField
-        label="Width"
-        value={value.strokeWidth}
-        min={0.25}
-        step={0.25}
-        onChange={(strokeWidth) => onChange({ strokeWidth })}
-      />
-    </div>
-  ),
+  Options: function BoxOptions({ value, onChange }) {
+    const t = useT();
+    return (
+      <div className="row">
+        <ColorField label={t.editor.border} value={value.stroke ?? '#d32f2f'} onChange={(stroke) => onChange({ stroke })} />
+        <NumberField label={t.editor.width} value={value.strokeWidth} min={0.25} step={0.25} onChange={(strokeWidth) => onChange({ strokeWidth })} />
+      </div>
+    );
+  },
 });

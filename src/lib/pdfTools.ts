@@ -2,6 +2,7 @@
 import { degrees, EncryptedPDFError, PDFDocument, type PDFFont, type PDFPage } from 'pdf-lib';
 import { blobBytes, embedRegistryFont, hexColor, viewToPdf, visibleBox } from './export';
 import { closePdf, normalizeRotation, openPdf, renderPageToBlob } from './pdfjs';
+import { tr } from '../i18n';
 
 export interface NamedBytes {
   name: string;
@@ -24,9 +25,9 @@ export async function loadPdf(bytes: Uint8Array): Promise<PDFDocument> {
     // With AES-encrypted object streams pdf-lib fails while parsing, before it can
     // report EncryptedPDFError, so also look for the /Encrypt entry ourselves.
     if (e instanceof EncryptedPDFError || isEncrypted(bytes)) {
-      throw new Error('This PDF is password-protected. Remove the password with "Unlock PDF" first.');
+      throw new Error(tr().errors.passwordProtected);
     }
-    throw new Error(`Could not read this PDF (${e instanceof Error ? e.message : String(e)}).`);
+    throw new Error(tr().errors.couldNotRead(e instanceof Error ? e.message : String(e)));
   }
 }
 
@@ -49,14 +50,14 @@ export function parsePageRanges(input: string, count: number): number[][] {
   const groups: number[][] = [];
   for (const part of input.split(/[,;]/).map((p) => p.trim()).filter(Boolean)) {
     const m = /^(\d*)\s*(?:-\s*(\d*))?$/.exec(part);
-    if (!m || (!m[1] && !m[2])) throw new Error(`"${part}" is not a page or range.`);
+    if (!m || (!m[1] && !m[2])) throw new Error(tr().errors.notARange(part));
     const isRange = part.includes('-');
     const from = m[1] ? parseInt(m[1], 10) : 1;
     const to = isRange ? (m[2] ? parseInt(m[2], 10) : count) : from;
-    if (from < 1 || to > count || from > to) throw new Error(`"${part}" is outside pages 1–${count}.`);
+    if (from < 1 || to > count || from > to) throw new Error(tr().errors.outsidePages(part, count));
     groups.push(Array.from({ length: to - from + 1 }, (_, i) => from - 1 + i));
   }
-  if (!groups.length) throw new Error('Enter at least one page or range.');
+  if (!groups.length) throw new Error(tr().errors.enterRange);
   return groups;
 }
 
@@ -305,7 +306,7 @@ export async function protectPdf(bytes: Uint8Array, o: ProtectOptions): Promise<
   const cantoo = await import('@cantoo/pdf-lib');
   // updateMetadata: false keeps the producer and dates, like loadPdf() does for every other tool.
   const doc = await cantoo.PDFDocument.load(bytes, { updateMetadata: false }).catch(() => {
-    throw new Error('This PDF is already password-protected. Unlock it first.');
+    throw new Error(tr().errors.alreadyProtected);
   });
   doc.encrypt({
     userPassword: o.userPassword,
@@ -374,7 +375,7 @@ export async function unlockPdf(bytes: Uint8Array, password: string): Promise<Ui
   try {
     doc = await CantooDocument.load(bytes, { password, updateMetadata: false });
   } catch {
-    throw new Error('Wrong password, or this PDF could not be decrypted.');
+    throw new Error(tr().errors.wrongPassword);
   }
   return doc.save();
 }

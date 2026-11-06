@@ -2,12 +2,12 @@ import { ImagePlus } from 'lucide-react';
 import { uid } from '../lib/doc';
 import { pickFiles, readImage } from '../lib/files';
 import type { ActionTool } from './types';
+import { tr } from '../i18n';
 
 /** Opens a file dialog and drops the image in the middle of the current page. */
 export const imageTool: ActionTool = {
   kind: 'action',
   id: 'image',
-  label: 'Image / stamp',
   icon: ImagePlus,
   group: 'insert',
   shortcut: 'I',
@@ -25,7 +25,7 @@ export const imageTool: ActionTool = {
       ctx.add({ kind: 'image', id: uid(), pageId: page.id, x: (size.w - w) / 2, y: (size.h - h) / 2, w, h, src: img.src, opacity: 1 });
       ctx.setTool('select');
     } catch {
-      ctx.reportError(`Could not read image ${file.name}.`);
+      ctx.reportError(tr().editor.couldNotReadImage(file.name));
     }
   },
 };

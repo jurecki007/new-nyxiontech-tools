@@ -5,10 +5,8 @@ import { defineModeTool } from './types';
 export const selectTool = defineModeTool({
   kind: 'mode',
   id: 'select',
-  label: 'Select',
   icon: MousePointer2,
   group: 'general',
   shortcut: 'V',
-  hint: 'Drag to move, use the corner handle to resize. Arrow keys nudge.',
   begin: (ctx) => ctx.select(null),
 });

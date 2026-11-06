@@ -5,9 +5,11 @@ import { baseName, pdfBlob } from '../lib/pdfTools';
 import { linkTo } from '../lib/route';
 import { Option, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { useT } from '../i18n';
 
 function FieldInput({ field, value, onChange }: { field: FormFieldInfo; value: FormValues[string]; onChange: (v: FormValues[string]) => void }) {
   const disabled = field.readOnly;
+  const t = useT().forms;
   switch (field.kind) {
     case 'text':
       return field.multiline ? (
@@ -19,7 +21,7 @@ function FieldInput({ field, value, onChange }: { field: FormFieldInfo; value: F
       return (
         <label className="check">
           <input type="checkbox" disabled={disabled} checked={!!value} onChange={(e) => onChange(e.target.checked)} />
-          {value ? 'Checked' : 'Not checked'}
+          {value ? t.checked : t.notChecked}
         </label>
       );
     case 'radio':
@@ -61,8 +63,6 @@ function FieldInput({ field, value, onChange }: { field: FormFieldInfo; value: F
 
 export const formsUtility: Utility = {
   id: 'fill-form',
-  label: 'Fill PDF form',
-  description: 'Fill in the fields of an interactive PDF form (applications, declarations), and optionally lock them.',
   icon: ClipboardList,
   group: 'edit',
   Component: function FillForm({ ctx }) {
@@ -72,6 +72,8 @@ export const formsUtility: Utility = {
     const [flatten, setFlatten] = useState(false);
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const all = useT();
+    const t = all.forms;
 
     useEffect(() => {
       setFields(null);
@@ -91,12 +93,12 @@ export const formsUtility: Utility = {
         <SinglePdfInput pdf={pdf} />
         {fields && fields.length === 0 && (
           <p className="hint">
-            This PDF has no fillable fields. To write on it anyway, use <a {...linkTo('edit')}>Edit PDF</a> and add text where needed.
+            {t.noFieldsBefore} <a {...linkTo('edit')}>{all.tools.edit.label}</a> {t.noFieldsAfter}
           </p>
         )}
         {fields && fields.length > 0 && (
           <>
-            <p className="hint">{fields.length} fields found. Field names come from the form's author.</p>
+            <p className="hint">{t.found(fields.length)}</p>
             {fields.map((f) => (
               <Option key={f.name} label={f.name}>
                 <FieldInput field={f} value={values[f.name]} onChange={(v) => setValues({ ...values, [f.name]: v })} />
@@ -105,13 +107,13 @@ export const formsUtility: Utility = {
             <Option label="">
               <label className="check">
                 <input type="checkbox" checked={flatten} onChange={(e) => setFlatten(e.target.checked)} />
-                Lock the answers (flatten): fields become normal text that cannot be changed
+                {t.flatten}
               </label>
             </Option>
           </>
         )}
         <RunBar
-          label="Save filled form"
+          label={t.run}
           disabled={!pdf.bytes || !fields?.length}
           {...task}
           onRun={() =>

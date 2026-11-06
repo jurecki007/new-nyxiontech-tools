@@ -4,15 +4,16 @@ import type { ToolId } from './routes';
 
 export type UtilityGroup = 'organize' | 'edit' | 'optimize' | 'convert' | 'security' | 'review' | 'images' | 'other';
 
-export const UTILITY_GROUPS: { id: UtilityGroup; label: string }[] = [
-  { id: 'edit', label: 'Edit & sign' },
-  { id: 'organize', label: 'Organize' },
-  { id: 'optimize', label: 'Optimize' },
-  { id: 'convert', label: 'Convert' },
-  { id: 'security', label: 'Security' },
-  { id: 'review', label: 'Review' },
-  { id: 'images', label: 'Images' },
-  { id: 'other', label: 'Other' },
+/** Sidebar and dashboard sections, in order. Their names are in the dictionaries (src/i18n, `groups`). */
+export const UTILITY_GROUPS: { id: UtilityGroup }[] = [
+  { id: 'edit' },
+  { id: 'organize' },
+  { id: 'optimize' },
+  { id: 'convert' },
+  { id: 'security' },
+  { id: 'review' },
+  { id: 'images' },
+  { id: 'other' },
 ];
 
 /** What a dashboard tool can ask of the app shell. */
@@ -23,11 +24,11 @@ export interface UtilityContext {
 
 /** A stand-alone tool with its own page in the dashboard (merge, compress, QR, ...). */
 export interface Utility {
-  /** Also picks its public URL: see TOOL_SLUGS in routes.ts. */
+  /**
+   * Also picks its public URL (TOOL_SLUGS in routes.ts) and its name and one-sentence
+   * description in every language (`tools` in src/i18n/en.ts).
+   */
   id: ToolId;
-  label: string;
-  /** One sentence, shown on the tool page and the dashboard card. */
-  description: string;
   icon: LucideIcon;
   group: UtilityGroup;
   Component: FC<{ ctx: UtilityContext }>;

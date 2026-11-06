@@ -1,6 +1,7 @@
 // The tool registry. To add a tool, create a module next to these that exports a
 // `ModeTool` (acts on pointer input on a page) or an `ActionTool` (runs once when
-// picked), and list it here. The sidebar, shortcuts and settings pick it up.
+// picked), give it a name and hint in src/i18n (`editor.tools` in en.ts, pl.ts), and
+// list it here. The sidebar, shortcuts and settings pick it up.
 import { imageTool } from './image';
 import { selectTool } from './select';
 import { boxTool, highlightTool, whiteoutTool } from './shapes';

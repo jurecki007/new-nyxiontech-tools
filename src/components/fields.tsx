@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties, type React
 import { Bold, Check, ChevronDown, Italic } from 'lucide-react';
 import { FONT_CATEGORIES, FONTS, fontStyle, getFont, hasFace, loadFontPreviews, loadFonts } from '../lib/fonts';
 import type { FontId, TextStyle } from '../types';
+import { useT } from '../i18n';
 
 const round = (n: number) => Math.round(n * 10) / 10;
 
@@ -86,6 +87,7 @@ export function FontPicker({ value, onChange }: { value: FontId; onChange: (id: 
   const open = menuStyle !== null;
   const [, rerender] = useReducer((n: number) => n + 1, 0);
   const ref = useRef<HTMLDivElement>(null);
+  const t = useT();
 
   const close = () => setMenuStyle(null);
   const toggle = () => {
@@ -136,7 +138,7 @@ export function FontPicker({ value, onChange }: { value: FontId; onChange: (id: 
         <div className="font-menu" role="listbox" style={menuStyle}>
           {FONT_CATEGORIES.map((c) => (
             <div key={c.id}>
-              <div className="font-menu-group">{c.label}</div>
+              <div className="font-menu-group">{t.editor.fontCategories[c.id]}</div>
               {FONTS.filter((f) => f.category === c.id).map((f) => (
                 <button
                   key={f.id}
@@ -149,7 +151,7 @@ export function FontPicker({ value, onChange }: { value: FontId; onChange: (id: 
                   }}
                 >
                   <span style={fontStyle(f.id, false, false)}>{f.label}</span>
-                  {f.note && <small>{f.note}</small>}
+                  {f.note && <small>{t.editor.fontNotes[f.note] ?? f.note}</small>}
                   {f.id === value && <Check size={14} />}
                 </button>
               ))}
@@ -176,6 +178,7 @@ export function TextStyleFields({
 }) {
   const canBold = hasFace(value.font, true, false);
   const canItalic = hasFace(value.font, false, true);
+  const t = useT();
   return (
     <>
       <FontPicker
@@ -185,18 +188,18 @@ export function TextStyleFields({
         }
       />
       <div className="row nowrap">
-        <NumberField label="Size" className="size-field" value={value.size} min={2} step={0.5} onFocus={onBeginEdit} onChange={(size) => onChange({ size }, false)} />
-        <ColorField label="Color" value={value.color} onFocus={onBeginEdit} onChange={(color) => onChange({ color }, false)} />
+        <NumberField label={t.editor.size} className="size-field" value={value.size} min={2} step={0.5} onFocus={onBeginEdit} onChange={(size) => onChange({ size }, false)} />
+        <ColorField label={t.editor.color} value={value.color} onFocus={onBeginEdit} onChange={(color) => onChange({ color }, false)} />
         <div className="field toggles">
-          <span>Style</span>
+          <span>{t.editor.style}</span>
           <div className="row nowrap tight">
-            <Toggle on={value.bold} disabled={!canBold} title={canBold ? 'Bold' : 'This font has no bold'} onClick={() => onChange({ bold: !value.bold }, true)}>
+            <Toggle on={value.bold} disabled={!canBold} title={canBold ? t.editor.bold : t.editor.noBold} onClick={() => onChange({ bold: !value.bold }, true)}>
               <Bold size={15} />
             </Toggle>
             <Toggle
               on={value.italic}
               disabled={!canItalic}
-              title={canItalic ? 'Italic' : 'This font has no italic'}
+              title={canItalic ? t.editor.italic : t.editor.noItalic}
               onClick={() => onChange({ italic: !value.italic }, true)}
             >
               <Italic size={15} />

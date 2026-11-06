@@ -6,6 +6,7 @@ import { pickFiles } from '../lib/files';
 import { decodeImage } from '../lib/images';
 import { loadUiPref, saveUiPref } from '../lib/storage';
 import type { ActionTool } from './types';
+import { useT } from '../i18n';
 
 type Mode = 'draw' | 'type' | 'upload';
 
@@ -96,6 +97,8 @@ function SignatureDialog({ onDone, onCancel }: { onDone: (png: string) => void; 
   const [removeWhite, setRemoveWhite] = useState(true);
   const [, setFontsReady] = useState(false);
   const padRef = useRef<HTMLCanvasElement | null>(null);
+  const t = useT();
+  const s = t.editor.signature;
 
   useEffect(() => {
     void loadFonts(SCRIPT_FONTS).then(() => setFontsReady(true));
@@ -147,24 +150,24 @@ function SignatureDialog({ onDone, onCancel }: { onDone: (png: string) => void; 
   };
 
   return (
-    <div className="modal" role="dialog" aria-label="Add signature">
+    <div className="modal" role="dialog" aria-label={s.title}>
       <header className="modal-head">
-        <b>Add signature</b>
-        <button className="icon-btn" title="Close" onClick={onCancel}>
+        <b>{s.title}</b>
+        <button className="icon-btn" title={t.common.close} onClick={onCancel}>
           <X size={18} />
         </button>
       </header>
       <div className="segmented">
         {(['draw', 'type', 'upload'] as const).map((m) => (
           <button key={m} className={mode === m ? 'on' : ''} onClick={() => setMode(m)}>
-            {m === 'draw' ? 'Draw' : m === 'type' ? 'Type' : 'Upload image'}
+            {s[m]}
           </button>
         ))}
       </div>
 
       {mode !== 'upload' && (
         <div className="row">
-          <span className="muted">Ink</span>
+          <span className="muted">{s.ink}</span>
           {INK.map((c) => (
             <button key={c} className={`swatch${c === ink ? ' on' : ''}`} style={{ background: c }} title={c} onClick={() => setInk(c)} />
           ))}
@@ -182,20 +185,20 @@ function SignatureDialog({ onDone, onCancel }: { onDone: (png: string) => void; 
                 c.getContext('2d')!.clearRect(0, 0, c.width, c.height);
               }}
             >
-              Clear
+              {s.clear}
             </button>
-            <span className="muted">Sign with your mouse, touchpad or finger.</span>
+            <span className="muted">{s.drawHint}</span>
           </div>
         </>
       )}
 
       {mode === 'type' && (
         <>
-          <input className="text-field" placeholder="Your name" value={name} autoFocus onChange={(e) => setName(e.target.value)} />
+          <input className="text-field" placeholder={s.yourName} value={name} autoFocus onChange={(e) => setName(e.target.value)} />
           <div className="sig-fonts">
             {SCRIPT_FONTS.map((f) => (
               <button key={f} className={f === font ? 'on' : ''} style={{ ...fontStyle(f, false, false), color: ink }} onClick={() => setFont(f)}>
-                {name || 'Jan Kowalski'}
+                {name || s.sampleName}
               </button>
             ))}
           </div>
@@ -206,33 +209,33 @@ function SignatureDialog({ onDone, onCancel }: { onDone: (png: string) => void; 
         <>
           <div className="row">
             <button className="btn ghost" onClick={() => void pickFiles('image/*,.heic', false).then(([f]) => f && fromUpload(f))}>
-              Choose image…
+              {s.chooseImage}
             </button>
             <label className="check">
               <input type="checkbox" checked={removeWhite} onChange={(e) => setRemoveWhite(e.target.checked)} />
-              Remove white background (applies to the next image)
+              {s.removeWhite}
             </label>
           </div>
-          <div className="sig-preview">{upload ? <img src={upload} alt="Uploaded signature" /> : <span className="muted">A photo or scan of your signature on white paper works best.</span>}</div>
+          <div className="sig-preview">{upload ? <img src={upload} alt={s.uploadedAlt} /> : <span className="muted">{s.uploadHint}</span>}</div>
         </>
       )}
 
       <footer className="modal-foot">
         {saved && (
-          <button className="btn ghost" title="Use the signature from last time" onClick={() => finish(saved)}>
-            <img src={saved} alt="" className="sig-thumb" /> Use last
+          <button className="btn ghost" title={s.useLastTitle} onClick={() => finish(saved)}>
+            <img src={saved} alt="" className="sig-thumb" /> {s.useLast}
           </button>
         )}
         <span className="spacer" />
         <button className="btn ghost" onClick={onCancel}>
-          Cancel
+          {t.common.cancel}
         </button>
         <button
           className="btn primary"
           disabled={(mode === 'type' && !name.trim()) || (mode === 'upload' && !upload)}
           onClick={() => finish(mode === 'draw' ? trimmedPng(padRef.current!) : mode === 'type' ? fromTyped() : upload)}
         >
-          Insert signature
+          {s.insert}
         </button>
       </footer>
     </div>
@@ -243,7 +246,6 @@ function SignatureDialog({ onDone, onCancel }: { onDone: (png: string) => void; 
 export const signatureTool: ActionTool = {
   kind: 'action',
   id: 'signature',
-  label: 'Signature',
   icon: Signature,
   group: 'insert',
   shortcut: 'S',

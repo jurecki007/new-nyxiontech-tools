@@ -3,23 +3,23 @@ import { Combine, RotateCw, Scissors } from 'lucide-react';
 import { baseName, mergePdfs, parsePageRanges, pdfBlob, rotatePdf, splitPdf } from '../lib/pdfTools';
 import { FileDrop, FileList, Option, Results, RunBar, Segmented, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { useT } from '../i18n';
 
 export const mergeUtility: Utility = {
   id: 'merge',
-  label: 'Merge PDF',
-  description: 'Combine several PDFs into one file, in the order you choose.',
   icon: Combine,
   group: 'organize',
   Component: function Merge({ ctx }) {
     const [files, setFiles] = useState<File[]>([]);
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().merge;
     return (
       <ToolPage utility={mergeUtility}>
-        <FileDrop accept="application/pdf,.pdf" multiple compact={files.length > 0} onFiles={(f) => setFiles([...files, ...f])} title="Add PDF files" hint="Drop several files, then put them in order" />
+        <FileDrop accept="application/pdf,.pdf" multiple compact={files.length > 0} onFiles={(f) => setFiles([...files, ...f])} title={t.addFiles} hint={t.addFilesHint} />
         {files.length > 0 && <FileList files={files} onChange={setFiles} reorderable />}
         <RunBar
-          label={`Merge ${files.length || ''} files`}
+          label={t.run(files.length)}
           disabled={files.length < 2}
           {...task}
           onRun={() =>
@@ -39,8 +39,6 @@ type SplitMode = 'each' | 'ranges' | 'extract';
 
 export const splitUtility: Utility = {
   id: 'split',
-  label: 'Split PDF',
-  description: 'Split a PDF into single pages or ranges, or extract selected pages into a new file.',
   icon: Scissors,
   group: 'organize',
   Component: function Split({ ctx }) {
@@ -49,30 +47,31 @@ export const splitUtility: Utility = {
     const [ranges, setRanges] = useState('1-2, 3-');
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().split;
     return (
       <ToolPage utility={splitUtility}>
         <SinglePdfInput pdf={pdf} />
-        <Option label="Mode">
+        <Option label={t.mode}>
           <Segmented<SplitMode>
             value={mode}
             onChange={setMode}
             options={[
-              { value: 'each', label: 'Every page' },
-              { value: 'ranges', label: 'By ranges' },
-              { value: 'extract', label: 'Extract pages' },
+              { value: 'each', label: t.every },
+              { value: 'ranges', label: t.ranges },
+              { value: 'extract', label: t.extract },
             ]}
           />
         </Option>
         {mode !== 'each' && (
           <Option
-            label={mode === 'ranges' ? 'Ranges' : 'Pages'}
-            hint={mode === 'ranges' ? 'Each range becomes a file, e.g. "1-3, 4-6, 7-".' : 'These pages go into one new file, e.g. "1, 3-5, 9".'}
+            label={mode === 'ranges' ? t.rangesLabel : t.pagesLabel}
+            hint={mode === 'ranges' ? t.rangesHint : t.extractHint}
           >
             <input className="text-field" value={ranges} onChange={(e) => setRanges(e.target.value)} />
           </Option>
         )}
         <RunBar
-          label="Split PDF"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>
@@ -102,8 +101,6 @@ export const splitUtility: Utility = {
 
 export const rotateUtility: Utility = {
   id: 'rotate',
-  label: 'Rotate PDF',
-  description: 'Rotate all pages, or only some, by 90°, 180° or 270°.',
   icon: RotateCw,
   group: 'organize',
   Component: function Rotate({ ctx }) {
@@ -113,26 +110,28 @@ export const rotateUtility: Utility = {
     const [pages, setPages] = useState('1');
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const all = useT();
+    const t = all.rotate;
     return (
       <ToolPage utility={rotateUtility}>
         <SinglePdfInput pdf={pdf} />
-        <Option label="Rotation">
+        <Option label={t.rotation}>
           <Segmented<90 | 180 | 270>
             value={angle}
             onChange={setAngle}
             options={[
-              { value: 90, label: '90° right' },
-              { value: 180, label: '180°' },
-              { value: 270, label: '90° left' },
+              { value: 90, label: t.right },
+              { value: 180, label: t.half },
+              { value: 270, label: t.left },
             ]}
           />
         </Option>
-        <Option label="Pages">
-          <Segmented<'all' | 'some'> value={which} onChange={setWhich} options={[{ value: 'all', label: 'All pages' }, { value: 'some', label: 'Selected' }]} />
-          {which === 'some' && <input className="text-field" value={pages} onChange={(e) => setPages(e.target.value)} placeholder="e.g. 1, 3-4" />}
+        <Option label={t.pages}>
+          <Segmented<'all' | 'some'> value={which} onChange={setWhich} options={[{ value: 'all', label: t.all }, { value: 'some', label: t.selected }]} />
+          {which === 'some' && <input className="text-field" value={pages} onChange={(e) => setPages(e.target.value)} placeholder={all.common.pagesExample} />}
         </Option>
         <RunBar
-          label="Rotate"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>

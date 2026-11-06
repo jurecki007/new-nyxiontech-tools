@@ -7,16 +7,15 @@ import { baseName, loadPdf, pdfBlob } from '../lib/pdfTools';
 import { cleanAnnotations, findTextBoxes, redactPdf, REDACT_PATTERNS, type AnnotationCleanup, type Box, type RedactQuery } from '../lib/redact';
 import { Option, Results, RunBar, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility } from './types';
+import { tr, useT, type Messages } from '../i18n';
 
 const PREVIEW_WIDTH = 640;
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
 /** "1 comment will be removed · 2 form fields will be cleared", or '' when there is nothing. */
-function cleanupText({ comments, fields }: AnnotationCleanup): string {
+function cleanupText({ comments, fields }: AnnotationCleanup, t: Messages['redact']): string {
   const parts: string[] = [];
-  if (comments) parts.push(`${plural(comments, 'comment', 'comments')} will be removed`);
-  if (fields) parts.push(`${plural(fields, 'form field', 'form fields')} will be cleared`);
+  if (comments) parts.push(t.comments(comments));
+  if (fields) parts.push(t.fields(fields));
   return parts.join(' · ');
 }
 
@@ -26,6 +25,7 @@ function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; in
   const [size, setSize] = useState<{ w: number; h: number; scale: number } | null>(null);
   const [draft, setDraft] = useState<Box | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
+  const t = useT().redact;
 
   useEffect(() => {
     let cancelled = false;
@@ -58,8 +58,8 @@ function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; in
   return (
     <div className="redact-page">
       <div className="muted">
-        Page {index + 1}
-        {boxes.length > 0 && ` · ${boxes.length} ${boxes.length === 1 ? 'area' : 'areas'}`}
+        {t.page(index + 1)}
+        {boxes.length > 0 && ` · ${t.areas(boxes.length)}`}
       </div>
       <div className="redact-sheet" style={size ? { width: size.w * size.scale, height: size.h * size.scale } : undefined}>
         <canvas ref={canvas} style={size ? { width: size.w * size.scale, height: size.h * size.scale } : undefined} />
@@ -85,7 +85,7 @@ function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; in
           >
             {boxes.map((b, i) => (
               <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} className="redact-box" onClick={() => onChange(boxes.filter((_, j) => j !== i))}>
-                <title>Click to remove</title>
+                <title>{t.clickToRemove}</title>
               </rect>
             ))}
             {draft && <rect x={draft.x} y={draft.y} width={draft.w} height={draft.h} className="redact-box draft" />}
@@ -98,8 +98,6 @@ function RedactPage({ doc, index, boxes, onChange }: { doc: PDFDocumentProxy; in
 
 export const redactUtility: Utility = {
   id: 'redact',
-  label: 'Redact PDF',
-  description: 'Black out personal or confidential data for good: the hidden text is removed, not just covered.',
   icon: EyeOff,
   group: 'security',
   Component: function Redact({ ctx }) {
@@ -114,6 +112,7 @@ export const redactUtility: Utility = {
     const [found, setFound] = useState<string | null>(null);
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().redact;
 
     useEffect(() => {
       setDoc(null);
@@ -147,13 +146,14 @@ export const redactUtility: Utility = {
       const count = matches.reduce((n, m) => n + m.length, 0);
       setBoxes((prev) => prev.map((b, i) => [...b, ...(matches[i] ?? [])]));
       setQueries((prev) => [...prev, q]);
-      const extra = lib ? cleanupText(cleanAnnotations(lib, allPages(lib), [q], false)) : '';
-      setFound(`${label}: ${count} ${count === 1 ? 'match' : 'matches'} marked.${extra ? ` Also ${extra.replace(/ · /g, ', ')}.` : ''}`);
+      const r = tr().redact;
+      const extra = lib ? cleanupText(cleanAnnotations(lib, allPages(lib), [q], false), r) : '';
+      setFound(r.found(label, count, extra.replace(/ · /g, ', ')));
     };
 
     const total = boxes.reduce((n, b) => n + b.length, 0);
     const cleanup = useMemo(() => (lib ? cleanAnnotations(lib, allPages(lib), queries, false) : { comments: 0, fields: 0 }), [lib, queries]);
-    const extra = cleanupText(cleanup);
+    const extra = cleanupText(cleanup, t);
     const anything = total > 0 || extra !== '';
 
     return (
@@ -161,26 +161,24 @@ export const redactUtility: Utility = {
         <SinglePdfInput pdf={pdf} />
         {doc && (
           <>
-            <Option label="Find text" hint="Every occurrence gets a black box. You can also drag boxes on the pages below.">
+            <Option label={t.findText} hint={t.findHint}>
               <div className="row nowrap">
-                <input className="text-field" value={query} placeholder="e.g. a name or account number" onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && query.trim() && void addMatches(query.trim(), `"${query.trim()}"`)} />
-                <button className="btn ghost" disabled={!query.trim()} onClick={() => void addMatches(query.trim(), `"${query.trim()}"`)}>
-                  <Search size={15} /> Mark
+                <input className="text-field" value={query} placeholder={t.placeholder} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && query.trim() && void addMatches(query.trim(), t.quoted(query.trim()))} />
+                <button className="btn ghost" disabled={!query.trim()} onClick={() => void addMatches(query.trim(), t.quoted(query.trim()))}>
+                  <Search size={15} /> {t.mark}
                 </button>
               </div>
               <div className="chips">
                 {REDACT_PATTERNS.map((p) => (
-                  <button key={p.id} className="chip" onClick={() => void addMatches(p.regex, p.label)}>
-                    + {p.label}
+                  <button key={p.id} className="chip" onClick={() => void addMatches(p.regex, t.patterns[p.id])}>
+                    + {t.patterns[p.id]}
                   </button>
                 ))}
               </div>
               {found && <span className="hint">{found}</span>}
             </Option>
             <div className="redact-toolbar">
-              <b>
-                {total} {total === 1 ? 'area' : 'areas'} to redact
-              </b>
+              <b>{t.toRedact(total)}</b>
               {extra && <span className="muted redact-extra">· {extra}</span>}
               <span className="spacer" />
               <button
@@ -191,7 +189,7 @@ export const redactUtility: Utility = {
                   setQueries([]);
                 }}
               >
-                <Trash2 size={15} /> Clear all
+                <Trash2 size={15} /> {t.clearAll}
               </button>
             </div>
             <div className="redact-pages">
@@ -202,7 +200,7 @@ export const redactUtility: Utility = {
           </>
         )}
         <RunBar
-          label="Redact and save"
+          label={t.run}
           disabled={!doc || !anything}
           {...task}
           onRun={() =>
@@ -216,7 +214,7 @@ export const redactUtility: Utility = {
           files={out}
           zipName="redacted.zip"
           ctx={ctx}
-          note="Pages with redactions are saved as images (their text is gone); other pages are unchanged, except that comments and form field values containing the searched text are removed. Document properties are cleared."
+          note={t.note}
         />
       </ToolPage>
     );

@@ -1,5 +1,6 @@
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { TOOL_GROUPS, TOOLS, type ModeTool, type ToolDef } from '../tools';
+import { useT } from '../i18n';
 
 interface Props {
   activeTool: ModeTool;
@@ -13,11 +14,13 @@ interface Props {
 /** Vertical tool palette, grouped, with the active tool's options underneath. */
 export function ToolSidebar({ activeTool, settings, collapsed, onToggleCollapsed, onPick, onSettingsChange }: Props) {
   const Options = activeTool.Options;
+  const t = useT();
+  const active = t.editor.tools[activeTool.id];
   return (
     <aside className={`tool-sidebar${collapsed ? ' collapsed' : ''}`}>
       <div className="tool-sidebar-head">
-        {!collapsed && <span className="panel-title">Tools</span>}
-        <button className="icon-btn" title={collapsed ? 'Expand tools' : 'Collapse tools'} onClick={onToggleCollapsed}>
+        {!collapsed && <span className="panel-title">{t.editor.toolsTitle}</span>}
+        <button className="icon-btn" title={collapsed ? t.editor.expandTools : t.editor.collapseTools} onClick={onToggleCollapsed}>
           {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
         </button>
       </div>
@@ -28,17 +31,17 @@ export function ToolSidebar({ activeTool, settings, collapsed, onToggleCollapsed
           if (!tools.length) return null;
           return (
             <div key={group.id} className="tool-group-section">
-              {!collapsed && <div className="tool-group-label">{group.label}</div>}
-              {tools.map((t) => (
+              {!collapsed && <div className="tool-group-label">{t.editor.groups[group.id]}</div>}
+              {tools.map((tool) => (
                 <button
-                  key={t.id}
-                  className={`tool-item${t.id === activeTool.id ? ' on' : ''}`}
-                  title={collapsed ? `${t.label}${t.shortcut ? ` (${t.shortcut})` : ''}` : undefined}
-                  onClick={() => onPick(t)}
+                  key={tool.id}
+                  className={`tool-item${tool.id === activeTool.id ? ' on' : ''}`}
+                  title={collapsed ? `${t.editor.tools[tool.id].label}${tool.shortcut ? ` (${tool.shortcut})` : ''}` : undefined}
+                  onClick={() => onPick(tool)}
                 >
-                  <t.icon size={18} />
-                  {!collapsed && <span className="tool-item-label">{t.label}</span>}
-                  {!collapsed && t.shortcut && <kbd>{t.shortcut}</kbd>}
+                  <tool.icon size={18} />
+                  {!collapsed && <span className="tool-item-label">{t.editor.tools[tool.id].label}</span>}
+                  {!collapsed && tool.shortcut && <kbd>{tool.shortcut}</kbd>}
                 </button>
               ))}
             </div>
@@ -46,11 +49,11 @@ export function ToolSidebar({ activeTool, settings, collapsed, onToggleCollapsed
         })}
       </nav>
 
-      {!collapsed && (Options || activeTool.hint) && (
+      {!collapsed && (Options || active.hint) && (
         <section className="tool-options">
-          <div className="panel-title">{activeTool.label} options</div>
+          <div className="panel-title">{t.editor.toolOptions(active.label)}</div>
           {Options && <Options value={settings} onChange={onSettingsChange} />}
-          {activeTool.hint && <p className="hint">{activeTool.hint}</p>}
+          {active.hint && <p className="hint">{active.hint}</p>}
         </section>
       )}
     </aside>

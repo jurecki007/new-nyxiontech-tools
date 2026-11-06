@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Droplet, FilePenLine, Hash, LayoutGrid, Signature, Tags } from 'lucide-react';
 import { ColorField, FontPicker, NumberField } from '../components/fields';
 import { DEFAULT_FONT } from '../lib/fonts';
-import { storedIn } from '../lib/desktop';
 import {
   addPageNumbers,
   addWatermark,
@@ -17,18 +16,23 @@ import {
 } from '../lib/pdfTools';
 import { FileDrop, Option, Results, RunBar, Segmented, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
 import type { Utility, UtilityContext } from './types';
+import { storedIn, useT, type Messages } from '../i18n';
 
 /** Entries that open the full editor, optionally with one of its tools picked. */
-function editorLauncher(opts: Omit<Utility, 'Component'> & { tool?: string; tips: string[] }): Utility {
+function editorLauncher(
+  opts: Omit<Utility, 'Component'> & { tool?: string; tips: (t: Messages['launcher'], storedIn: string) => string[] },
+): Utility {
+  const { tool, tips, ...rest } = opts;
   const utility: Utility = {
-    ...opts,
+    ...rest,
     Component: function Launcher({ ctx }: { ctx: UtilityContext }) {
+      const t = useT();
       return (
         <ToolPage utility={utility}>
-          <FileDrop accept="application/pdf,.pdf" multiple onFiles={(files) => ctx.openInEditor(files, opts.tool)} title="Choose PDF files to open in the editor" hint="Several files are merged into one document" />
+          <FileDrop accept="application/pdf,.pdf" multiple onFiles={(files) => ctx.openInEditor(files, tool)} title={t.launcher.choose} hint={t.launcher.chooseHint} />
           <ul className="tips">
-            {opts.tips.map((t) => (
-              <li key={t}>{t}</li>
+            {tips(t.launcher, storedIn(t)).map((tip) => (
+              <li key={tip}>{tip}</li>
             ))}
           </ul>
         </ToolPage>
@@ -40,38 +44,24 @@ function editorLauncher(opts: Omit<Utility, 'Component'> & { tool?: string; tips
 
 export const editUtility = editorLauncher({
   id: 'edit',
-  label: 'Edit PDF',
-  description: 'Add text, cover content with whiteout, highlight, frame and insert images.',
   icon: FilePenLine,
   group: 'edit',
-  tips: [
-    'Existing text cannot be retyped in place: cover it with Whiteout and type the new text on top.',
-    'Arimo, Tinos and Cousine match Arial, Times and Courier, so additions blend in with most invoices.',
-    `Your work is saved ${storedIn} automatically; find it under Recent documents.`,
-  ],
+  tips: (t, storedIn) => t.editTips(storedIn),
 });
 
 export const signUtility = editorLauncher({
   id: 'sign',
-  label: 'Sign PDF',
-  description: 'Draw, type or upload your signature and place it on the document.',
   icon: Signature,
   group: 'edit',
   tool: 'signature',
-  tips: [
-    'The signature dialog opens with the document. Draw with a mouse or touchpad, type your name in a handwriting font, or upload a scan.',
-    `Your last signature is remembered ${storedIn} for next time.`,
-    'This is a visual signature, not a qualified electronic signature (e.g. Profil Zaufany or a certificate).',
-  ],
+  tips: (t, storedIn) => t.signTips(storedIn),
 });
 
 export const organizeUtility = editorLauncher({
   id: 'organize',
-  label: 'Organize pages',
-  description: 'Reorder, rotate, duplicate or delete pages, and combine files visually.',
   icon: LayoutGrid,
   group: 'organize',
-  tips: ['Drag thumbnails in the Pages panel to reorder them.', 'Use "Add PDF pages" to insert pages from other files after the selected page.'],
+  tips: (t, storedIn) => t.organizeTips(storedIn),
 });
 
 const POSITIONS: { value: NumberPosition; label: string }[] = [
@@ -87,8 +77,6 @@ const FORMATS = ['{n}', '{n} / {total}', 'Page {n} of {total}', 'Strona {n} z {t
 
 export const pageNumbersUtility: Utility = {
   id: 'page-numbers',
-  label: 'Page numbers',
-  description: 'Number the pages, with your own position, format and font.',
   icon: Hash,
   group: 'edit',
   Component: function PageNumbers({ ctx }) {
@@ -106,19 +94,20 @@ export const pageNumbersUtility: Utility = {
     const set = (patch: Partial<PageNumberOptions>) => setO({ ...o, ...patch });
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().pageNumbers;
     return (
       <ToolPage utility={pageNumbersUtility}>
         <SinglePdfInput pdf={pdf} />
-        <Option label="Position">
+        <Option label={t.position}>
           <div className="position-grid">
             {POSITIONS.map((p) => (
-              <button key={p.value} className={p.value === o.position ? 'on' : ''} title={p.value.replace('-', ' ')} onClick={() => set({ position: p.value })}>
+              <button key={p.value} className={p.value === o.position ? 'on' : ''} title={t.positions[p.value]} onClick={() => set({ position: p.value })}>
                 {p.label}
               </button>
             ))}
           </div>
         </Option>
-        <Option label="Format" hint="{n} is the page number, {total} the number of pages.">
+        <Option label={t.format} hint={t.formatHint}>
           <div className="row">
             <input className="text-field" value={o.format} onChange={(e) => set({ format: e.target.value })} />
           </div>
@@ -130,27 +119,27 @@ export const pageNumbersUtility: Utility = {
             ))}
           </div>
         </Option>
-        <Option label="Font">
+        <Option label={t.font}>
           <div className="option-row">
             <div className="grow-2">
               <FontPicker value={o.font} onChange={(font) => set({ font })} />
             </div>
-            <NumberField label="Size" value={o.size} min={4} onChange={(size) => set({ size })} />
-            <NumberField label="Margin" value={o.margin} min={0} onChange={(margin) => set({ margin })} />
-            <ColorField label="Colour" value={o.color} onChange={(color) => set({ color })} />
+            <NumberField label={t.size} value={o.size} min={4} onChange={(size) => set({ size })} />
+            <NumberField label={t.margin} value={o.margin} min={0} onChange={(margin) => set({ margin })} />
+            <ColorField label={t.colour} value={o.color} onChange={(color) => set({ color })} />
           </div>
         </Option>
-        <Option label="Numbering">
+        <Option label={t.numbering}>
           <div className="option-row">
-            <NumberField label="Start at" value={o.startAt} min={0} onChange={(startAt) => set({ startAt: Math.round(startAt) })} />
+            <NumberField label={t.startAt} value={o.startAt} min={0} onChange={(startAt) => set({ startAt: Math.round(startAt) })} />
             <label className="check">
               <input type="checkbox" checked={o.skipFirst} onChange={(e) => set({ skipFirst: e.target.checked })} />
-              Skip the first page (cover)
+              {t.skipFirst}
             </label>
           </div>
         </Option>
         <RunBar
-          label="Add page numbers"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>
@@ -168,8 +157,6 @@ export const pageNumbersUtility: Utility = {
 
 export const watermarkUtility: Utility = {
   id: 'watermark',
-  label: 'Watermark',
-  description: 'Stamp text such as COPY, DRAFT or KOPIA across every page.',
   icon: Droplet,
   group: 'edit',
   Component: function Watermark({ ctx }) {
@@ -187,10 +174,11 @@ export const watermarkUtility: Utility = {
     const set = (patch: Partial<WatermarkOptions>) => setO({ ...o, ...patch });
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().watermark;
     return (
       <ToolPage utility={watermarkUtility}>
         <SinglePdfInput pdf={pdf} />
-        <Option label="Text">
+        <Option label={t.text}>
           <input className="text-field" value={o.text} onChange={(e) => set({ text: e.target.value })} />
           <div className="chips">
             {['KOPIA', 'COPY', 'DRAFT', 'CONFIDENTIAL', 'ORYGINAŁ', 'PAID'].map((t) => (
@@ -200,38 +188,38 @@ export const watermarkUtility: Utility = {
             ))}
           </div>
         </Option>
-        <Option label="Look">
+        <Option label={t.look}>
           <div className="option-row">
             <div className="grow-2">
               <FontPicker value={o.font} onChange={(font) => set({ font })} />
             </div>
-            <NumberField label="Size" value={o.size} min={6} onChange={(size) => set({ size })} />
-            <ColorField label="Colour" value={o.color} onChange={(color) => set({ color })} />
-            <NumberField label="Opacity %" value={o.opacity * 100} min={3} step={5} onChange={(n) => set({ opacity: Math.min(100, n) / 100 })} />
+            <NumberField label={t.size} value={o.size} min={6} onChange={(size) => set({ size })} />
+            <ColorField label={t.colour} value={o.color} onChange={(color) => set({ color })} />
+            <NumberField label={t.opacity} value={o.opacity * 100} min={3} step={5} onChange={(n) => set({ opacity: Math.min(100, n) / 100 })} />
           </div>
         </Option>
-        <Option label="Layout">
+        <Option label={t.layout}>
           <div className="option-row">
             <Segmented<number>
               value={o.angle}
               onChange={(angle) => set({ angle })}
               options={[
-                { value: 45, label: 'Diagonal' },
-                { value: 0, label: 'Horizontal' },
+                { value: 45, label: t.diagonal },
+                { value: 0, label: t.horizontal },
               ]}
             />
             <Segmented<'single' | 'tiled'>
               value={o.tiled ? 'tiled' : 'single'}
               onChange={(v) => set({ tiled: v === 'tiled' })}
               options={[
-                { value: 'single', label: 'Once, centred' },
-                { value: 'tiled', label: 'Tiled' },
+                { value: 'single', label: t.once },
+                { value: 'tiled', label: t.tiled },
               ]}
             />
           </div>
         </Option>
         <RunBar
-          label="Add watermark"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages || !o.text.trim()}
           {...task}
           onRun={() =>
@@ -251,8 +239,6 @@ const EMPTY_META: Metadata = { title: '', author: '', subject: '', keywords: '',
 
 export const metadataUtility: Utility = {
   id: 'metadata',
-  label: 'Edit metadata',
-  description: 'See and change the title, author and other hidden document properties, or wipe them.',
   icon: Tags,
   group: 'edit',
   Component: function MetadataTool() {
@@ -260,6 +246,7 @@ export const metadataUtility: Utility = {
     const [meta, setMeta] = useState<Metadata>(EMPTY_META);
     const [out, setOut] = useState<OutputFile[]>([]);
     const task = useTask();
+    const t = useT().metadata;
 
     useEffect(() => {
       setOut([]);
@@ -267,13 +254,13 @@ export const metadataUtility: Utility = {
       else setMeta(EMPTY_META);
     }, [pdf.bytes, pdf.pages]);
 
-    const fields: { key: keyof Metadata; label: string; hint?: string }[] = [
-      { key: 'title', label: 'Title', hint: 'Shown in the browser tab or viewer title bar.' },
-      { key: 'author', label: 'Author' },
-      { key: 'subject', label: 'Subject' },
-      { key: 'keywords', label: 'Keywords', hint: 'Separated by commas.' },
-      { key: 'creator', label: 'Creator', hint: 'The application that made the original document.' },
-      { key: 'producer', label: 'Producer', hint: 'The software that wrote the PDF file.' },
+    const fields: { key: keyof Metadata; hint?: string }[] = [
+      { key: 'title', hint: t.titleHint },
+      { key: 'author' },
+      { key: 'subject' },
+      { key: 'keywords', hint: t.keywordsHint },
+      { key: 'creator', hint: t.creatorHint },
+      { key: 'producer', hint: t.producerHint },
     ];
 
     return (
@@ -282,19 +269,19 @@ export const metadataUtility: Utility = {
         {pdf.pages !== null && (
           <>
             {fields.map((f) => (
-              <Option key={f.key} label={f.label} hint={f.hint}>
+              <Option key={f.key} label={t.fields[f.key]} hint={f.hint}>
                 <input className="text-field" value={meta[f.key]} onChange={(e) => setMeta({ ...meta, [f.key]: e.target.value })} />
               </Option>
             ))}
             <Option label="">
               <button className="btn ghost" onClick={() => setMeta(EMPTY_META)}>
-                Clear all fields
+                {t.clear}
               </button>
             </Option>
           </>
         )}
         <RunBar
-          label="Save metadata"
+          label={t.run}
           disabled={!pdf.bytes || !pdf.pages}
           {...task}
           onRun={() =>

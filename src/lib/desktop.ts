@@ -17,7 +17,3 @@ export async function saveWithDialog(blob: Blob, filename: string): Promise<bool
  * in the default browser instead (src-tauri/src/lib.rs).
  */
 export const externalLink = isDesktop ? {} : { target: '_blank', rel: 'noopener noreferrer' };
-
-/** Where the user's documents live, for UI text: "in this browser" or "on this computer". */
-export const storedIn = isDesktop ? 'on this computer' : 'in this browser';
-export const storedFrom = isDesktop ? 'from this computer' : 'from this browser';

@@ -2,6 +2,7 @@ import * as pdfjs from 'pdfjs-dist';
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import type { PageInfo, Rotation, Source } from '../types';
+import { tr } from '../i18n';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -112,7 +113,7 @@ export async function renderPageToBlob(
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvas, viewport }).promise;
   const blob = await new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode image'))), type, quality),
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(tr().errors.encodeImage))), type, quality),
   );
   page.cleanup();
   return { blob, width: viewport.width / (dpi / 72), height: viewport.height / (dpi / 72) };

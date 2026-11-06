@@ -1,5 +1,6 @@
 import { zipSync } from 'fflate';
 import { isDesktop, saveWithDialog } from './desktop';
+import { getLang } from '../i18n';
 
 /** Packs files into a .zip; duplicate names get a numeric suffix. */
 export async function zipFiles(files: { name: string; blob: Blob }[]): Promise<Blob> {
@@ -36,8 +37,13 @@ export function downloadBlob(blob: Blob, filename: string) {
   notifySaved();
 }
 
+/** "1.5 KB" in English, "1,5 KB" in languages with a decimal comma. */
 export function formatBytes(n: number): string {
+  const num = (x: number, digits: number) => {
+    const s = x.toFixed(digits);
+    return (1.5).toLocaleString(getLang()).includes(',') ? s.replace('.', ',') : s;
+  };
   if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+  if (n < 1024 * 1024) return `${num(n / 1024, 1)} KB`;
+  return `${num(n / 1024 / 1024, 2)} MB`;
 }

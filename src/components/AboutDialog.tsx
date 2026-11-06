@@ -6,15 +6,18 @@ import changelog from '../../CHANGELOG.md?raw';
 import { APP_NAME, APP_VERSION, COMPANY_NAME, COMPANY_URL, DONATE_URL, ISSUES_URL, REPO_URL, SPONSORS_URL } from '../config';
 import { externalLink, isDesktop } from '../lib/desktop';
 import { parseChangelog, type Updates } from '../lib/updates';
+import { useT } from '../i18n';
 
 export type AboutTab = 'about' | 'privacy' | 'changes';
 
-const TAB_LABELS: Record<AboutTab, string> = { about: 'About', privacy: 'Privacy', changes: "What's new" };
+const TABS: AboutTab[] = ['about', 'privacy', 'changes'];
 
 /** "About", "Privacy" and "What's new" in one dialog. */
 export function AboutDialog({ initialTab, updates, onClose }: { initialTab: AboutTab; updates: Updates; onClose: () => void }) {
   const [tab, setTab] = useState<AboutTab>(initialTab);
   const releases = useMemo(() => parseChangelog(changelog), []);
+  const t = useT();
+  const a = t.about;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -31,19 +34,19 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal about" role="dialog" aria-modal="true" aria-label={tab === 'about' ? `About ${APP_NAME}` : TAB_LABELS[tab]}>
+      <div className="modal about" role="dialog" aria-modal="true" aria-label={tab === 'about' ? t.shell.aboutTitle(APP_NAME) : a.tabs[tab]}>
         <header className="modal-head">
           <b>{APP_NAME}</b>
           <span className="version-pill">v{APP_VERSION}</span>
-          <button className="icon-btn" title="Close" onClick={onClose}>
+          <button className="icon-btn" title={t.common.close} onClick={onClose}>
             <X size={18} />
           </button>
         </header>
 
         <div className="segmented">
-          {(Object.keys(TAB_LABELS) as AboutTab[]).map((t) => (
-            <button key={t} className={tab === t ? 'on' : ''} aria-pressed={tab === t} onClick={() => setTab(t)}>
-              {TAB_LABELS[t]}
+          {TABS.map((id) => (
+            <button key={id} className={tab === id ? 'on' : ''} aria-pressed={tab === id} onClick={() => setTab(id)}>
+              {a.tabs[id]}
             </button>
           ))}
         </div>
@@ -52,22 +55,19 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
           <PrivacyPanel />
         ) : tab === 'about' ? (
           <div className="about-body">
-            <p>
-              Free, open-source PDF and image tools that run entirely {isDesktop ? 'on your computer' : 'in your browser'}. Files are never uploaded:
-              there is no server-side processing, no account and no tracking.
-            </p>
+            <p>{a.intro(isDesktop ? a.onYourComputer : a.inYourBrowser)}</p>
             <p className="muted">
-              Made by{' '}
+              {a.madeBy}{' '}
               <a href={COMPANY_URL} {...externalLink}>
                 {COMPANY_NAME}
               </a>
-              . Licensed under the{' '}
+              . {a.licensedUnder}{' '}
               <a href={`${REPO_URL}/blob/master/LICENSE`} {...externalLink}>
                 GNU Affero General Public License v3.0
               </a>
-              . Built on open-source libraries and fonts:{' '}
+              . {a.builtOn}{' '}
               <a href={isDesktop ? `${REPO_URL}/blob/master/public/THIRD-PARTY-NOTICES.txt` : '/THIRD-PARTY-NOTICES.txt'} {...externalLink}>
-                third-party licences
+                {a.thirdParty}
               </a>
               .
             </p>
@@ -76,14 +76,14 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
                 <Globe size={15} /> nyxiontech.com
               </a>
               <a className="btn" href={REPO_URL} {...externalLink}>
-                <GithubIcon size={15} /> Source code
+                <GithubIcon size={15} /> {a.sourceCode}
               </a>
               <a className="btn" href={ISSUES_URL} {...externalLink}>
-                <Bug size={15} /> Report a problem
+                <Bug size={15} /> {a.reportProblem}
               </a>
               {DONATE_URL && (
                 <a className="btn primary" href={DONATE_URL} {...externalLink}>
-                  <Heart size={15} /> Support the project
+                  <Heart size={15} /> {a.supportProject}
                 </a>
               )}
               {SPONSORS_URL && (
@@ -96,10 +96,11 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
           </div>
         ) : (
           <div className="changelog">
+            {a.changelogNote && <p className="muted">{a.changelogNote}</p>}
             {releases.map((r) => (
               <section key={r.version}>
                 <h4>
-                  {r.version} {r.version === APP_VERSION && <span className="version-pill">current</span>}
+                  {r.version} {r.version === APP_VERSION && <span className="version-pill">{a.current}</span>}
                   {r.date && <span className="muted"> · {r.date}</span>}
                 </h4>
                 {r.sections.map((s, i) => (
@@ -115,7 +116,7 @@ export function AboutDialog({ initialTab, updates, onClose }: { initialTab: Abou
               </section>
             ))}
             <a className="muted changelog-full" href={`${REPO_URL}/blob/master/CHANGELOG.md`} {...externalLink}>
-              Full changelog on GitHub <ExternalLink size={12} />
+              {a.fullChangelog} <ExternalLink size={12} />
             </a>
           </div>
         )}
@@ -129,6 +130,7 @@ type CheckState = { phase: 'idle' | 'checking' | 'latest' } | { phase: 'found'; 
 /** Desktop app: turns the automatic update check on or off, and checks on request. */
 function UpdateSettings({ updates }: { updates: Updates }) {
   const [state, setState] = useState<CheckState>({ phase: 'idle' });
+  const a = useT().about;
   const checkNow = () => {
     setState({ phase: 'checking' });
     updates.checkNow().then(
@@ -138,28 +140,30 @@ function UpdateSettings({ updates }: { updates: Updates }) {
   };
   return (
     <section className="about-updates">
-      <h4>Updates</h4>
+      <h4>{a.updates}</h4>
       <label className="check">
         <input type="checkbox" checked={updates.autoCheck} onChange={(e) => updates.setAutoCheck(e.target.checked)} />
-        Check for updates automatically
+        {a.autoCheck}
       </label>
       <p className="muted">
-        The app asks GitHub Releases for the latest version number; nothing about you or your documents is sent. When this is off, the app only
-        contacts GitHub when you click "Check now". <a href={`${REPO_URL}/blob/master/PRIVACY.md`} {...externalLink}>Privacy policy</a>
+        {a.updatesExplained}{' '}
+        <a href={`${REPO_URL}/blob/master/PRIVACY.md`} {...externalLink}>
+          {a.privacyPolicy}
+        </a>
       </p>
       <div className="about-check">
         <button className="btn" disabled={state.phase === 'checking'} onClick={checkNow}>
-          <RefreshCw size={15} /> Check now
+          <RefreshCw size={15} /> {a.checkNow}
         </button>
         <span className="muted" role="status">
           {state.phase === 'checking'
-            ? 'Checking…'
+            ? a.checking
             : state.phase === 'latest'
-              ? `You have the latest version (${APP_VERSION}).`
+              ? a.latest(APP_VERSION)
               : state.phase === 'found'
-                ? `Version ${state.version} is available: see the banner to install it.`
+                ? a.found(state.version)
                 : state.phase === 'error'
-                  ? `Could not check for updates: ${state.message}`
+                  ? a.checkFailed(state.message)
                   : ''}
         </span>
       </div>

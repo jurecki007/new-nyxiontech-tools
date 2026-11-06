@@ -1,5 +1,6 @@
 // Background removal: an on-device U²-Net model for photos, and a colour-key
 // flood fill for logos, scans and product shots on a plain background.
+import { tr } from '../i18n';
 
 const vendor = (path: string) => new URL(`${import.meta.env.BASE_URL}vendor/${path}`, window.location.origin).href;
 
@@ -158,5 +159,5 @@ export async function removeBackground(
     rctx.fillRect(0, 0, result.width, result.height);
     rctx.drawImage(canvas, 0, 0);
   }
-  return new Promise((resolve, reject) => result.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode image'))), 'image/png'));
+  return new Promise((resolve, reject) => result.toBlob((b) => (b ? resolve(b) : reject(new Error(tr().errors.encodeImage))), 'image/png'));
 }

@@ -4,6 +4,7 @@ import { DONATE_URL, REPO_URL } from '../config';
 import { externalLink } from '../lib/desktop';
 import { loadUiPref, saveUiPref } from '../lib/storage';
 import { FILE_SAVED_EVENT } from '../lib/zip';
+import { useT } from '../i18n';
 
 const SHOWN_THIS_SESSION = 'nyxiontech-pdf-tools:supportNote.shown';
 const DISMISSED_AT = 'supportNote.dismissedAt';
@@ -38,6 +39,7 @@ function mayShow() {
  */
 export function SupportNote() {
   const [visible, setVisible] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     let timer: number | undefined;
@@ -63,9 +65,9 @@ export function SupportNote() {
     <div className="support-note-region" role="status" aria-live="polite">
       {visible && (
         <div className="support-note">
-          <span>Saved you some time?</span>
+          <span>{t.supportNote.savedTime}</span>
           <a href={REPO_URL} {...externalLink} onClick={dismiss}>
-            <Star size={14} /> Star it on GitHub
+            <Star size={14} /> {t.supportNote.star}
           </a>
           {DONATE_URL && (
             <>
@@ -73,11 +75,11 @@ export function SupportNote() {
                 ·
               </span>
               <a href={DONATE_URL} {...externalLink} onClick={dismiss}>
-                <Coffee size={14} /> Support on Ko-fi
+                <Coffee size={14} /> {t.supportNote.kofi}
               </a>
             </>
           )}
-          <button className="icon-btn" aria-label="Dismiss" title="Dismiss" onClick={dismiss}>
+          <button className="icon-btn" aria-label={t.supportNote.dismiss} title={t.supportNote.dismiss} onClick={dismiss}>
             <X size={15} />
           </button>
         </div>

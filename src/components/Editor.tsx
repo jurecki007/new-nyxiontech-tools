@@ -13,6 +13,7 @@ import { pageKey, usePageInfos } from '../lib/hooks';
 import { loadSnippets, loadUiPref, newSnippetId, saveProject, saveSnippets, saveUiPref } from '../lib/storage';
 import { DEFAULT_TOOL, getModeTool, TOOLS, type EditorToolContext, type ToolDef } from '../tools';
 import type { Annot, Doc, Project, Snippet, TextAnnot } from '../types';
+import { tr, useT } from '../i18n';
 
 const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
 
@@ -24,7 +25,8 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
   const [history, dispatch] = useReducer(historyReducer, { doc: initial.doc, past: [], future: [] });
   const doc = history.doc;
 
-  const [toolId, setToolId] = useState(DEFAULT_TOOL);
+  const [toolId, setToolId] = useState<string>(DEFAULT_TOOL);
+  const t = useT();
   const [toolSettings, setToolSettings] = useState<ToolSettings>(() => loadUiPref('tool-settings', {}));
   const [toolsCollapsed, setToolsCollapsed] = useState(() => loadUiPref('tools-collapsed', false));
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -145,7 +147,7 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
   const addPdf = async () => {
     const files = await pickFiles('application/pdf,.pdf', true);
     if (!files.length) return;
-    setBusy('Adding pages…');
+    setBusy(tr().editor.addingPages);
     try {
       const added = await readSources(files);
       const pages = await pagesOf(added);
@@ -153,7 +155,7 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
       dispatch({ type: 'apply', fn: ops.insertPages(pages, activePage?.id ?? null), history: true });
       if (pages[0]) setActiveId(pages[0].id);
     } catch {
-      setError('Could not read one of the selected PDFs.');
+      setError(tr().editor.couldNotReadPdfs);
     } finally {
       setBusy(null);
     }
@@ -161,12 +163,12 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
 
   const download = async () => {
     if (!doc.pages.length) return;
-    setBusy('Generating PDF…');
+    setBusy(tr().editor.generating);
     try {
       const bytes = await exportPdf(sources, doc);
-      downloadBytes(bytes, `${name.trim() || 'document'}.pdf`);
+      downloadBytes(bytes, `${name.trim() || tr().editor.defaultName}.pdf`);
     } catch (e) {
-      setError(`Export failed: ${e instanceof Error ? e.message : String(e)}`);
+      setError(tr().editor.exportFailed(e instanceof Error ? e.message : String(e)));
     } finally {
       setBusy(null);
     }
@@ -231,46 +233,46 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
   return (
     <div className="editor">
       <header className="topbar">
-        <button className="icon-btn" title="Back to dashboard" onClick={() => void close()}>
+        <button className="icon-btn" title={t.editor.back} onClick={() => void close()}>
           <ArrowLeft size={18} />
         </button>
         <div className="brand small">
           NYXION<b>TECH</b>
           <i>.</i>
         </div>
-        <input className="name-input" value={name} onChange={(e) => setName(e.target.value)} title="File name used for download" />
+        <input className="name-input" value={name} onChange={(e) => setName(e.target.value)} title={t.editor.fileName} />
 
         <div className="tool-group">
-          <button className="tool" title="Undo (Ctrl+Z)" disabled={!canUndo(history)} onClick={() => dispatch({ type: 'undo' })}>
+          <button className="tool" title={t.editor.undo} disabled={!canUndo(history)} onClick={() => dispatch({ type: 'undo' })}>
             <Undo2 size={18} />
           </button>
-          <button className="tool" title="Redo (Ctrl+Y)" disabled={!history.future.length} onClick={() => dispatch({ type: 'redo' })}>
+          <button className="tool" title={t.editor.redo} disabled={!history.future.length} onClick={() => dispatch({ type: 'redo' })}>
             <Redo2 size={18} />
           </button>
         </div>
 
         <div className="tool-group">
-          <button className="tool" title="Zoom out" onClick={() => stepZoom(-1)}>
+          <button className="tool" title={t.editor.zoomOut} onClick={() => stepZoom(-1)}>
             <ZoomOut size={18} />
           </button>
           <span className="zoom-label">{Math.round(zoom * 100)}%</span>
-          <button className="tool" title="Zoom in" onClick={() => stepZoom(1)}>
+          <button className="tool" title={t.editor.zoomIn} onClick={() => stepZoom(1)}>
             <ZoomIn size={18} />
           </button>
         </div>
 
         <span className="spacer" />
         <button className="btn ghost" onClick={() => void addPdf()}>
-          <FilePlus2 size={16} /> Add PDF
+          <FilePlus2 size={16} /> {t.editor.addPdf}
         </button>
         <button className="btn primary" disabled={!doc.pages.length || !!busy} onClick={() => void download()}>
-          <Download size={16} /> Download PDF
+          <Download size={16} /> {t.editor.downloadPdf}
         </button>
       </header>
 
       {error && (
         <div className="banner error" onClick={() => setError(null)}>
-          {error} <span className="muted">(click to dismiss)</span>
+          {error} <span className="muted">{t.common.clickToDismiss}</span>
         </div>
       )}
 
@@ -303,16 +305,16 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
         >
           {doc.pages.length === 0 && (
             <div className="empty">
-              <p>This document has no pages.</p>
+              <p>{t.editor.noPages}</p>
               <button className="btn primary" onClick={() => void addPdf()}>
-                <FilePlus2 size={16} /> Add PDF pages
+                <FilePlus2 size={16} /> {t.editor.addPdfPages}
               </button>
             </div>
           )}
           {doc.pages.map((page, i) => {
             const info = infos[pageKey(page)];
             const source = sources.find((s) => s.id === page.sourceId)!;
-            if (!info) return <div key={page.id} className="page loading">Loading page {i + 1}…</div>;
+            if (!info) return <div key={page.id} className="page loading">{t.editor.loadingPage(i + 1)}</div>;
             return (
               <PageView
                 key={page.id}
@@ -341,20 +343,20 @@ export function Editor({ initial, initialTool, onClose }: { initial: Project; in
           <Inspector annot={selected} dispatch={dispatch} focusToken={focusToken} onSelect={setSelectedId} onSaveSnippet={saveSnippet} />
           <SnippetsPanel snippets={snippets} disabled={!activePage} onInsert={insertSnippet} onRemove={removeSnippet} />
           <section className="panel shortcuts">
-            <div className="panel-title">Shortcuts</div>
+            <div className="panel-title">{t.editor.shortcuts}</div>
             <dl>
               <dt>Del</dt>
-              <dd>Delete selected</dd>
-              <dt>Arrows</dt>
-              <dd>Nudge 1pt (Shift: 10pt)</dd>
+              <dd>{t.editor.shortcutList.del}</dd>
+              <dt>{t.editor.shortcutList.arrows}</dt>
+              <dd>{t.editor.shortcutList.nudge}</dd>
               <dt>Ctrl+D</dt>
-              <dd>Duplicate</dd>
+              <dd>{t.editor.shortcutList.duplicate}</dd>
               <dt>Ctrl+Z / Y</dt>
-              <dd>Undo / redo</dd>
+              <dd>{t.editor.shortcutList.undoRedo}</dd>
               <dt>Ctrl+S</dt>
-              <dd>Download PDF</dd>
+              <dd>{t.editor.shortcutList.download}</dd>
               <dt>Esc</dt>
-              <dd>Back to Select</dd>
+              <dd>{t.editor.shortcutList.select}</dd>
             </dl>
           </section>
         </aside>

@@ -1,6 +1,7 @@
 import { clear, createStore, del, get, set, setMany, values } from 'idb-keyval';
 import type { Project, Snippet } from '../types';
 import { uid } from './doc';
+import { tr } from '../i18n';
 
 const STORAGE_NAME = 'nyxiontech-pdf-tools';
 // Name used before the project was renamed; data saved under it is moved once.
@@ -105,10 +106,11 @@ export async function listProjects(): Promise<Project[]> {
 
 const SNIPPETS_KEY = `${STORAGE_NAME}:snippets`;
 
-export const DEFAULT_SNIPPETS: Snippet[] = [
+/** Text stamps offered until the user changes the list, in the interface language. */
+export const defaultSnippets = (): Snippet[] => [
   {
     id: 'approved',
-    text: 'Approved for payment',
+    text: tr().editor.defaultSnippets.approved,
     font: 'arimo',
     size: 10,
     color: '#1530cb',
@@ -117,7 +119,7 @@ export const DEFAULT_SNIPPETS: Snippet[] = [
   },
   {
     id: 'copy',
-    text: 'Copy – original on file',
+    text: tr().editor.defaultSnippets.copy,
     font: 'arimo',
     size: 9,
     color: '#333333',
@@ -133,7 +135,7 @@ export function loadSnippets(): Snippet[] {
   } catch {
     // fall through to defaults
   }
-  return DEFAULT_SNIPPETS;
+  return defaultSnippets();
 }
 
 export function saveSnippets(snippets: Snippet[]) {

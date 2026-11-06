@@ -185,16 +185,16 @@ test.describe('path routing in the app', () => {
     const csp = cspViolations(page);
     await page.goto('/pl/polacz-pdf');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
-    await expect(page.getByRole('heading', { name: 'Merge PDF', level: 1 })).toBeVisible();
-    await expect(page.locator('.nav-item', { hasText: 'Split PDF' })).toHaveAttribute('href', '/pl/podziel-pdf');
-    await page.locator('.nav-item', { hasText: 'Split PDF' }).click();
+    await expect(page.getByRole('heading', { name: 'Połącz PDF', level: 1 })).toBeVisible();
+    await expect(page.locator('.nav-item', { hasText: 'Podziel PDF' })).toHaveAttribute('href', '/pl/podziel-pdf');
+    await page.locator('.nav-item', { hasText: 'Podziel PDF' }).click();
     await expect(page).toHaveURL(/\/pl\/podziel-pdf$/);
-    await expect(page.getByRole('heading', { name: 'Split PDF', level: 1 })).toBeVisible();
-    await page.locator('.nav-item', { hasText: 'Dashboard' }).click();
+    await expect(page.getByRole('heading', { name: 'Podziel PDF', level: 1 })).toBeVisible();
+    await page.locator('.nav-item', { hasText: 'Pulpit' }).click();
     await expect(page).toHaveURL(/\/pl\/$/);
 
     await page.goto('/pl/');
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pulpit' })).toBeVisible();
     expect(csp).toEqual([]);
   });
 

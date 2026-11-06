@@ -14,7 +14,7 @@ import { homePath, parsePath, TOOL_IDS, toolPath, type Lang, type ToolId } from 
 
 export interface Route {
   tool: ToolId | null;
-  /** Language of the page's address (the app itself is in English). */
+  /** Language of the page's address; on the web it is also the interface language (src/i18n). */
   lang: Lang;
 }
 
@@ -89,4 +89,19 @@ export function useRoute(): Route {
     };
   }, []);
   return route;
+}
+
+/** Web: the address of the current page in another language (/merge-pdf and /pl/polacz-pdf). */
+export function languageHref(lang: Lang): string {
+  return pathOf({ tool: currentRoute().tool, lang });
+}
+
+/**
+ * Web: opens the current page in another language, which also switches the interface
+ * language (src/i18n follows the address). Not for the desktop app: use setStoredLang.
+ */
+export function switchLanguage(lang: Lang) {
+  const path = languageHref(lang);
+  if (path !== window.location.pathname) history.pushState(null, '', `${path}${window.location.search}`);
+  window.dispatchEvent(new Event(CHANGE));
 }

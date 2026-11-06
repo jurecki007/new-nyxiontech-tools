@@ -5,6 +5,7 @@ import { renderPage } from '../lib/pdfjs';
 import type { ModeTool } from '../tools';
 import type { DragSession } from '../tools/types';
 import type { Annot, ImageAnnot, PageInfo, PageRef, RectAnnot, Source } from '../types';
+import { useT } from '../i18n';
 
 /** Moving and resizing are shared by all tools; anything else is the tool's own session. */
 type Drag =
@@ -37,6 +38,7 @@ export function PageView(props: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
+  const t = useT();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -138,8 +140,8 @@ export function PageView(props: Props) {
   return (
     <div className={`page${props.active ? ' active' : ''}`} id={`page-${page.id}`}>
       <div className="page-label">
-        Page {props.number}
-        {page.rotation ? ` · rotated ${page.rotation}°` : ''}
+        {t.editor.page(props.number)}
+        {page.rotation ? t.editor.rotated(page.rotation) : ''}
       </div>
       <div className="page-sheet" style={{ width: size.w * zoom, height: size.h * zoom }}>
         <canvas ref={canvasRef} style={{ width: size.w * zoom, height: size.h * zoom }} />
