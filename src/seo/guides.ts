@@ -1,5 +1,5 @@
 // Guides: static articles that explain a task and link to the tool that does it
-// (/guides/check-pdf-redaction, /pl/poradnik/anonimizacja-pdf-rodo). The build turns
+// (/guides/check-pdf-redaction, /pl/poradnik/anonimizacja-pdf-rodo and more). The build turns
 // each into its own page (src/seo/pages.ts). Unlike the tool pages they don't load
 // the app: the article is the page. Each guide exists in one language only, so it
 // has no hreflang links. Describe the tools exactly as the code behaves.
@@ -27,6 +27,9 @@ export interface Guide {
 }
 
 const EDPB_PSEUDONYMISATION = 'https://www.edpb.europa.eu/news/news/2025/edpb-adopts-pseudonymisation-guidelines-and-paves-way-improve-cooperation_pl';
+const PORTAL_OSWIATOWY_BIP = 'https://www.portaloswiatowy.pl/wazne-wydarzenia-dla-szkol-i-przedszkoli/bip-w-szkole-pod-kontrola-uodo-27339.html';
+const WPROST_MEN = 'https://www.wprost.pl/polityka/12145822/men-zaliczylo-wpadke-chodzi-o-anonimizacje-danych.html';
+const KSEF_TERMINY = 'https://ksef.podatki.gov.pl/od-kiedy-trzeba-wystawiac-faktury-w-ksef';
 
 export const GUIDES: Guide[] = [
   {
@@ -125,6 +128,192 @@ export const GUIDES: Guide[] = [
       },
       { p: 'Po pobraniu wykonaj testy opisane wyżej. Jeśli coś przeszło, dodaj brakujące obszary i zapisz plik jeszcze raz.' },
       { p: '**[Otwórz narzędzie Anonimizuj PDF](/pl/anonimizuj-pdf)**' },
+    ],
+  },
+  {
+    path: '/pl/poradnik/anonimizacja-bip-szkola',
+    lang: 'pl',
+    tool: 'redact',
+    title: 'Anonimizacja w BIP szkoły: czy zaczernienie działa',
+    description:
+      'Jak sprawdzić, czy dane w protokołach, uchwałach i umowach w BIP szkoły są naprawdę usunięte, a nie tylko zakryte. Pięć kroków przed publikacją.',
+    h1: 'Anonimizacja dokumentów w BIP szkoły: jak sprawdzić, czy zaczernienie działa',
+    name: 'Poradnik: anonimizacja dokumentów w BIP szkoły',
+    published: '2026-11-06',
+    blocks: [
+      {
+        p: 'Biuletyn Informacji Publicznej szkoły z czasem zbiera dziesiątki dokumentów, a w wielu z nich są dane osób prywatnych, które przed publikacją trzeba ukryć. Ten poradnik jest dla dyrektorów szkół, sekretariatów, inspektorów ochrony danych oraz informatyków w oświacie i gminach. Pokazujemy, dlaczego czarny prostokąt w Wordzie albo w PDF często niczego nie ukrywa, jak w pięciu krokach sprawdzić plik przed publikacją i jak robi to nasze narzędzie [Anonimizuj PDF](/pl/anonimizuj-pdf).',
+      },
+      {
+        p: 'To poradnik techniczny, a nie porada prawna. O tym, które dokumenty i dane publikować, decydują przepisy i procedury szkoły; w razie wątpliwości zapytaj inspektora ochrony danych. Żadne narzędzie samo w sobie nie zapewnia zgodności z RODO.',
+      },
+
+      { h2: 'BIP szkół pod kontrolą UODO' },
+      {
+        p: 'Jak podał [Portal Oświatowy (24.02.2026)](' +
+          PORTAL_OSWIATOWY_BIP +
+          '), Prezes UODO zaplanował kontrole ochrony danych osobowych w Biuletynach Informacji Publicznej w związku z licznymi skargami i zgłaszanymi naruszeniami. Wśród problemów, które portal wymienia na podstawie dotychczasowych kontroli BIP, pierwszy to brak prawidłowej anonimizacji dokumentów. Kolejne to publikowanie danych nadmiarowych, dokumenty pozostawione w BIP bez określenia okresu publikacji i brak procedur przeglądu publikowanych treści.',
+      },
+
+      { h2: 'Co trafia do BIP i jakie dane trzeba ukryć' },
+      { p: 'Typowe dokumenty w BIP szkoły:' },
+      {
+        ul: [
+          'protokoły, np. z kontroli albo z postępowań o udzielenie zamówienia;',
+          'uchwały i zarządzenia dyrektora;',
+          'umowy oraz oferty złożone w zapytaniach ofertowych;',
+          'petycje i odpowiedzi na nie.',
+        ],
+      },
+      { p: 'Dane, które najczęściej trzeba w nich ukryć:' },
+      {
+        ul: [
+          'imiona i nazwiska osób prywatnych, np. rodziców albo autora petycji, który nie zgodził się na ujawnienie danych;',
+          'PESEL, seria i numer dowodu osobistego;',
+          'adresy zamieszkania, prywatne telefony i adresy e-mail;',
+          'podpisy i parafki (to zwykle obrazy, więc trzeba je zaznaczyć ręcznie);',
+          'numery kont bankowych osób prywatnych;',
+          'dane uczniów: nazwiska, klasy, informacje o zdrowiu, orzeczeniach i sytuacji rodzinnej.',
+        ],
+      },
+      {
+        p: 'Usunięcie nazwiska nie wystarczy, jeśli z kontekstu da się ustalić, o kogo chodzi. Zdanie „uczeń klasy 3b, syn pracownicy sekretariatu” wskazuje konkretną osobę także bez nazwiska.',
+      },
+
+      { h2: 'Dlaczego czarny prostokąt w Wordzie lub PDF nie wystarcza' },
+      {
+        p: 'PDF składa się z warstw: tekstu strony, rysunków, obrazów, komentarzy, pól formularza i metadanych. Prostokąt narysowany w Wordzie przed zapisem do PDF albo kształt dodany w programie do PDF to kolejny element położony nad tekstem. Na ekranie i na wydruku danych nie widać, ale tekst pod spodem nadal jest w pliku. Można go zaznaczyć i skopiować, znaleźć wyszukiwarką albo odsłonić, przesuwając prostokąt w dowolnym edytorze. Tak samo działa biała czcionka i zmiana koloru tekstu na czarny.',
+      },
+      {
+        p: 'Ten błąd zdarza się nie tylko szkołom. [Wprost](' +
+          WPROST_MEN +
+          ') opisał, że Ministerstwo Edukacji Narodowej w niewystarczający sposób zanonimizowało dane autora petycji: dało się je zaznaczyć kursorem i skopiować. Odczytał je Portal Samorządowy, który poinformował resort o błędzie. Rzeczniczka ministerstwa odpowiedziała, że anonimizacja została już dokonana prawidłowo.',
+      },
+
+      { h2: 'Pięć kroków przed publikacją' },
+      {
+        ol: [
+          '**Pracuj na kopii.** Oryginał z pełnymi danymi zostaje w dokumentacji szkoły. Sprawdzasz zawsze plik wynikowy, który trafi do BIP, a nie plik roboczy.',
+          '**Test kopiuj-wklej.** Otwórz plik, zaznacz całą stronę (Ctrl+A) i wklej do Notatnika. Potem zaznacz myszką sam obszar pod zaczernieniem. Jeśli w schowku pojawią się ukryte dane, nie zostały usunięte.',
+          '**Wyszukiwanie.** Naciśnij Ctrl+F i wpisz fragment każdej usuniętej informacji: nazwisko, kilka cyfr PESEL-u, numer konta. Numery sprawdzaj ze spacjami, z myślnikami i bez nich.',
+          '**Komentarze, pola, właściwości i nazwa pliku.** Przejrzyj panel komentarzy i pola formularza, sprawdź we właściwościach dokumentu autora i tytuł. Nazwa „petycja_Kowalska.pdf” zdradza więcej niż zaczerniona treść.',
+          '**Druga osoba.** Ktoś, kto nie przygotowywał dokumentu, powtarza testy z punktów 2, 3 i 4 i przegląda każdą stronę, także podpisy, pieczątki i załączniki.',
+        ],
+      },
+      {
+        p: 'Dokładny opis tych testów znajdziesz w poradniku [Anonimizacja PDF zgodnie z RODO](/pl/poradnik/anonimizacja-pdf-rodo), a po angielsku w [How to check a PDF redaction](/guides/check-pdf-redaction). Informatyk może sprawdzić cały plik jednym poleceniem z pakietu Poppler, które wypisze każdy ciąg 11 cyfr, czyli tyle, ile ma PESEL:',
+      },
+      { pre: 'pdftotext protokol.pdf - | grep -E "[0-9]{11}"' },
+
+      { h2: 'Jak robi to narzędzie Anonimizuj PDF' },
+      { p: '[Anonimizuj PDF](/pl/anonimizuj-pdf) działa w przeglądarce, na Twoim komputerze, więc dokument nie jest nigdzie wysyłany. Po kolei:' },
+      {
+        ul: [
+          'Dane zaznaczasz, wpisując tekst, wybierając gotowe wzorce (adresy e-mail, numery telefonów, numery kont i IBAN, NIP i PESEL) albo rysując prostokąty myszką. Podpisy i pieczątki zaznacz ręcznie.',
+          'Każda strona z choćby jednym zaczernieniem jest renderowana na nowo jako obraz (200 DPI) z wtopionymi czarnymi prostokątami. Oryginalnego tekstu, komentarzy ani pól formularza z tej strony nie ma w pliku wynikowym.',
+          'Strony bez zaczernień są kopiowane bez zmian. Usuwane są z nich tylko komentarze i wartości pól formularza zawierające szukany tekst albo pasujące do wybranych wzorców.',
+          'Właściwości dokumentu, takie jak autor i tytuł, nie są przenoszone do nowego pliku.',
+        ],
+      },
+
+      { h2: 'Ograniczenia' },
+      {
+        ul: [
+          'Zanonimizowane strony są obrazami, więc ich tekstu nie da się wyszukać ani zaznaczyć, dopóki nie przepuścisz wyniku przez [OCR](/pl/ocr-pdf). Dokument z samych obrazów jest też trudny dla osób korzystających z czytników ekranu.',
+          'Skan bez OCR nie ma warstwy tekstowej, więc obszary trzeba zaznaczyć ręcznie.',
+          'Fraza zapisana w PDF w kilku osobnych fragmentach może nie zostać znaleziona. Przejrzyj podgląd każdej strony.',
+          'Wzorce łapią typowe zapisy: wzorzec telefonu złapie też inne długie liczby, a nietypowo zapisany numer może zostać pominięty.',
+          'Plik wynikowy ma nazwę oryginału z dopiskiem `_redacted`. Zmień ją przed publikacją.',
+          'Narzędzie usuwa to, co zaznaczysz. Nie ocenia, które dane wolno opublikować.',
+        ],
+      },
+      { p: 'Po pobraniu pliku wykonaj pięć kroków opisanych wyżej. Dopiero plik, który przeszedł wszystkie testy, publikuj w BIP.' },
+      { p: '**[Otwórz narzędzie Anonimizuj PDF](/pl/anonimizuj-pdf)**' },
+    ],
+  },
+  {
+    path: '/pl/poradnik/ocr-i-laczenie-dokumentow-bez-chmury',
+    lang: 'pl',
+    tool: 'ocr',
+    title: 'OCR i łączenie dokumentów klienta bez chmury',
+    description:
+      'Jak zrobić z zeskanowanych umów, zaświadczeń i wyciągów jeden przeszukiwalny PDF po polsku, zmniejszyć go i zabezpieczyć hasłem bez wysyłania plików.',
+    h1: 'OCR skanów i łączenie dokumentów klienta bez wysyłania do chmury',
+    name: 'Poradnik: OCR i łączenie dokumentów klienta bez chmury',
+    published: '2026-11-06',
+    blocks: [
+      {
+        p: 'Biura rachunkowe, działy kadr i jednoosobowe firmy codziennie dostają skany i zdjęcia dokumentów. Ten poradnik pokazuje, jak zrobić z nich jeden czytelny PDF z wyszukiwalnym tekstem, zmniejszyć go do wysłania e-mailem i zabezpieczyć hasłem, bez wysyłania plików klientów do zewnętrznych serwisów. Każdy krok wykonasz naszymi narzędziami, które działają w przeglądarce.',
+      },
+
+      { h2: 'Jakie dokumenty i jakie dane' },
+      {
+        ul: [
+          'skany umów: o pracę, zlecenia, najmu;',
+          'zaświadczenia, np. o zatrudnieniu i zarobkach albo z urzędu skarbowego;',
+          'wyciągi bankowe;',
+          'załączniki do PIT: informacje od pracodawcy, faktury i potwierdzenia do ulg;',
+          'zdjęcia dokumentów i paragonów zrobione telefonem, także w formacie HEIC z iPhone’a.',
+        ],
+      },
+      {
+        p: 'Łączy je jedno: zawierają PESEL, adresy, numery kont, kwoty wynagrodzeń, a czasem informacje o zdrowiu, np. przy uldze rehabilitacyjnej.',
+      },
+
+      { h2: 'Dlaczego nie wrzucać skanów klientów do przypadkowego konwertera online' },
+      {
+        p: 'Typowy konwerter online działa tak: plik trafia na serwer usługodawcy, tam jest przetwarzany, a Ty pobierasz wynik. Zanim zrobisz to z dokumentem klienta, warto znać odpowiedzi na kilka pytań. Kto prowadzi serwis i gdzie są jego serwery? Jak długo plik jest przechowywany i czy służy do czegoś jeszcze? Czy ktoś w biurze w ogóle wie, że dane tam trafiły?',
+      },
+      {
+        p: 'Przekazanie danych firmie, która przetwarza je w Twoim imieniu, to w języku RODO powierzenie przetwarzania (art. 28), które wymaga umowy z tą firmą. Przy jednorazowym wrzuceniu pliku do przypadkowego serwisu trudno to zapewnić. To poradnik techniczny, a nie porada prawna: zasady korzystania z usług zewnętrznych ustala administrator danych, a w większych firmach inspektor ochrony danych.',
+      },
+      {
+        p: 'Nasze narzędzia przetwarzają pliki w przeglądarce, na Twoim komputerze. Polityka bezpieczeństwa strony (Content-Security-Policy) pozwala jej łączyć się tylko z własną domeną, a kod źródłowy jest publiczny. Jest też aplikacja na Windows, która działa bez internetu.',
+      },
+
+      { h2: 'Krok 1: zdjęcia i skany w jednym PDF' },
+      {
+        p: 'Zdjęcia dokumentów zamienisz na PDF w narzędziu [JPG do PDF](/pl/jpg-do-pdf): przyjmuje JPG, PNG i HEIC, jedno zdjęcie na stronę, domyślnie w formacie A4. Jeśli i tak chcesz rozpoznać tekst, możesz pominąć ten krok: [OCR PDF](/pl/ocr-pdf) przyjmuje zdjęcia bezpośrednio i składa z nich jeden PDF w podanej kolejności.',
+      },
+
+      { h2: 'Krok 2: OCR po polsku' },
+      {
+        p: 'Skan to obraz tekstu: nie da się go przeszukać ani skopiować. [OCR PDF](/pl/ocr-pdf) rozpoznaje tekst silnikiem Tesseract, po polsku, po angielsku albo w obu językach naraz, i dodaje go jako niewidoczną warstwę nad niezmienionym obrazem strony. Plik wygląda tak samo, ale działa Ctrl+F i kopiowanie.',
+      },
+      {
+        ul: [
+          'Tryby jakości: Fast (200 dpi), Accurate (300 dpi, około 10 sekund na stronę, zależnie od komputera) i Small print (400 dpi) dla drobnego druku. Dwudziestostronicowy wyciąg w trybie Accurate to więc kilka minut.',
+          'Strony, które mają już tekst, mogą zostać pominięte.',
+          'Przy pierwszym użyciu przeglądarka pobiera z tej strony dane języka.',
+          'OCR się myli, zwłaszcza na krzywych zdjęciach, pieczątkach i piśmie odręcznym. Rozpoznany tekst służy do wyszukiwania i kopiowania; kwoty i numery kont zawsze porównaj ze skanem.',
+        ],
+      },
+
+      { h2: 'Krok 3: połącz dokumenty w jeden plik' },
+      {
+        p: 'W narzędziu [Połącz PDF](/pl/polacz-pdf) dodajesz pliki i przeciągasz je w odpowiedniej kolejności. Strony są kopiowane bez zmian, więc warstwa tekstu z OCR zostaje. Pojedyncze strony przestawisz w narzędziu [Zmień kolejność stron](/pl/zmien-kolejnosc-stron-pdf), a zbyt duży plik rozdzielisz w narzędziu [Podziel PDF](/pl/podziel-pdf).',
+      },
+
+      { h2: 'Krok 4: zmniejsz plik do wysłania e-mailem' },
+      {
+        p: '[Kompresuj PDF](/pl/kompresuj-pdf) ma tryb bezstratny (Lossless), który zachowuje tekst, także ten dodany przez OCR, oraz trzy mocniejsze poziomy: Light, Recommended i Strong. Te zamieniają każdą stronę w obraz (150, 120 lub 85 dpi) i usuwają warstwę tekstu. Jeśli skany są za duże i potrzebujesz mocniejszej kompresji, zrób ją przed OCR, a dopiero potem rozpoznaj tekst. Przy niższej rozdzielczości OCR może mylić się częściej, więc sprawdź wynik.',
+      },
+
+      { h2: 'Krok 5: usuń zbędne dane i zabezpiecz hasłem' },
+      {
+        p: 'Jeśli odbiorca nie potrzebuje wszystkich danych, np. numeru konta albo PESEL-u, usuń je w narzędziu [Anonimizuj PDF](/pl/anonimizuj-pdf). Strony z zaczernieniem stają się obrazami, więc jeśli tekst ma zostać wyszukiwalny, przepuść wynik jeszcze raz przez OCR. Jak sprawdzić, czy dane naprawdę zniknęły, opisujemy w poradniku [Anonimizacja PDF zgodnie z RODO](/pl/poradnik/anonimizacja-pdf-rodo).',
+      },
+      {
+        p: 'Na końcu użyj narzędzia [Zabezpiecz PDF hasłem](/pl/zabezpiecz-pdf-haslem), które szyfruje plik algorytmem AES-256. Hasło przekaż innym kanałem, np. SMS-em albo telefonicznie, a nie w tym samym e-mailu co plik. Zapisz je w bezpiecznym miejscu, bo nie da się go odzyskać.',
+      },
+
+      { h2: 'A co z KSeF?' },
+      {
+        p: 'Krajowy System e-Faktur służy do wystawiania i odbierania ustrukturyzowanych faktur elektronicznych w formacie XML, a nie skanów ani PDF. Według [serwisu KSeF Ministerstwa Finansów](' +
+          KSEF_TERMINY +
+          ') faktury w KSeF trzeba wystawiać od 1 lutego 2026 r. w firmach, które w 2024 r. miały sprzedaż powyżej 200 mln zł (z VAT), a od 1 kwietnia 2026 r. w pozostałych. Nasze narzędzia nie są narzędziami do KSeF: nie wysyłają tam faktur ani ich nie pobierają. Przydają się przy dokumentach spoza tego systemu, takich jak umowy, zaświadczenia, wyciągi i załączniki.',
+      },
+      { p: '**[Otwórz narzędzie OCR PDF](/pl/ocr-pdf)**' },
     ],
   },
   {
