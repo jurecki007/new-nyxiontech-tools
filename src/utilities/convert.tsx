@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, FileImage, FileText, Images, Minimize2 } from 'lucide-react';
 import { imagesToPdf, type OrientationOption, type PageSizeOption } from '../lib/images';
+import { takeLaunchedImages } from '../lib/pwa';
 import { baseName, extractText, parsePageRanges, pdfBlob, pdfToImages, rasterizePdf, resavePdf } from '../lib/pdfTools';
 import { downloadBlob, formatBytes } from '../lib/zip';
 import { FileDrop, FileList, Option, Results, RunBar, Segmented, SinglePdfInput, ToolPage, useSinglePdf, useTask, type OutputFile } from './ui';
@@ -84,7 +85,8 @@ export const imagesToPdfUtility: Utility = {
   icon: Images,
   group: 'convert',
   Component: function ImagesToPdf({ ctx }) {
-    const [files, setFiles] = useState<File[]>([]);
+    // Starts with the images the installed app was opened with, if any.
+    const [files, setFiles] = useState<File[]>(takeLaunchedImages);
     const [pageSize, setPageSize] = useState<PageSizeOption>('a4');
     const [orientation, setOrientation] = useState<OrientationOption>('auto');
     const [margin, setMargin] = useState(20);

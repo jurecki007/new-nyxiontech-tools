@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, Sparkles } from 'lucide-react';
+import { Download, Globe, Heart, Info, LayoutDashboard, RefreshCw, Search, Sparkles } from 'lucide-react';
 import { AboutDialog, type AboutTab } from './AboutDialog';
 import { GithubIcon } from './GithubIcon';
 import { LanguageSwitch } from './LanguageSwitch';
@@ -10,6 +10,7 @@ import { APP_NAME, APP_SHORT_NAME, APP_VERSION, COMPANY_URL, DONATE_URL, REPO_UR
 import { externalLink } from '../lib/desktop';
 import { en } from '../i18n/en';
 import { fold, storedIn, useT } from '../i18n';
+import { useInstallPrompt } from '../lib/pwa';
 import { linkTo, useRoute } from '../lib/route';
 import { useUpdates, type AvailableUpdate, type InstallState } from '../lib/updates';
 import { getUtility, UTILITIES, UTILITY_GROUPS, type ToolId, type UtilityContext } from '../utilities';
@@ -22,6 +23,7 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
   const [about, setAbout] = useState<AboutTab | null>(null);
   const closeAbout = useCallback(() => setAbout(null), []);
   const updates = useUpdates();
+  const install = useInstallPrompt();
   const update = updates.available;
   const utility = route.tool ? getUtility(route.tool) : undefined;
   const t = useT();
@@ -79,6 +81,11 @@ export function Shell({ ctx, onOpenProject, error, onDismissError }: { ctx: Util
             <button onClick={() => setAbout('about')} title={t.shell.aboutTitle(APP_NAME)}>
               <Info size={13} /> {t.shell.about}
             </button>
+            {install && (
+              <button className="install" onClick={install} title={t.shell.installTitle}>
+                <Download size={13} /> {t.shell.install}
+              </button>
+            )}
             <a href={REPO_URL} {...externalLink} title={t.shell.starTitle}>
               <GithubIcon size={13} /> {t.shell.star}
             </a>

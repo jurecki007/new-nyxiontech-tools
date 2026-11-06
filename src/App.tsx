@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Editor } from './components/Editor';
 import { Shell } from './components/Shell';
-import { createProject } from './lib/files';
+import { createProject, isImage, isPdf } from './lib/files';
+import { receiveLaunchedFiles, registerServiceWorker, setLaunchedImages } from './lib/pwa';
 import { navigate } from './lib/route';
 import { saveProject } from './lib/storage';
 import { tr, useT } from './i18n';
@@ -31,6 +32,28 @@ export function App() {
         .finally(() => setBusy(false));
     },
   };
+
+  // Files opened from the OS or shared from another app (installed web app only):
+  // PDFs open in the editor as if dropped on the dashboard, images in Images to PDF.
+  const openInEditor = useRef(ctx.openInEditor);
+  openInEditor.current = ctx.openInEditor;
+  useEffect(() => {
+    registerServiceWorker();
+    receiveLaunchedFiles(
+      (files) => {
+        const pdfs = files.filter(isPdf);
+        const images = files.filter((f) => !isPdf(f) && isImage(f));
+        if (pdfs.length) return openInEditor.current(pdfs);
+        if (images.length) {
+          setEditing(null);
+          setLaunchedImages(images);
+          return navigate('images-to-pdf');
+        }
+        setError('Please choose one or more PDF files.');
+      },
+      setError,
+    );
+  }, []);
 
   if (editing) {
     const close = () => {

@@ -19,6 +19,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - "Files stay on this device" in the sidebar opens a new Privacy tab in About: how the files stay local, the site's actual `connect-src` policy (read from the server configuration at build time), and how to check it yourself offline or in DevTools. When the connection drops, the line says so and that tools you've used still work.
 - After you save a result, a small note offers a GitHub star or a Ko-fi tip: at most once per browser session, and not again for a week once dismissed. The sidebar's GitHub link now reads "Star on GitHub".
 - `vite preview` sends the same Cache-Control as nginx for `/assets/` and `/vendor/`, so tests see what browsers cache in production.
+- The web app can be installed (Chrome, Edge): an "Install app" link appears in the sidebar when the browser offers it. Once installed, PDFs and images can be opened with it from the operating system, or shared to it from other apps. A small service worker receives shared files and hands them to the page; it caches nothing and sends nothing anywhere.
 
 ### Changed
 
