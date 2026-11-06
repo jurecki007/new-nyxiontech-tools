@@ -49,6 +49,11 @@ Other:
 
 Polish pages (strony po polsku): [Narzędzia PDF](https://tools.nyxiontech.com/pl/), [Edytuj PDF](https://tools.nyxiontech.com/pl/edytuj-pdf), [Podpisz PDF](https://tools.nyxiontech.com/pl/podpisz-pdf), [Wypełnij formularz PDF](https://tools.nyxiontech.com/pl/wypelnij-formularz-pdf), [Numeracja stron](https://tools.nyxiontech.com/pl/numeracja-stron-pdf), [Znak wodny](https://tools.nyxiontech.com/pl/znak-wodny-pdf), [Metadane PDF](https://tools.nyxiontech.com/pl/edytuj-metadane-pdf), [Połącz PDF](https://tools.nyxiontech.com/pl/polacz-pdf), [Podziel PDF](https://tools.nyxiontech.com/pl/podziel-pdf), [Kolejność stron](https://tools.nyxiontech.com/pl/zmien-kolejnosc-stron-pdf), [Obróć PDF](https://tools.nyxiontech.com/pl/obroc-pdf), [Kompresuj PDF](https://tools.nyxiontech.com/pl/kompresuj-pdf), [OCR PDF](https://tools.nyxiontech.com/pl/ocr-pdf), [JPG do PDF](https://tools.nyxiontech.com/pl/jpg-do-pdf), [PDF do JPG](https://tools.nyxiontech.com/pl/pdf-do-jpg), [PDF do tekstu](https://tools.nyxiontech.com/pl/pdf-do-tekstu), [PDF do Word](https://tools.nyxiontech.com/pl/pdf-do-word), [Word do PDF](https://tools.nyxiontech.com/pl/word-do-pdf), [Zabezpiecz PDF hasłem](https://tools.nyxiontech.com/pl/zabezpiecz-pdf-haslem), [Odblokuj PDF](https://tools.nyxiontech.com/pl/odblokuj-pdf), [Anonimizuj PDF](https://tools.nyxiontech.com/pl/anonimizuj-pdf), [Porównaj PDF](https://tools.nyxiontech.com/pl/porownaj-pdf), [Kompresja zdjęć](https://tools.nyxiontech.com/pl/kompresuj-zdjecia), [Usuń tło](https://tools.nyxiontech.com/pl/usun-tlo), [HEIC do JPG](https://tools.nyxiontech.com/pl/heic-do-jpg), [Generator kodów QR](https://tools.nyxiontech.com/pl/generator-kodow-qr).
 
+## Guides
+
+- [How to check a PDF redaction really removed the text](https://tools.nyxiontech.com/guides/check-pdf-redaction): copy-paste, search and pdftotext checks; comments, forms and metadata.
+- [Anonimizacja dokumentów PDF zgodnie z RODO](https://tools.nyxiontech.com/pl/poradnik/anonimizacja-pdf-rodo) (Polish): anonymisation vs pseudonymisation, verification, checklist for CVs and contracts.
+
 ## Frequently asked questions
 
 - Are my files uploaded? No. Every tool runs in your browser on your own device; the files never leave it. The page loads its code once from tools.nyxiontech.com and makes no other requests.

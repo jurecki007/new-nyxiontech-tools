@@ -1,5 +1,6 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { HOME_PL, TOOL_PAGES } from '../../src/seo/content';
+import { GUIDES } from '../../src/seo/guides';
 import { homePath, TOOL_IDS, toolPath, type Lang } from '../../src/utilities/routes';
 import { cspViolations } from './helpers';
 
@@ -67,9 +68,39 @@ test.describe('static tool pages', () => {
     expect(res.status()).toBe(200);
     const xml = await res.text();
     const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
-    const expected = [homePath('en'), homePath('pl'), ...TOOL_IDS.flatMap((id) => LANGS.map((l) => toolPath(id, l)))].map((p) => SITE + p);
+    const expected = [homePath('en'), homePath('pl'), ...TOOL_IDS.flatMap((id) => LANGS.map((l) => toolPath(id, l))), ...GUIDES.map((g) => g.path)].map((p) => SITE + p);
     expect(locs.sort()).toEqual(expected.sort());
     for (const id of TOOL_IDS) expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="pl" href="${SITE}${toolPath(id, 'pl')}" />`);
+    // A guide exists in one language only: no alternates.
+    for (const g of GUIDES) expect(xml).toContain(`<url>\n    <loc>${SITE}${g.path}</loc>\n  </url>`);
+  });
+
+  test('guides are standalone articles that link to their tool, and the tool page links back', async ({ request }) => {
+    for (const g of GUIDES) {
+      const html = await raw(request, g.path);
+      expect(first(html, /<html lang="([^"]+)">/), g.path).toBe(g.lang);
+      expect(first(html, /<title>([^<]*)<\/title>/), g.path).toBe(g.title);
+      expect(first(html, /<meta name="description" content="([^"]*)"/), g.path).toBe(g.description);
+      expect(first(html, /<link rel="canonical" href="([^"]*)"/), g.path).toBe(SITE + g.path);
+      expect(first(html, /<h1>([^<]*)<\/h1>/), g.path).toBe(g.h1);
+      expect(html, g.path).not.toContain('hreflang=');
+      expect(html, g.path).toContain(`href="${toolPath(g.tool, g.lang)}"`);
+      // The article is the page: the app isn't loaded on top of it.
+      expect(html, g.path).not.toContain('<script type="module"');
+      const graph = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1])['@graph'] as { '@type': string }[];
+      expect(graph.map((n) => n['@type']), g.path).toEqual(expect.arrayContaining(['Article', 'BreadcrumbList']));
+      expect(await raw(request, toolPath(g.tool, g.lang)), g.path).toContain(`href="${g.path}"`);
+    }
+  });
+
+  test('a guide shows its text in the browser without errors', async ({ page }) => {
+    const csp = cspViolations(page);
+    for (const g of GUIDES) {
+      await page.goto(g.path);
+      await expect(page.getByRole('heading', { name: g.h1, level: 1 })).toBeVisible();
+      await expect(page.locator('main a[href="' + toolPath(g.tool, g.lang) + '"]').first()).toBeVisible();
+    }
+    expect(csp).toEqual([]);
   });
 
   test('llms.txt links every tool page', async ({ request }) => {

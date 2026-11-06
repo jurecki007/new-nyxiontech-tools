@@ -1,10 +1,11 @@
 // Builds the static pages search engines index: one per tool and language
-// (/merge-pdf, /pl/polacz-pdf), the Polish home (/pl/), the 404 page and the
-// sitemap. Each page is the built index.html with its own title, description,
+// (/merge-pdf, /pl/polacz-pdf), the Polish home (/pl/), the guides
+// (/guides/check-pdf-redaction; see guides.ts), the 404 page and the sitemap. Each page is the built index.html with its own title, description,
 // canonical URL, hreflang links, structured data and crawlable fallback content;
 // the app loads on top and opens the tool. Run at build time by vite.config.ts;
 // pure string functions, no Node or browser APIs.
 import { COMMON, HOME_PL, TOOL_PAGES, type PageCopy } from './content.ts';
+import { GUIDES, guidesFor, type Block, type Guide } from './guides.ts';
 import { homePath, TOOL_IDS, toolPath, type Lang, type ToolId } from '../utilities/routes.ts';
 
 export const SITE = 'https://tools.nyxiontech.com';
@@ -171,11 +172,125 @@ function toolBody(id: ToolId, lang: Lang, copy: PageCopy, faq: [string, string][
     list('ol', copy.steps.map(esc)),
     `${IND}<h2>${esc(c.faq)}</h2>`,
     faqHtml(faq),
+    ...guidesFor(id, lang).map((g) => `${IND}<p><a href="${g.path}">${esc(g.name)}</a></p>`),
     `${IND}<h2>${esc(c.related)}</h2>`,
     list('ul', related),
     `${IND}<p><a href="${homePath(lang)}">${esc(c.allTools)}</a> · <a href="${toolPath(id, other)}" hreflang="${other}" lang="${other}">${esc(c.otherLanguage)}</a> · <a href="${REPO}">${esc(c.source)}</a></p>`,
     `${IND}<p>${esc(c.footer)}</p>`,
   ].join('\n');
+}
+
+/** Inline markup of guide text: `code`, **bold**, [label](href); everything else escaped. */
+function inline(text: string): string {
+  return esc(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label: string, href: string) =>
+      href.startsWith('http') ? `<a href="${href}" rel="noopener">${label}</a>` : `<a href="${href}">${label}</a>`,
+    );
+}
+
+function blockHtml(b: Block): string {
+  if ('h2' in b) return `${IND}<h2>${inline(b.h2)}</h2>`;
+  if ('p' in b) return `${IND}<p>${inline(b.p)}</p>`;
+  if ('ul' in b) return list('ul', b.ul.map(inline));
+  if ('ol' in b) return list('ol', b.ol.map(inline));
+  return `${IND}<pre><code>${esc(b.pre)}</code></pre>`;
+}
+
+/** Plain text of a guide's body, for the word count in its structured data. */
+const guideText = (g: Guide) =>
+  g.blocks
+    .flatMap((b) => ('h2' in b ? [b.h2] : 'p' in b ? [b.p] : 'ul' in b ? b.ul : 'ol' in b ? b.ol : [b.pre]))
+    .join(' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/[`*]/g, '');
+
+export const guideWords = (g: Guide) => guideText(g).split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+
+// Guides are articles, not the app: no app script or stylesheet, and the content is
+// visible at once. Light and dark colours follow the system, like the app.
+const GUIDE_STYLE = `<style>
+      :root { color-scheme: light dark; --fg: #14171c; --muted: #5b6270; --bg: #ffffff; --soft: #f2f4f7; --line: #dde1e7; --link: #1d5bd6; }
+      @media (prefers-color-scheme: dark) { :root { --fg: #e8eaee; --muted: #a3a9b5; --bg: #14171c; --soft: #1f242c; --line: #2e343e; --link: #7aa7ff; } }
+      html { background: var(--bg); }
+      body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+      .guide { max-width: 46rem; margin: 0 auto; padding: 2rem 1rem 3rem; }
+      .guide a { color: var(--link); }
+      .guide .crumbs, .guide footer { color: var(--muted); font-size: 0.9rem; }
+      .guide h1 { font-size: 1.9rem; line-height: 1.25; margin: 0.5rem 0 1rem; }
+      .guide h2 { font-size: 1.3rem; margin: 2.2rem 0 0.6rem; }
+      .guide li { margin: 0.35rem 0; }
+      .guide code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.9em; background: var(--soft); padding: 0.1em 0.3em; border-radius: 4px; }
+      .guide pre { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 0.8rem 1rem; overflow-x: auto; }
+      .guide pre code { background: none; padding: 0; }
+      .guide footer { border-top: 1px solid var(--line); margin-top: 2.5rem; padding-top: 1rem; }
+    </style>`;
+
+function guidePage(template: string, g: Guide): string {
+  const c = COMMON[g.lang];
+  const tool = TOOL_PAGES[g.tool][g.lang];
+  const toolUrl = toolPath(g.tool, g.lang);
+  const pageUrl = url(g.path);
+  const body = [
+    `${IND}<p class="crumbs"><a href="${homePath(g.lang)}">${esc(c.home)}</a> › <a href="${toolUrl}">${esc(tool.name)}</a></p>`,
+    `${IND}<h1>${esc(g.h1)}</h1>`,
+    ...g.blocks.map(blockHtml),
+    `${IND}<footer><p><a href="${homePath(g.lang)}">${esc(c.allTools)}</a> · <a href="${REPO}">${esc(c.source)}</a> · ${esc(c.footer)}</p></footer>`,
+  ].join('\n');
+  let html = render(template, {
+    lang: g.lang,
+    title: g.title,
+    description: g.description,
+    path: g.path,
+    alternates: null,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        organization,
+        website,
+        {
+          '@type': 'Article',
+          '@id': `${pageUrl}#article`,
+          url: pageUrl,
+          headline: g.h1,
+          description: g.description,
+          inLanguage: g.lang,
+          datePublished: g.published,
+          dateModified: g.published,
+          wordCount: guideWords(g),
+          image: `${SITE}/og-image.png`,
+          author: { '@id': ORG_ID },
+          publisher: { '@id': ORG_ID },
+          isPartOf: { '@id': WEBSITE_ID },
+          mainEntityOfPage: pageUrl,
+          about: { '@id': `${url(toolUrl)}#app` },
+          breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${pageUrl}#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: c.home, item: url(homePath(g.lang)) },
+            { '@type': 'ListItem', position: 2, name: tool.name, item: url(toolUrl) },
+            { '@type': 'ListItem', position: 3, name: g.h1, item: pageUrl },
+          ],
+        },
+      ],
+    },
+    body,
+  });
+  html = swap(html, /<meta property="og:type" content="[^"]*" \/>/, '<meta property="og:type" content="article" />', 'og:type');
+  // One language only: no alternate locale either.
+  html = swap(html, /\s*<meta property="og:locale:alternate" content="[^"]*" \/>/, '', 'og:locale:alternate');
+  html = swap(html, /\s*<script type="module"[^>]*><\/script>/, '', 'app script');
+  html = html.replace(/\s*<link rel="modulepreload"[^>]*>/g, '');
+  html = swap(html, /\s*<link rel="stylesheet"[^>]*href="\/assets\/[^"]*"[^>]*>/, '', 'app stylesheet');
+  html = html.replace(/\s*<!-- The fallback below[^]*?-->/, '');
+  html = swap(html, /\s*<noscript>[\s\S]*?<\/noscript>/, '', '<noscript>');
+  html = swap(html, /<style>[^<]*boot-fallback[^<]*<\/style>/, GUIDE_STYLE, 'boot-fallback style');
+  html = swap(html, /<main class="boot-fallback"[^>]*>/, '<main class="guide">', 'fallback <main>');
+  return html;
 }
 
 export interface StaticPage {
@@ -266,6 +381,11 @@ export function buildPages(template: string): StaticPage[] {
       ].join('\n'),
     }),
   });
+
+  for (const g of GUIDES) {
+    checkCopy(`guide ${g.path}`, g.title, g.description);
+    pages.push({ file: `${g.path.slice(1)}.html`, path: g.path, lang: g.lang, title: g.title, html: guidePage(template, g) });
+  }
   return pages;
 }
 
@@ -291,7 +411,7 @@ export function notFoundPage(): string {
 `;
 }
 
-/** sitemap.xml: every page in both languages, each with its hreflang alternates. */
+/** sitemap.xml: every page in both languages, each with its hreflang alternates; guides (one language) without. */
 export function sitemap(): string {
   const entry = (loc: string, en: string, pl: string) =>
     [
@@ -304,6 +424,7 @@ export function sitemap(): string {
     ].join('\n');
   const pairs: [string, string][] = [[homePath('en'), homePath('pl')], ...TOOL_IDS.map((id): [string, string] => [toolPath(id, 'en'), toolPath(id, 'pl')])];
   const urls = pairs.flatMap(([en, pl]) => [entry(en, en, pl), entry(pl, en, pl)]);
+  for (const g of GUIDES) urls.push(['  <url>', `    <loc>${url(g.path)}</loc>`, '  </url>'].join('\n'));
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.join('\n')}

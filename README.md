@@ -322,6 +322,8 @@ The sidebar, dashboard grid, router, static pages, sitemap and the e2e tests in 
 
 Search engines ignore everything after `#`, so each tool has a real page. After the normal build, the `seo-pages` plugin in `vite.config.ts` copies the built `index.html` once per tool and language and gives each copy its own title, description, canonical URL, hreflang links (en, pl, x-default), JSON-LD (WebPage, WebApplication, BreadcrumbList, FAQPage) and readable content inside `#root`. The same app loads on top and opens the tool; the content only fades in if the app hasn't started after 1.5 s. The plugin also writes `pl/index.html`, `404.html` and `sitemap.xml`, and fills the tool links into the home page's fallback content.
 
+Guides (`src/seo/guides.ts`, e.g. `/guides/check-pdf-redaction`) are articles about a task, each in one language, so they have no hreflang links. They are built from the same `index.html` but without the app's script and stylesheet, are listed in the sitemap, and the matching tool page links to them. Describe the tool only as the code behaves.
+
 In the browser, `src/lib/route.ts` reads the tool from the address, and in-app links switch tools with `history.pushState`, so the address bar always shows a shareable link. Pages under `/pl/` keep Polish addresses. The desktop app keeps `#/tool/<id>` routes, because its window always loads the bundled `index.html`.
 
 ## Adding an editor tool
